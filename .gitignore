@@ -1,4 +1,4 @@
-# Logs
+# Node.js (React Frontend)
 logs
 *.log
 npm-debug.log*
@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Python/Django (Backend)
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+venv/
+.env
