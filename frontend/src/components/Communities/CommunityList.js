@@ -43,26 +43,150 @@ const CommunityList = () => {
     fetchCommunities();
   }, [navigate]);
 
-  if (loading) return <div>Loading communities...</div>;
-  if (error) return <div style={{color: 'red'}}>{error}</div>;
-  if (!communities.length) return <div>No communities found</div>;
+  if (loading) return <div className="loading-state">Loading communities...</div>;
+  if (error) return <div className="error-state">{error}</div>;
+  if (!communities.length) return <div className="empty-state">No communities found</div>;
 
   return (
-    <div className="communities-list">
-      <h1>Communities</h1>
+    <div className="communities-container">
+      <div className="communities-header">
+        <h1>Discover Communities</h1>
+        <Link to="/create-community" className="create-button">
+          Create New Community
+        </Link>
+      </div>
+      
       <div className="communities-grid">
         {communities.map(community => (
-          <Link key={community.id} to={`/communities/${community.id}`}>
+          <Link key={community.id} to={`/communities/${community.id}`} className="community-card-link">
             <div className="community-card">
-              <h2>{community.name}</h2>
-              <p>{community.description}</p>
-              {community.banner_image && (
-                <img src={community.banner_image} alt={`${community.name} banner`} />
-              )}
+              <div className="community-banner">
+                {community.banner_image ? (
+                  <img src={community.banner_image} alt={`${community.name} banner`} />
+                ) : (
+                  <div className="placeholder-banner">
+                    {community.name[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="community-content">
+                <h2>{community.name}</h2>
+                <p>{community.description}</p>
+              </div>
             </div>
           </Link>
         ))}
       </div>
+
+      <style jsx>{`
+        .communities-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 2rem;
+        }
+
+        .communities-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        }
+
+        .communities-header h1 {
+          font-size: 2rem;
+          color: #333;
+          margin: 0;
+        }
+
+        .create-button {
+          background: #0061ff;
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          text-decoration: none;
+          transition: background 0.3s ease;
+        }
+
+        .create-button:hover {
+          background: #0056b3;
+        }
+
+        .communities-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 2rem;
+        }
+
+        .community-card-link {
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .community-card {
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .community-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .community-banner {
+          height: 160px;
+          background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
+          position: relative;
+        }
+
+        .community-banner img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .placeholder-banner {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 3rem;
+          color: white;
+        }
+
+        .community-content {
+          padding: 1.5rem;
+        }
+
+        .community-content h2 {
+          margin: 0 0 0.5rem 0;
+          color: #333;
+          font-size: 1.25rem;
+        }
+
+        .community-content p {
+          margin: 0;
+          color: #666;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .loading-state,
+        .error-state,
+        .empty-state {
+          text-align: center;
+          padding: 3rem;
+          color: #666;
+          font-size: 1.1rem;
+        }
+
+        .error-state {
+          color: #dc3545;
+        }
+      `}</style>
     </div>
   );
 };
