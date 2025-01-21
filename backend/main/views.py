@@ -6,13 +6,15 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from .models import Community, GalleryImage, ResourceCategory, Resource
+from .models import Community, GalleryImage, ResourceCategory, Resource, ForumPost, ForumComment
 from .serializers import (
     CommunitySerializer, 
     UserSerializer, 
     GalleryImageSerializer,
     ResourceCategorySerializer,
-    ResourceSerializer
+    ResourceSerializer,
+    ForumPostSerializer,
+    ForumCommentSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -172,3 +174,75 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class ForumPostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, community_id):
+        try:
+            # First check if the community exists
+            community = get_object_or_404(Community, id=community_id)
+            
+            # Get all posts for this community
+            posts = ForumPost.objects.filter(community=community)
+            
+            # Serialize the data
+            serializer = ForumPostSerializer(posts, many=True)
+            return Response(serializer.data)
+            
+        except Community.DoesNotExist:
+            return Response(
+                {'error': 'Community not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error in ForumPostView.get: {str(e)}")  # Debug print
+            return Response(
+                {'error': 'Internal server error', 'details': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, community_id):
+        try:
+            # First check if the community exists
+            community = get_object_or_404(Community, id=community_id)
+            
+            # Prepare the data
+            data = {
+                'title': request.data.get('title'),
+                'content': request.data.get('content'),
+                'community': community.id
+            }
+            
+            serializer = ForumPostSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(created_by=request.user, community=community)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Community.DoesNotExist:
+            return Response(
+                {'error': 'Community not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error in ForumPostView.post: {str(e)}")  # Debug print
+            return Response(
+                {'error': 'Internal server error', 'details': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ForumCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = get_object_or_404(ForumPost, id=post_id)
+        data = {
+            'content': request.data.get('content'),
+            'post': post_id
+        }
+        serializer = ForumCommentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
