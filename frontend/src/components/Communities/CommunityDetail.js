@@ -90,22 +90,22 @@ const CommunityDetail = () => {
       </div>
 
       {/* Navigation for different sections */}
-      <div className="section-nav">
+      <div className="community-tabs">
         <button 
+          className={`tab-button ${activeTab === 'media' ? 'active' : ''}`}
           onClick={() => setActiveTab('media')}
-          className={activeTab === 'media' ? 'active' : ''}
         >
           Media Gallery
         </button>
         <button 
+          className={`tab-button ${activeTab === 'resources' ? 'active' : ''}`}
           onClick={() => setActiveTab('resources')}
-          className={activeTab === 'resources' ? 'active' : ''}
         >
-          Resources
+          Resource Collections
         </button>
         <button 
+          className={`tab-button ${activeTab === 'forum' ? 'active' : ''}`}
           onClick={() => setActiveTab('forum')}
-          className={activeTab === 'forum' ? 'active' : ''}
         >
           Forum
         </button>
@@ -123,13 +123,13 @@ const CommunityDetail = () => {
           padding: 20px;
         }
         
-        .section-nav {
+        .community-tabs {
           display: flex;
           gap: 1rem;
           margin: 2rem 0;
         }
         
-        .section-nav button {
+        .tab-button {
           padding: 0.5rem 1rem;
           border: none;
           border-radius: 4px;
@@ -137,7 +137,7 @@ const CommunityDetail = () => {
           background-color: #f0f0f0;
         }
         
-        .section-nav button.active {
+        .tab-button.active {
           background-color: #007bff;
           color: white;
         }

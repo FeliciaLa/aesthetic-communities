@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -11,7 +11,6 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
-      console.log("Token:", token); // Debug log
 
       if (!token) {
         setError("Please log in to view your profile");
@@ -22,20 +21,19 @@ const Profile = () => {
       try {
         const response = await axios.get('http://localhost:8000/api/profile/', {
           headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Token ${token}`
           }
         });
-        console.log("Profile data:", response.data); // Debug log
         setProfile(response.data);
-      } catch (error) {
-        console.error("Error:", error);
-        if (error.response?.status === 401) {
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        if (err.response?.status === 401) {
           localStorage.removeItem("token");
           navigate("/login");
+        } else {
+          setError("Failed to fetch profile");
         }
-        setError("Failed to fetch profile");
-      } finally {
         setLoading(false);
       }
     };
@@ -49,11 +47,10 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <h1>Profile</h1>
+      <h2>Profile</h2>
       <div className="profile-info">
         <p><strong>Username:</strong> {profile.username}</p>
         <p><strong>Email:</strong> {profile.email}</p>
-        <p><strong>ID:</strong> {profile.id}</p>
       </div>
     </div>
   );
