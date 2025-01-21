@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-
+    
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
@@ -48,11 +48,18 @@ class GalleryImageSerializer(serializers.ModelSerializer):
         read_only_fields = ['uploaded_by', 'uploaded_at']
 
 class ResourceCategorySerializer(serializers.ModelSerializer):
-    created_by = serializers.ReadOnlyField(source='created_by.username')
-    
     class Meta:
         model = ResourceCategory
-        fields = ['id', 'name', 'category_type', 'description', 'community', 'created_by', 'created_at']
+        fields = ['id', 'name', 'category_type', 'description', 'community', 'created_by']
+        read_only_fields = ['created_by']
+
+    def validate(self, data):
+        print("Validation data:", data)
+        return data
+
+    def create(self, validated_data):
+        print("Creating with data:", validated_data)
+        return super().create(validated_data)
 
 class ResourceSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')

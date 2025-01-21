@@ -17,6 +17,7 @@ from .serializers import (
     ForumCommentSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import viewsets
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -126,25 +127,37 @@ class GalleryImageView(APIView):
 
 class ResourceCategoryView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def get(self, request):
-        community_id = request.query_params.get('community_id')
-        if not community_id:
-            return Response(
-                {'error': 'community_id is required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        categories = ResourceCategory.objects.filter(community_id=community_id)
+        categories = ResourceCategory.objects.filter(community_id=request.query_params.get('community_id'))
         serializer = ResourceCategorySerializer(categories, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ResourceCategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(created_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            print("Received data:", request.data)  # Debug print
+            
+            # Create a new data dictionary with all required fields
+            data = request.data.copy()
+            data['created_by'] = request.user.id  # Add the user ID explicitly
+            
+            print("Processing data:", data)  # Debug print
+            
+            serializer = ResourceCategorySerializer(data=data)
+            if serializer.is_valid():
+                # Pass the user directly to save method
+                category = serializer.save(created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            print("Validation errors:", serializer.errors)  # Debug print
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class ResourceView(APIView):
     permission_classes = [IsAuthenticated]
@@ -246,3 +259,11 @@ class ForumCommentView(APIView):
             serializer.save(created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ResourceCategoryViewSet(viewsets.ModelViewSet):
+    queryset = ResourceCategory.objects.all()
+    serializer_class = ResourceCategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
