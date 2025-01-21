@@ -9,6 +9,8 @@ from .views import (
     ResourceCategoryView,
     ResourceView,
     UserProfileView,
+    ForumPostView,
+    ForumCommentView,
 )
 
 urlpatterns = [
@@ -19,11 +21,15 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='profile'),
     
     # Community endpoints
-    path('communities/', CommunityView.as_view(), name='communities'),
+    path('communities/', CommunityView.as_view(), name='community-list'),
     path('communities/<int:pk>/', CommunityDetailView.as_view(), name='community-detail'),
     path('communities/<int:community_id>/gallery/', GalleryImageView.as_view(), name='community-gallery'),
     
     # Resource endpoints
     path('resources/categories/', ResourceCategoryView.as_view(), name='resource-categories'),
     path('resources/', ResourceView.as_view(), name='resources'),
+    
+    # Make sure these forum URLs are uncommented and properly formatted
+    path('communities/<int:community_id>/forum/', ForumPostView.as_view(), name='forum-posts'),
+    path('forum/posts/<int:post_id>/comments/', ForumCommentView.as_view(), name='forum-comments'),
 ]

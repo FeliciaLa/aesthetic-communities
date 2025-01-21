@@ -62,18 +62,19 @@ class ResourceSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'url', 'author', 'category', 'created_by', 'created_at']
 
 class ForumCommentSerializer(serializers.ModelSerializer):
-    created_by = serializers.ReadOnlyField(source='created_by.username')
+    created_by = UserSerializer(read_only=True)
     
     class Meta:
         model = ForumComment
         fields = ['id', 'content', 'created_by', 'created_at', 'updated_at']
-        read_only_fields = ['created_by']
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
 
 class ForumPostSerializer(serializers.ModelSerializer):
-    created_by = serializers.ReadOnlyField(source='created_by.username')
+    created_by = UserSerializer(read_only=True)
     comments = ForumCommentSerializer(many=True, read_only=True)
+    community = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = ForumPost
-        fields = ['id', 'title', 'content', 'created_by', 'created_at', 'updated_at', 'comments']
-        read_only_fields = ['created_by']
+        fields = ['id', 'title', 'content', 'created_by', 'created_at', 'updated_at', 'comments', 'community']
+        read_only_fields = ['created_by', 'created_at', 'updated_at', 'community']
