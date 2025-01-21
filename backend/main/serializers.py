@@ -1,11 +1,16 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Community, GalleryImage, ResourceCategory, Resource
+from .models import Community, GalleryImage, ResourceCategory, Resource, ForumPost, ForumComment
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ['id', 'username', 'email']
+        # Note: We exclude password field for security
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -30,36 +35,45 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 class CommunitySerializer(serializers.ModelSerializer):
-    created_by = UserSerializer(read_only=True)
-
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
     class Meta:
         model = Community
-        fields = ['id', 'name', 'description', 'banner_image', 'created_by', 'created_at']
+        fields = ['id', 'name', 'description', 'created_by', 'created_at']
 
 class GalleryImageSerializer(serializers.ModelSerializer):
-    uploaded_by = serializers.CharField(source='uploaded_by.username', read_only=True)
-    image_url = serializers.SerializerMethodField()
-
     class Meta:
         model = GalleryImage
-        fields = ['id', 'image', 'image_url', 'uploaded_by']
-
-    def get_image_url(self, obj):
-        if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-        return None
+        fields = ['id', 'image', 'uploaded_by', 'uploaded_at', 'community']
+        read_only_fields = ['uploaded_by', 'uploaded_at']
 
 class ResourceCategorySerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
     class Meta:
         model = ResourceCategory
-        fields = ['id', 'name', 'description', 'is_preset', 'community', 'created_by', 'created_at']
-        read_only_fields = ['created_by', 'created_at']
+        fields = ['id', 'name', 'category_type', 'description', 'community', 'created_by', 'created_at']
 
 class ResourceSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
     class Meta:
         model = Resource
-        fields = ['id', 'title', 'description', 'resource_type', 'url', 'content', 
-                 'file', 'category', 'created_by', 'created_at', 'updated_at']
-        read_only_fields = ['created_by', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'url', 'author', 'category', 'created_by', 'created_at']
+
+class ForumCommentSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    
+    class Meta:
+        model = ForumComment
+        fields = ['id', 'content', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['created_by']
+
+class ForumPostSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+    comments = ForumCommentSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = ForumPost
+        fields = ['id', 'title', 'content', 'created_by', 'created_at', 'updated_at', 'comments']
+        read_only_fields = ['created_by']
