@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "main",
+    # Remove or comment out 'communities' since we've moved everything to main
+    # 'communities',
 ]
 
 REST_FRAMEWORK = {

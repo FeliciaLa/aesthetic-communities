@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import NavbarLoggedIn from "./components/Layout/NavbarLoggedIn";
 import NavbarLoggedOut from "./components/Layout/NavbarLoggedOut";
 import Register from "./components/Auth/Register";
@@ -30,26 +30,21 @@ function App() {
 }
 
 function AppContent({ isLoggedIn, setIsLoggedIn }) {
-  const navigate = useNavigate(); // Now useNavigate is used within Router context
+  const navigate = useNavigate();
 
-  // Logout function to clear token and update state
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setIsLoggedIn(false); // Update the state when logging out
-    navigate("/login"); // Navigate to login page after logout
+    setIsLoggedIn(false);
+    navigate("/login");
   };
 
   return (
     <div>
-      {/* Conditional rendering of navbar based on login status */}
-      {isLoggedIn ? (
-        <NavbarLoggedIn handleLogout={handleLogout} />
-      ) : (
-        <NavbarLoggedOut />
-      )}
+      {/* Only show navbar when logged in */}
+      {isLoggedIn && <NavbarLoggedIn handleLogout={handleLogout} />}
       
       <Routes>
-        <Route path="/" element={<h1>Aesthetics Finder</h1>} />
+        <Route path="/" element={isLoggedIn ? <Navigate to="/communities" /> : <Navigate to="/login" />} />
         <Route path="/register" element={<Register />} />
         <Route 
           path="/login" 

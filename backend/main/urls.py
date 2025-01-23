@@ -5,12 +5,15 @@ from .views import (
     UserLogoutView,
     CommunityView,
     CommunityDetailView,
+    CommunityUpdateView,
     GalleryImageView,
     ResourceCategoryView,
     ResourceView,
     UserProfileView,
     ForumPostView,
     ForumCommentView,
+    update_community_banner,
+    GalleryImageDetailView,
 )
 
 urlpatterns = [
@@ -23,13 +26,18 @@ urlpatterns = [
     # Community endpoints
     path('communities/', CommunityView.as_view(), name='community-list'),
     path('communities/<int:pk>/', CommunityDetailView.as_view(), name='community-detail'),
-    path('communities/<int:community_id>/gallery/', GalleryImageView.as_view(), name='community-gallery'),
+    path('communities/<int:community_id>/update_details/', CommunityUpdateView.as_view(), name='community-update'),
+    path('communities/<int:community_id>/banner/', update_community_banner, name='update-community-banner'),
     
     # Resource endpoints
     path('resources/categories/', ResourceCategoryView.as_view(), name='resource-categories'),
     path('resources/', ResourceView.as_view(), name='resources'),
     
-    # Make sure these forum URLs are uncommented and properly formatted
+    # Forum endpoints
     path('communities/<int:community_id>/forum/', ForumPostView.as_view(), name='forum-posts'),
     path('forum/posts/<int:post_id>/comments/', ForumCommentView.as_view(), name='forum-comments'),
+
+    # Gallery endpoints
+    path('communities/<int:community_id>/gallery/', GalleryImageView.as_view(), name='community-gallery'),
+    path('communities/<int:community_id>/gallery/<int:image_id>/', GalleryImageDetailView.as_view(), name='gallery-image-detail'),
 ]

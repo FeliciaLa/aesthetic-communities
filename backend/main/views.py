@@ -18,6 +18,8 @@ from .serializers import (
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
+from rest_framework.decorators import api_view, parser_classes
+from django.core.files.storage import default_storage
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -79,9 +81,54 @@ class CommunityDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        community = get_object_or_404(Community, pk=pk)
-        serializer = CommunitySerializer(community)
-        return Response(serializer.data)
+        try:
+            community = get_object_or_404(Community, id=pk)
+            serializer = CommunitySerializer(community, context={'request': request})
+            return Response(serializer.data)
+        except Community.DoesNotExist:
+            return Response(
+                {'error': 'Community not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class CommunityUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, community_id):
+        try:
+            # Get the community
+            community = get_object_or_404(Community, id=community_id)
+            
+            # Debug prints
+            print(f"Request user: {request.user}")
+            print(f"Community creator: {community.created_by}")
+            print(f"Is creator: {community.created_by == request.user}")
+            
+            # Check if user is the creator
+            if request.user != community.created_by:
+                return Response(
+                    {'error': 'Only the creator can update the community'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Update fields
+            if 'name' in request.data:
+                community.name = request.data['name']
+            if 'description' in request.data:
+                community.description = request.data['description']
+            
+            community.save()
+            
+            # Return updated community data
+            serializer = CommunitySerializer(community)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error in update: {str(e)}")  # Debug print
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class GalleryImageView(APIView):
     permission_classes = [IsAuthenticated]
@@ -120,6 +167,41 @@ class GalleryImageView(APIView):
             
         except Exception as e:
             print(f"Error in post: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class GalleryImageDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, community_id, image_id):
+        try:
+            print(f"Attempting to delete image {image_id} from community {community_id}")
+            community = get_object_or_404(Community, id=community_id)
+            image = get_object_or_404(GalleryImage, id=image_id, community=community)
+            
+            # Check if user is authorized to delete
+            if request.user == image.uploaded_by or request.user == community.created_by:
+                # Delete the image file from storage
+                if image.image:
+                    try:
+                        default_storage.delete(image.image.path)
+                    except Exception as e:
+                        print(f"Error deleting file: {e}")
+                
+                # Delete the database record
+                image.delete()
+                print(f"Successfully deleted image {image_id}")
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                print(f"User {request.user} not authorized to delete image {image_id}")
+                return Response(
+                    {'error': 'Not authorized to delete this image'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except Exception as e:
+            print(f"Error deleting image: {str(e)}")
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -267,3 +349,46 @@ class ResourceCategoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+@api_view(['PUT'])
+@parser_classes([MultiPartParser, FormParser])
+def update_community_banner(request, community_id):
+    try:
+        community = get_object_or_404(Community, id=community_id)
+        
+        # Check if user is the creator
+        if request.user != community.created_by:
+            return Response(
+                {'error': 'Only the creator can update the banner'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if 'banner_image' not in request.FILES:
+            return Response(
+                {'error': 'No image provided'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Handle the banner image upload
+        banner_image = request.FILES['banner_image']
+        
+        # Delete old banner if it exists
+        if community.banner_image:
+            try:
+                default_storage.delete(community.banner_image.path)
+            except Exception:
+                pass  # If old file doesn't exist, continue
+        
+        # Save new banner
+        community.banner_image = banner_image
+        community.save()
+        
+        serializer = CommunitySerializer(community)
+        return Response(serializer.data)
+            
+    except Exception as e:
+        print(f"Error in update_community_banner: {str(e)}")  # Add debugging
+        return Response(
+            {'error': 'Failed to update banner'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

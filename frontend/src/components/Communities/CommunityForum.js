@@ -77,8 +77,6 @@ const CommunityForum = ({ communityId }) => {
 
   return (
     <div className="forum-container">
-      <h3>Community Forum</h3>
-      
       {/* New Post Form */}
       <div className="new-post-form">
         <h4>Create New Post</h4>
@@ -206,11 +204,6 @@ const CommunityForum = ({ communityId }) => {
           border: 1px solid red;
           border-radius: 4px;
           background-color: #fff5f5;
-        }
-
-        h3 {
-          margin-bottom: 20px;
-          color: #333;
         }
 
         h4 {

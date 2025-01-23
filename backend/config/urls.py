@@ -5,8 +5,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # Admin interface
-    path('api/', include('main.urls')),  # Include the `main` app's URLs under the `api/` prefix
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/', include('main.urls')),  # Changed from communities to main
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

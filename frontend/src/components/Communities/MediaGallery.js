@@ -38,23 +38,37 @@ const MediaGallery = ({ communityId, isCreator }) => {
     }
   };
 
-  const handleImageDelete = async (e, imageId) => {
-    e.stopPropagation();
+  const handleImageDelete = async (imageId) => {
     if (!window.confirm('Are you sure you want to delete this image?')) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(
+      console.log('Attempting to delete image:', imageId);
+      console.log('URL:', `http://localhost:8000/api/communities/${communityId}/gallery/${imageId}/`);
+      
+      const response = await axios.delete(
         `http://localhost:8000/api/communities/${communityId}/gallery/${imageId}/`,
         {
-          headers: { 'Authorization': `Token ${token}` }
+          headers: { 
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
-      setImages(images.filter(img => img.id !== imageId));
+
+      console.log('Delete response:', response);
+
+      if (response.status === 204 || response.status === 200) {
+        setImages(prevImages => prevImages.filter(img => img.id !== imageId));
+        setIsFullscreen(false);
+      }
     } catch (err) {
-      setError('Failed to delete image');
+      console.error('Delete request failed:', err.response || err);
+      console.error('Status:', err.response?.status);
+      console.error('Data:', err.response?.data);
+      alert('Failed to delete image. Please check the console for details.');
     }
   };
 
@@ -124,16 +138,6 @@ const MediaGallery = ({ communityId, isCreator }) => {
                   src={image.image.startsWith('http') ? image.image : `http://localhost:8000${image.image}`}
                   alt={`Gallery item ${index + 1}`}
                 />
-                {isCreator && (
-                  <div className="image-overlay">
-                    <button 
-                      className="delete-button"
-                      onClick={(e) => handleImageDelete(e, image.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -144,6 +148,8 @@ const MediaGallery = ({ communityId, isCreator }) => {
         <FullscreenGallery 
           images={images} 
           onClose={() => setIsFullscreen(false)}
+          onDelete={handleImageDelete}
+          isCreator={isCreator}
         />
       )}
 
@@ -255,39 +261,6 @@ const MediaGallery = ({ communityId, isCreator }) => {
           width: 100%;
           height: 100%;
           object-fit: cover;
-        }
-
-        .image-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .gallery-card:hover .image-overlay {
-          opacity: 1;
-        }
-
-        .delete-button {
-          background: #dc3545;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 20px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: all 0.3s ease;
-        }
-
-        .delete-button:hover {
-          background: #c82333;
         }
       `}</style>
     </div>
