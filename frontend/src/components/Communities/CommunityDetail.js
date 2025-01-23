@@ -4,9 +4,11 @@ import axios from 'axios';
 import MediaGallery from './MediaGallery';
 import CommunityForum from './CommunityForum';
 import Resources from './Resources';
-import Modal from '../common/Modal';
+import Modal from '../Common/Modal';
 import MediaUploadForm from './MediaUploadForm';
 import CollectionForm from './CollectionForm';
+import EditCommunityForm from './EditCommunityForm';
+import { API_BASE_URL } from '../../config';
 
 const CommunityDetail = () => {
   const { id } = useParams();
@@ -24,6 +26,9 @@ const CommunityDetail = () => {
     createdAt: '',
   });
   const [showCollectionForm, setShowCollectionForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showMediaUploadModal, setShowMediaUploadModal] = useState(false);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -60,7 +65,9 @@ const CommunityDetail = () => {
 
         setCommunity(communityResponse.data);
         // Check if the logged-in user is the creator
-        setIsCreator(communityResponse.data.created_by.id === profileResponse.data.id);
+        setIsCreator(Boolean(communityResponse.data.is_creator));
+        console.log('Community data:', communityResponse.data);
+        console.log('Is creator:', communityResponse.data.is_creator);
         setLoading(false);
       } catch (error) {
         console.error('Error:', error);
@@ -76,8 +83,95 @@ const CommunityDetail = () => {
     fetchCommunity();
   }, [id, navigate]);
 
-  // Debug log to see what we're passing
-  console.log('Community creator:', community?.created_by);
+  // Debug log whenever isCreator changes
+  useEffect(() => {
+    console.log('isCreator state updated:', isCreator);
+  }, [isCreator]);
+
+  const handleUpdateSuccess = async () => {
+    // Refresh community data
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8000/api/communities/${id}/`,
+        {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        }
+      );
+      setCommunity(response.data);
+    } catch (err) {
+      console.error('Error refreshing community data:', err);
+    }
+  };
+
+  const fetchCommunityData = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/communities/${id}`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCommunity(data);
+      }
+    } catch (error) {
+      console.error('Error fetching community:', error);
+    }
+  };
+
+  const handleBannerUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('banner_image', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:8000/api/communities/${id}/banner/`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'multipart/form-data',
+          }
+        }
+      );
+
+      // Fetch updated community data after successful upload
+      const response = await axios.get(
+        `http://localhost:8000/api/communities/${id}/`,
+        {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        }
+      );
+      
+      // Update the community state with new data
+      setCommunity(response.data);
+      
+    } catch (error) {
+      console.error('Error uploading banner:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleEditSuccess = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `http://localhost:8000/api/communities/${id}/`,
+      {
+        headers: { 'Authorization': `Token ${token}` }
+      }
+    );
+    setCommunity(response.data);
+    setShowEditModal(false);
+  };
 
   if (loading) return <div>Loading community...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
@@ -89,60 +183,71 @@ const CommunityDetail = () => {
 
   return (
     <div className="community-detail">
-      <div className="community-header">
-        {community.banner_image ? (
-          <div className="banner-image" style={{ backgroundImage: `url(${community.banner_image})` }} />
-        ) : (
-          <div className="banner-placeholder">
-            <h1>{name}</h1>
-          </div>
+      <div className="community-banner">
+        {community?.banner_image && (
+          <img 
+            src={community.banner_image.startsWith('http') 
+              ? community.banner_image 
+              : `http://localhost:8000${community.banner_image}`}
+            alt={community.name} 
+            className="banner-image"
+          />
         )}
-        <div className="community-info">
-          <h1>{name}</h1>
-          <p className="description">{description}</p>
-          <div className="meta-info">
-            <span>Created by {createdBy}</span>
-            <span>•</span>
-            <span>{createdAt}</span>
+        {isCreator && (
+          <button 
+            className="edit-community-button"
+            onClick={() => setShowEditModal(true)}
+          >
+            Edit
+          </button>
+        )}
+        <div className="banner-content">
+          <div className="banner-header">
+            <div className="title-section">
+              <h1>{community?.name}</h1>
+            </div>
+            <p className="description">{community?.description}</p>
+            <div className="meta-info">
+              <span>Created by {community?.created_by}</span>
+              <span className="dot">•</span>
+              <span>{new Date(community?.created_at).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="sections-container">
-        <section className="section-box">
-          <div className="section-header">
-            <h3>Media Gallery</h3>
-            {isCreator && (
-              <button 
-                className="add-button"
-                onClick={() => setShowMediaModal(true)}
-              >
-                <span>+</span> Add Media
-              </button>
-            )}
-          </div>
-          <MediaGallery communityId={id} isCreator={isCreator} hideUpload={true} />
-        </section>
+      <div className="community-content">
+        <div className="gallery-section">
+          <MediaGallery communityId={id} isCreator={isCreator} />
+        </div>
 
-        <section className="section-box">
-          <div className="section-header">
-            <h3>Resource Collections</h3>
-            <button 
-              className="add-button"
-              onClick={() => setShowCollectionForm(true)}
-            >
-              <span>+</span> Add Collection
-            </button>
+        <div className="main-content">
+          <div className="content-section">
+            <div className="section-box">
+              <div className="section-header">
+                <h3>Resource Collections</h3>
+                {isCreator && (
+                  <button 
+                    className="add-button"
+                    onClick={() => setShowCollectionForm(true)}
+                  >
+                    <span>+</span> Add Collection
+                  </button>
+                )}
+              </div>
+              <Resources communityId={id} />
+            </div>
           </div>
-          <Resources communityId={id} hideForm={true} />
-        </section>
 
-        <section className="section-box">
-          <div className="section-header">
-            <h3>Community Forum</h3>
+          <div className="content-section">
+            <div className="section-box">
+              <div className="section-header">
+                <h3>Community Forum</h3>
+              </div>
+              <CommunityForum communityId={id} />
+            </div>
           </div>
-          <CommunityForum communityId={id} />
-        </section>
+        </div>
       </div>
 
       {/* Media Upload Modal */}
@@ -174,66 +279,133 @@ const CommunityDetail = () => {
         />
       </Modal>
 
-      <style jsx>{`
+      {/* Edit Community Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <EditCommunityForm
+              community={community}
+              onSuccess={handleEditSuccess}
+              onClose={() => setShowEditModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {showMediaUploadModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Add Image</h2>
+            <MediaUploadForm
+              communityId={id}
+              onSuccess={() => {
+                setShowMediaUploadModal(false);
+                // Refresh the gallery
+                fetchCommunityData();
+              }}
+              onClose={() => setShowMediaUploadModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      <style jsx="true">{`
         .community-detail {
-          min-height: calc(100vh - 64px);
-          background: #f5f5f5;
+          margin-top: 60px; /* Add space for the navigation bar */
         }
 
-        .community-header {
+        .community-banner {
           position: relative;
-          background: white;
-          margin-bottom: 2rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          height: 400px;
+          width: 100%;
+          overflow: hidden;
         }
 
-        .banner-image {
-          height: 300px;
-          background-size: cover;
-          background-position: center;
-          position: relative;
-        }
-
-        .banner-placeholder {
-          height: 300px;
-          background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .banner-content {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 2rem;
+          background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.7));
           color: white;
         }
 
-        .community-info {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2rem;
+        .banner-header {
+          position: relative;
+          z-index: 1;
         }
 
-        .community-info h1 {
+        .title-section {
+          position: relative;
+        }
+
+        h1 {
+          font-size: 3.5rem;
           margin: 0;
-          font-size: 2.5rem;
-          color: #333;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .description {
-          font-size: 1.1rem;
-          color: #666;
-          margin: 1rem 0;
-          line-height: 1.6;
+          font-size: 1.2rem;
+          margin: 0.5rem 0 1rem 0;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
 
         .meta-info {
-          display: flex;
-          gap: 1rem;
-          align-items: center;
-          color: #666;
-          font-size: 0.9rem;
+          font-size: 1rem;
+          opacity: 0.9;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
 
-        .sections-container {
+        .dot {
+          margin: 0 0.5rem;
+        }
+
+        .edit-community-button {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          padding: 8px 16px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+          z-index: 10;
+          color: #333;
+          font-weight: 500;
+          text-shadow: none;
+        }
+
+        .edit-community-button:hover {
+          background: white;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          color: #000;
+        }
+
+        .banner-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .community-content {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 2rem 2rem;
+          padding: 0 2rem;
+        }
+
+        .gallery-section {
+          margin-bottom: 3rem;
+        }
+
+        .main-content {
+          max-width: 1200px;
+          margin: 2rem auto;
+          padding: 0 2rem;
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 2rem;
@@ -284,18 +456,70 @@ const CommunityDetail = () => {
           font-weight: bold;
         }
 
+        .edit-form {
+          padding: 20px;
+        }
+
+        .banner-input {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .banner-input:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .upload-status {
+          margin-top: 10px;
+          color: #666;
+          font-size: 14px;
+        }
+
         @media (max-width: 768px) {
           .sections-container {
             grid-template-columns: 1fr;
           }
 
-          .community-info h1 {
+          .community-banner {
+            padding: 3rem 1.5rem;
+          }
+
+          .banner-content h1 {
             font-size: 2rem;
           }
 
-          .banner-image, .banner-placeholder {
-            height: 200px;
+          .title-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
           }
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          width: 90%;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
         }
       `}</style>
     </div>

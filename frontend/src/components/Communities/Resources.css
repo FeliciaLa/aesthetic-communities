@@ -11,16 +11,6 @@
     border-radius: 8px;
 }
 
-.add-collection-form {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
 .add-collection-form input,
 .add-collection-form select,
 .add-collection-form textarea {

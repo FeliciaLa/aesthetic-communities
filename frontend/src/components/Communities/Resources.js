@@ -8,11 +8,6 @@ const Resources = ({ communityId }) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [newCollection, setNewCollection] = useState({
-        name: '',
-        category_type: 'BOOKS',
-        description: ''
-    });
     const [newResource, setNewResource] = useState({
         title: '',
         description: '',
@@ -40,34 +35,6 @@ const Resources = ({ communityId }) => {
             console.error('Error fetching categories:', err);
             setError('Failed to fetch categories');
             setLoading(false);
-        }
-    };
-
-    const handleAddCollection = async (e) => {
-        e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            const data = {
-                ...newCollection,
-                community: communityId
-            };
-            console.log('Sending collection data:', data);
-            
-            const response = await axios.post(
-                'http://localhost:8000/api/resources/categories/',
-                data,
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            setCategories([...categories, response.data]);
-            setNewCollection({ name: '', category_type: 'BOOKS', description: '' });
-        } catch (err) {
-            console.error('Error adding collection:', err.response?.data || err.message);
-            setError('Failed to add collection');
         }
     };
 
@@ -138,32 +105,6 @@ const Resources = ({ communityId }) => {
         <div className="resources-section">
             <div className="resources-sidebar">
                 <h3>Collections</h3>
-                <form onSubmit={handleAddCollection} className="add-collection-form">
-                    <input
-                        type="text"
-                        placeholder="Collection Name"
-                        value={newCollection.name}
-                        onChange={(e) => setNewCollection({...newCollection, name: e.target.value})}
-                        required
-                    />
-                    <select
-                        value={newCollection.category_type}
-                        onChange={(e) => setNewCollection({...newCollection, category_type: e.target.value})}
-                    >
-                        <option value="BOOKS">Books</option>
-                        <option value="MOVIES">Movies</option>
-                        <option value="VIDEOS">Videos</option>
-                        <option value="MUSIC">Music</option>
-                        <option value="TUTORIALS">Tutorials</option>
-                    </select>
-                    <textarea
-                        placeholder="Description"
-                        value={newCollection.description}
-                        onChange={(e) => setNewCollection({...newCollection, description: e.target.value})}
-                    />
-                    <button type="submit">Add Collection</button>
-                </form>
-
                 <div className="collection-list">
                     <h4>Collection List</h4>
                     {categories.length > 0 ? (

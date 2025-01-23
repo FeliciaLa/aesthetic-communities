@@ -35,11 +35,18 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 class CommunitySerializer(serializers.ModelSerializer):
+    is_creator = serializers.SerializerMethodField()
     created_by = serializers.ReadOnlyField(source='created_by.username')
     
     class Meta:
         model = Community
-        fields = ['id', 'name', 'description', 'created_by', 'created_at']
+        fields = ['id', 'name', 'description', 'created_by', 'created_at', 'is_creator', 'banner_image']
+
+    def get_is_creator(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.created_by == request.user
+        return False
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
