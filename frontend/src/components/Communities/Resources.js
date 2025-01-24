@@ -6,7 +6,7 @@ import EditCollectionForm from './EditCollectionForm';
 import ResourceList from './ResourceList';
 import AddResourceForm from './AddResourceForm';
 
-const Resources = ({ communityId }) => {
+const Resources = ({ communityId, isOwner }) => {
     const [collections, setCollections] = useState([]);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [showAddCollection, setShowAddCollection] = useState(false);
@@ -109,12 +109,14 @@ const Resources = ({ communityId }) => {
 
     return (
         <div className="resources-container">
-            <button 
-                className="add-collection-button"
-                onClick={() => setShowAddCollection(true)}
-            >
-                + Add Collection
-            </button>
+            {isOwner && (
+                <button 
+                    className="add-collection-button"
+                    onClick={() => setShowAddCollection(true)}
+                >
+                    + Add Collection
+                </button>
+            )}
 
             <div className="collections-grid">
                 {collections.map(collection => (
