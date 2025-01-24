@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Resources.css';
+import CollectionForm from './CollectionForm';
+import EditCollectionForm from './EditCollectionForm';
+import ResourceList from './ResourceList';
+import AddResourceForm from './AddResourceForm';
 
 const Resources = ({ communityId }) => {
-    const [categories, setCategories] = useState([]);
-    const [resources, setResources] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [collections, setCollections] = useState([]);
+    const [selectedCollection, setSelectedCollection] = useState(null);
+    const [showAddCollection, setShowAddCollection] = useState(false);
+    const [showEditCollection, setShowEditCollection] = useState(false);
+    const [editingCollection, setEditingCollection] = useState(null);
     const [error, setError] = useState(null);
-    const [newResource, setNewResource] = useState({
-        title: '',
-        description: '',
-        url: '',
-        author: ''
-    });
+    const [showAddResource, setShowAddResource] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
 
-    const fetchCategories = async () => {
+    const fetchCollections = async () => {
         try {
             const token = localStorage.getItem('token');
+            console.log('Fetching collections for community:', communityId);
+            
             const response = await axios.get(
-                `http://localhost:8000/api/resources/categories/`,
+                'http://localhost:8000/api/resources/categories/',
                 {
                     params: { community_id: communityId },
                     headers: { 
@@ -28,164 +31,195 @@ const Resources = ({ communityId }) => {
                     }
                 }
             );
-            console.log('Categories fetched:', response.data); // Debug log
-            setCategories(response.data);
-            setLoading(false);
+            
+            console.log('Collections response:', response.data);
+            setCollections(response.data);
         } catch (err) {
-            console.error('Error fetching categories:', err);
-            setError('Failed to fetch categories');
-            setLoading(false);
+            console.error('Error fetching collections:', err.response || err);
+            setError(err.response?.data?.error || 'Failed to fetch collections');
         }
     };
 
     useEffect(() => {
-        fetchCategories();
+        if (communityId) {
+            fetchCollections();
+        }
     }, [communityId]);
 
     useEffect(() => {
-        if (selectedCategory) {
-            console.log('Selected category changed:', selectedCategory); // Debug log
-            fetchResources(selectedCategory.id);
-        }
-    }, [selectedCategory]);
+        const handleClickOutside = () => setActiveDropdown(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
-    const fetchResources = async (categoryId) => {
-        try {
-            const token = localStorage.getItem('token');
-            console.log('Fetching resources for category:', categoryId); // Debug log
-            console.log('Token:', token); // Debug log
-            
-            const response = await axios.get(
-                `http://localhost:8000/api/resources/`,
-                {
-                    params: { category_id: categoryId },
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
+    const handleEditClick = (collection) => {
+        setEditingCollection(collection);
+        setShowEditCollection(true);
+    };
+
+    const handleEditSuccess = (updatedCollection) => {
+        setCollections(prevCollections => 
+            prevCollections.map(coll => 
+                coll.id === updatedCollection.id ? updatedCollection : coll
+            )
+        );
+        setShowEditCollection(false);
+        setEditingCollection(null);
+    };
+
+    const handleCollectionSuccess = (newCollection) => {
+        setCollections(prevCollections => [...prevCollections, newCollection]);
+        setShowAddCollection(false);
+    };
+
+    const handleDeleteClick = async (collectionId) => {
+        if (window.confirm('Are you sure you want to delete this collection?')) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(
+                    `http://localhost:8000/api/resources/categories/${collectionId}/`,
+                    {
+                        headers: { 'Authorization': `Token ${token}` }
                     }
-                }
-            );
-            console.log('Resources response:', response.data); // Debug log
-            setResources(response.data);
-        } catch (err) {
-            console.error('Error details:', err.response?.data || err.message); // More detailed error
-            setError('Failed to fetch resources');
+                );
+                
+                // Remove the deleted collection from state
+                setCollections(prevCollections => 
+                    prevCollections.filter(collection => collection.id !== collectionId)
+                );
+            } catch (err) {
+                console.error('Error deleting collection:', err);
+                setError('Failed to delete collection');
+            }
         }
     };
 
-    const handleAddResource = async (e) => {
-        e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                'http://localhost:8000/api/resources/',
-                {
-                    ...newResource,
-                    category: selectedCategory.id
-                },
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            setResources([...resources, response.data]);
-            setNewResource({ title: '', description: '', url: '', author: '' });
-        } catch (err) {
-            console.error('Error adding resource:', err);
-            setError('Failed to add resource');
-        }
+    const handleCollectionClick = (collection) => {
+        setSelectedCollection(collection);
     };
 
-    if (loading) return <div>Loading categories...</div>;
-    if (error) return <div className="error-message">{error}</div>;
+    const handleAddResourceClick = () => {
+        setShowAddResource(true);
+    };
+
+    const handleActionsClick = (e, collectionId) => {
+        e.stopPropagation();
+        setActiveDropdown(activeDropdown === collectionId ? null : collectionId);
+    };
 
     return (
-        <div className="resources-section">
-            <div className="resources-sidebar">
-                <h3>Collections</h3>
-                <div className="collection-list">
-                    <h4>Collection List</h4>
-                    {categories.length > 0 ? (
-                        categories.map(category => (
-                            <div
-                                key={category.id}
-                                className={`collection-item ${selectedCategory?.id === category.id ? 'selected' : ''}`}
-                                onClick={() => setSelectedCategory(category)}
+        <div className="resources-container">
+            <button 
+                className="add-collection-button"
+                onClick={() => setShowAddCollection(true)}
+            >
+                + Add Collection
+            </button>
+
+            <div className="collections-grid">
+                {collections.map(collection => (
+                    <div 
+                        key={collection.id} 
+                        className={`collection-card ${selectedCollection?.id === collection.id ? 'selected' : ''}`}
+                        onClick={() => handleCollectionClick(collection)}
+                    >
+                        {collection.preview_image && (
+                            <img 
+                                src={collection.preview_image} 
+                                alt={collection.name} 
+                                className="collection-preview"
+                            />
+                        )}
+                        <div className="collection-actions">
+                            <button 
+                                className="actions-button"
+                                onClick={(e) => handleActionsClick(e, collection.id)}
                             >
-                                {category.name}
+                                Actions
+                            </button>
+                            <div className={`actions-dropdown ${activeDropdown === collection.id ? 'show' : ''}`}>
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditClick(collection);
+                                }}>
+                                    Edit
+                                </button>
+                                <button 
+                                    className="delete"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteClick(collection.id);
+                                    }}
+                                >
+                                    Delete
+                                </button>
                             </div>
-                        ))
-                    ) : (
-                        <div>No collections available</div>
-                    )}
+                        </div>
+                        <h3>{collection.name}</h3>
+                        <p>{collection.description}</p>
+                    </div>
+                ))}
+            </div>
+
+            {selectedCollection && (
+                <div className="resources-list">
+                    <h2>{selectedCollection.name} Resources</h2>
+                    <button 
+                        className="add-resource-button"
+                        onClick={handleAddResourceClick}
+                    >
+                        + Add Resource
+                    </button>
+                    <ResourceList 
+                        collectionId={selectedCollection.id}
+                        onClose={() => setSelectedCollection(null)}
+                    />
                 </div>
-            </div>
+            )}
 
-            <div className="resources-content">
-                {selectedCategory ? (
-                    <>
-                        <h2>{selectedCategory.name}</h2>
-                        <p>{selectedCategory.description}</p>
+            {showAddCollection && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <CollectionForm
+                            communityId={communityId}
+                            onSuccess={handleCollectionSuccess}
+                            onClose={() => setShowAddCollection(false)}
+                        />
+                    </div>
+                </div>
+            )}
 
-                        <div className="add-resource-section">
-                            <h3>Add New {selectedCategory.category_type.toLowerCase()}</h3>
-                            <form onSubmit={handleAddResource} className="add-resource-form">
-                                <input
-                                    type="text"
-                                    placeholder="Title"
-                                    value={newResource.title}
-                                    onChange={(e) => setNewResource({...newResource, title: e.target.value})}
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Author/Creator"
-                                    value={newResource.author}
-                                    onChange={(e) => setNewResource({...newResource, author: e.target.value})}
-                                />
-                                <textarea
-                                    placeholder="Description"
-                                    value={newResource.description}
-                                    onChange={(e) => setNewResource({...newResource, description: e.target.value})}
-                                />
-                                <input
-                                    type="url"
-                                    placeholder="URL (e.g., IMDB link, purchase link, video URL)"
-                                    value={newResource.url}
-                                    onChange={(e) => setNewResource({...newResource, url: e.target.value})}
-                                />
-                                <button type="submit">Add {selectedCategory.category_type.slice(0, -1)}</button>
-                            </form>
-                        </div>
+            {showEditCollection && editingCollection && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <EditCollectionForm
+                            collection={editingCollection}
+                            onSuccess={handleEditSuccess}
+                            onClose={() => {
+                                setShowEditCollection(false);
+                                setEditingCollection(null);
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
-                        <div className="resources-list">
-                            <h3>{selectedCategory.name} List</h3>
-                            {resources.length > 0 ? (
-                                <div className="resource-grid">
-                                    {resources.map(resource => (
-                                        <div key={resource.id} className="resource-card">
-                                            <h4>{resource.title}</h4>
-                                            {resource.author && <p className="author">By: {resource.author}</p>}
-                                            <p className="description">{resource.description}</p>
-                                            {resource.url && (
-                                                <a href={resource.url} target="_blank" rel="noopener noreferrer" className="resource-link">
-                                                    View {selectedCategory.category_type.slice(0, -1)}
-                                                </a>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p>No items in this collection yet</p>
-                            )}
-                        </div>
-                    </>
-                ) : (
-                    <div>Select a collection to view and add items</div>
-                )}
-            </div>
+            {showAddResource && selectedCollection && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <AddResourceForm
+                            categoryId={selectedCollection.id}
+                            onSuccess={(newResource) => {
+                                // Update the ResourceList component
+                                setShowAddResource(false);
+                            }}
+                            onClose={() => setShowAddResource(false)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {error && <div className="error-message">{error}</div>}
         </div>
     );
 };
