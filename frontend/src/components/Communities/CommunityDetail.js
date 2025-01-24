@@ -7,6 +7,7 @@ import Resources from './Resources';
 import EditCommunityForm from './EditCommunityForm';
 import SpotifyPlayer from '../Music/SpotifyPlayer';
 import CommunityForum from './CommunityForum';
+import JoinCommunityButton from './JoinCommunityButton';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -15,37 +16,29 @@ const CommunityDetail = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [refreshGallery, setRefreshGallery] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchCommunityDetails = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const currentUserId = localStorage.getItem('userId');
-                
-                console.log('Current user ID:', currentUserId); // Debug log
-
                 const response = await axios.get(
                     `http://localhost:8000/api/communities/${id}/`,
                     {
-                        headers: {
-                            'Authorization': `Token ${token}`
-                        }
+                        headers: { 'Authorization': `Token ${token}` }
                     }
                 );
-
                 setCommunity(response.data);
+                const currentUser = response.data.current_username;
+                const communityCreator = response.data.creator_name;
+                setIsCreator(currentUser === communityCreator);
                 
-                // Debug logs
-                console.log('Community data:', response.data);
-                console.log('Created by:', response.data.created_by);
-                
-                // Check if the current user is the creator
-                const isCreatorCheck = response.data.created_by === currentUserId;
-                console.log('Is creator check:', { currentUserId, createdBy: response.data.created_by, isCreator: isCreatorCheck });
-                
-                setIsCreator(isCreatorCheck);
-            } catch (error) {
-                console.error('Error fetching community:', error);
+                console.log('Community creator:', communityCreator);
+                console.log('Current user:', currentUser);
+                console.log('Setting isCreator to:', currentUser === communityCreator);
+            } catch (err) {
+                console.error('Error fetching community:', err);
+                setError('Failed to load community');
             }
         };
 
@@ -147,11 +140,15 @@ const CommunityDetail = () => {
                     <div className="creator-info">
                         Created by {community?.creator_name || 'Unknown'} • {formatDate(community?.created_at)}
                     </div>
-                    {isCreator && (
-                        <button onClick={() => setShowEditModal(true)} className="edit-button">
-                            Edit
-                        </button>
-                    )}
+                    <div className="banner-actions">
+                        {isCreator ? (
+                            <button onClick={() => setShowEditModal(true)} className="edit-button">
+                                Edit
+                            </button>
+                        ) : (
+                            <JoinCommunityButton communityId={id} />
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -174,7 +171,7 @@ const CommunityDetail = () => {
 
                     <div className="collections-section">
                         <h3>Collections</h3>
-                        <Resources communityId={id} />
+                        <Resources communityId={id} isOwner={isCreator} />
                     </div>
 
                     <div className="forum-section">
