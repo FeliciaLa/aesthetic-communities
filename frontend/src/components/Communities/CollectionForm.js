@@ -1,95 +1,110 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const CollectionForm = ({ communityId, onSuccess }) => {
+const CollectionForm = ({ communityId, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
-    category_type: 'VIDEOS',
-    description: ''
+    description: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('description', formData.description);
+    if (previewUrl) {
+      formDataToSend.append('preview_image', previewUrl);
+    }
+
     try {
       const token = localStorage.getItem('token');
       
-      const requestData = {
-        name: formData.name,
-        category_type: formData.category_type,
-        description: formData.description,
-        community: parseInt(communityId),
-        created_by: null
-      };
-
-      console.log('Sending data:', requestData);
-
       const response = await axios.post(
-        'http://localhost:8000/api/resources/categories/',
-        requestData,
+        `http://localhost:8000/api/resources/categories/`,
+        formDataToSend,
         {
           headers: {
             'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
+            'community-id': communityId
           }
         }
       );
 
-      console.log('Response:', response.data);
-      onSuccess();
+      onSuccess(response.data);
     } catch (err) {
       console.error('API Error:', err.response?.data);
-      setError(err.response?.data?.error || 'Failed to create collection');
+      setError(err.response?.data?.message || 'Failed to create collection');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="collection-form">
+      <h2>Create Collection</h2>
+      
       <div className="form-group">
         <label>Collection Name</label>
         <input
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
         />
-      </div>
-
-      <div className="form-group">
-        <label>Category</label>
-        <select
-          value={formData.category_type}
-          onChange={(e) => setFormData({...formData, category_type: e.target.value})}
-          required
-        >
-          <option value="VIDEOS">Videos</option>
-          <option value="BOOKS">Books</option>
-          <option value="MOVIES">Movies</option>
-          <option value="MUSIC">Music</option>
-          <option value="TUTORIALS">Tutorials</option>
-          <option value="OTHER">Other</option>
-        </select>
       </div>
 
       <div className="form-group">
         <label>Description</label>
         <textarea
           value={formData.description}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           required
         />
       </div>
 
+      <div className="form-group">
+        <label>Preview Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+        {previewUrl && (
+          <img 
+            src={previewUrl} 
+            alt="Preview" 
+            style={{ maxWidth: '200px', marginTop: '10px' }} 
+          />
+        )}
+      </div>
+
       {error && <div className="error-message">{error}</div>}
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Creating...' : 'Create Collection'}
-      </button>
+      
+      <div className="button-group">
+        <button type="button" className="cancel-button" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="submit" className="submit-button" disabled={submitting}>
+          {submitting ? 'Creating...' : 'Create Collection'}
+        </button>
+      </div>
 
       <style jsx>{`
         .collection-form {
@@ -143,6 +158,26 @@ const CollectionForm = ({ communityId, onSuccess }) => {
 
         .submit-button:hover:not(:disabled) {
           background-color: #0056b3;
+        }
+
+        .cancel-button {
+          padding: 0.5rem 1rem;
+          background-color: #6c757d;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+          margin-top: 1rem;
+        }
+
+        .cancel-button:hover:not(:disabled) {
+          background-color: #5a6268;
+        }
+
+        .button-group {
+          display: flex;
+          justify-content: space-between;
         }
       `}</style>
     </form>
