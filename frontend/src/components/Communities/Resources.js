@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Resources.css';
 import CollectionForm from './CollectionForm';
 import EditCollectionForm from './EditCollectionForm';
-import ResourceList from './ResourceList';
+import CollectionDetailPage from './CollectionDetailPage';
 import AddResourceForm from './AddResourceForm';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Resources = ({ communityId, isOwner }) => {
     const [collections, setCollections] = useState([]);
@@ -13,8 +15,13 @@ const Resources = ({ communityId, isOwner }) => {
     const [showEditCollection, setShowEditCollection] = useState(false);
     const [editingCollection, setEditingCollection] = useState(null);
     const [error, setError] = useState(null);
-    const [showAddResource, setShowAddResource] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [stats, setStats] = useState({
+        total_resources: 0,
+        total_votes: 0,
+        total_views: 0
+    });
+    const navigate = useNavigate();
 
     const fetchCollections = async () => {
         try {
@@ -52,9 +59,18 @@ const Resources = ({ communityId, isOwner }) => {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
+    const handleActionsClick = (collectionId) => {
+        if (activeDropdown === collectionId) {
+            setActiveDropdown(null);
+        } else {
+            setActiveDropdown(collectionId);
+        }
+    };
+
     const handleEditClick = (collection) => {
         setEditingCollection(collection);
         setShowEditCollection(true);
+        setActiveDropdown(null);
     };
 
     const handleEditSuccess = (updatedCollection) => {
@@ -82,30 +98,27 @@ const Resources = ({ communityId, isOwner }) => {
                         headers: { 'Authorization': `Token ${token}` }
                     }
                 );
-                
-                // Remove the deleted collection from state
-                setCollections(prevCollections => 
-                    prevCollections.filter(collection => collection.id !== collectionId)
-                );
+                fetchCollections();
+                setActiveDropdown(null);
             } catch (err) {
-                console.error('Error deleting collection:', err);
-                setError('Failed to delete collection');
+                setError(err.response?.data?.error || 'Failed to delete collection');
             }
         }
     };
 
-    const handleCollectionClick = (collection) => {
-        setSelectedCollection(collection);
+    const handleCollectionClick = (collectionId) => {
+        navigate(`/resources/categories/${collectionId}`);
     };
 
-    const handleAddResourceClick = () => {
-        setShowAddResource(true);
-    };
+    const handleStatsUpdate = useCallback((newStats) => {
+        console.log('Received new stats:', newStats);
+        setStats(newStats);
+    }, []);
 
-    const handleActionsClick = (e, collectionId) => {
-        e.stopPropagation();
-        setActiveDropdown(activeDropdown === collectionId ? null : collectionId);
-    };
+    // Add this useEffect to monitor stats changes
+    useEffect(() => {
+        console.log('Stats updated:', stats);
+    }, [stats]);
 
     return (
         <div className="resources-container">
@@ -123,7 +136,8 @@ const Resources = ({ communityId, isOwner }) => {
                     <div 
                         key={collection.id} 
                         className={`collection-card ${selectedCollection?.id === collection.id ? 'selected' : ''}`}
-                        onClick={() => handleCollectionClick(collection)}
+                        onClick={() => handleCollectionClick(collection.id)}
+                        style={{ cursor: 'pointer' }}
                     >
                         {collection.preview_image && (
                             <img 
@@ -135,7 +149,7 @@ const Resources = ({ communityId, isOwner }) => {
                         <div className="collection-actions">
                             <button 
                                 className="actions-button"
-                                onClick={(e) => handleActionsClick(e, collection.id)}
+                                onClick={(e) => handleActionsClick(collection.id)}
                             >
                                 Actions
                             </button>
@@ -163,22 +177,6 @@ const Resources = ({ communityId, isOwner }) => {
                 ))}
             </div>
 
-            {selectedCollection && (
-                <div className="resources-list">
-                    <h2>{selectedCollection.name} Resources</h2>
-                    <button 
-                        className="add-resource-button"
-                        onClick={handleAddResourceClick}
-                    >
-                        + Add Resource
-                    </button>
-                    <ResourceList 
-                        collectionId={selectedCollection.id}
-                        onClose={() => setSelectedCollection(null)}
-                    />
-                </div>
-            )}
-
             {showAddCollection && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -191,6 +189,23 @@ const Resources = ({ communityId, isOwner }) => {
                 </div>
             )}
 
+            {selectedCollection && (
+                <>
+                    <div className="banner">
+                        <Link to="/communities" className="back-button">
+                            ← Back to the Community
+                        </Link>
+                        <h1>{selectedCollection.name}</h1>
+                        <p>{selectedCollection.description}</p>
+                    </div>
+                    
+                    <CollectionDetailPage
+                        collectionId={selectedCollection.id}
+                        onStatsUpdate={handleStatsUpdate}
+                    />
+                </>
+            )}
+
             {showEditCollection && editingCollection && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -201,21 +216,6 @@ const Resources = ({ communityId, isOwner }) => {
                                 setShowEditCollection(false);
                                 setEditingCollection(null);
                             }}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {showAddResource && selectedCollection && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <AddResourceForm
-                            categoryId={selectedCollection.id}
-                            onSuccess={(newResource) => {
-                                // Update the ResourceList component
-                                setShowAddResource(false);
-                            }}
-                            onClose={() => setShowAddResource(false)}
                         />
                     </div>
                 </div>
