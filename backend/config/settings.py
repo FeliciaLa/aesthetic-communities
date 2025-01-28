@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "main",
+    "music",
     # Remove or comment out 'communities' since we've moved everything to main
     # 'communities',
 ]
@@ -157,7 +158,23 @@ DEFAULT_FROM_EMAIL = "webmaster@localhost"
 
 # Media files configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Add allowed audio file types
+ALLOWED_AUDIO_TYPES = [
+    'audio/mpeg',  # .mp3
+    'audio/wav',   # .wav
+    'audio/ogg'    # .ogg
+]
+
+# Maximum file size (5MB)
+MAX_AUDIO_SIZE = 5 * 1024 * 1024
+
+# Make sure Django can serve media files in development
+if DEBUG:
+    MIDDLEWARE += [
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+    ]
 
 # CORS settings if needed
 CORS_ALLOW_ALL_ORIGINS = True  # For development only

@@ -137,64 +137,78 @@
 .resource-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 1.5rem;
+    padding: 1rem;
 }
 
-.resource-card {
-    background: white;
+.resource-item {
     border: 1px solid #ddd;
     border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.resource-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.resource-preview {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.resource-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.resource-content {
     padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.resource-card h4 {
+.resource-content h4 {
     margin: 0 0 0.5rem 0;
-    color: #333;
+    font-size: 1.1rem;
 }
 
-.resource-card .author {
+.resource-content .remark {
     color: #666;
     font-size: 0.9rem;
     margin: 0.5rem 0;
 }
 
-.resource-card .description {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
-    color: #444;
-}
-
-.resource-link {
+.resource-content a {
     display: inline-block;
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background: #007bff;
-    color: white;
+    margin-top: 0.5rem;
+    color: #0066cc;
     text-decoration: none;
-    border-radius: 4px;
-    font-size: 0.9rem;
 }
 
-.resource-link:hover {
-    background: #0056b3;
+.resource-content a:hover {
+    text-decoration: underline;
 }
 
 .add-collection-button {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 1rem 0;
-    background: #007bff;
-    color: white;
-    border: none;
+    color: #666;
+    background: none;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .add-collection-button:hover {
-    background: #0056b3;
+    background: rgba(0, 0, 0, 0.05);
+    border-color: #999;
 }
 
 .resources-header {
@@ -301,6 +315,11 @@
 
 .resources-container {
     padding: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .collections-grid {
@@ -318,11 +337,12 @@
     transition: transform 0.2s;
     position: relative;
     padding-bottom: 16px;
+    cursor: pointer;
 }
 
 .collection-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
 }
 
 .collection-card.selected {
@@ -338,8 +358,16 @@
 
 .collection-card h3 {
     margin: 12px 16px;
-    font-size: 1.2rem;
-    color: #333;
+    font-size: 1.4rem;
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
+.collection-card .title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #1a1a1a;
+    margin-bottom: 8px;
 }
 
 .collection-card p {
@@ -534,4 +562,141 @@
 .actions-dropdown button.delete:hover {
     background-color: #dc3545;
     color: white;
+}
+
+.resource-page {
+    padding: 80px 20px 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #007bff;
+    background: white;
+    border: 1px solid #007bff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.back-button:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+}
+
+.back-button:active {
+    transform: translateY(0);
+}
+
+.resource-header-content {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eaeaea;
+}
+
+/* Add a subtle pattern overlay */
+.resource-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%), 
+                      linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%);
+    background-size: 3px 3px;
+    opacity: 0.1;
+    border-radius: 12px;
+}
+
+.resource-list-container {
+    margin-top: 20px;
+    position: relative;
+    z-index: 0;
+}
+
+.stats-debug-container {
+    border: 2px solid red; /* Debug border */
+    padding: 1rem;
+    margin: 1rem 0;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    color: white;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    min-width: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for each stat box */
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.collections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.collections-header .add-collection-button {
+    color: #666;
+    background: none;
+    border: 1px solid #ddd;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    line-height: 1;
+}
+
+.collections-header .add-collection-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: #999;
+}
+
+/* Override any existing styles */
+.add-collection-button {
+    width: auto !important;
+    background: none !important;
+    color: #666 !important;
 } 
