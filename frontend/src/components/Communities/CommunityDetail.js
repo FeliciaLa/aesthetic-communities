@@ -8,6 +8,7 @@ import EditCommunityForm from './EditCommunityForm';
 import SpotifyPlayer from '../Music/SpotifyPlayer';
 import CommunityFeed from './CommunityFeed';
 import JoinCommunityButton from './JoinCommunityButton';
+import AnnouncementsDashboard from './AnnouncementsDashboard';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -155,17 +156,21 @@ const CommunityDetail = () => {
             <div className="content-section">
                 <div className="main-content">
                     <div className="top-section">
+                        <div className="upper-section">
+                            <div className="announcements-section">
+                                <AnnouncementsDashboard communityId={id} isCreator={isCreator} />
+                            </div>
+                            <div className="gallery-section">
+                                <MediaGallery 
+                                    communityId={id} 
+                                    isCreator={isCreator}
+                                    setIsFullscreen={setIsFullscreen}
+                                    isFullscreen={isFullscreen}
+                                />
+                            </div>
+                        </div>
                         <div className="playlist-section">
                             <SpotifyPlayer communityId={id} isCreator={isCreator} />
-                        </div>
-
-                        <div className="gallery-section">
-                            <MediaGallery 
-                                communityId={id} 
-                                isCreator={isCreator}
-                                setIsFullscreen={setIsFullscreen}
-                                isFullscreen={isFullscreen}
-                            />
                         </div>
                     </div>
 
@@ -281,18 +286,31 @@ const CommunityDetail = () => {
 
                 .top-section {
                     display: flex;
-                    gap: 4rem;
-                    margin-top: 2rem;
+                    flex-direction: column;
+                    gap: 2rem;
+                    padding: 2rem;
                 }
 
-                .playlist-section {
-                    flex: 0 0 auto;
-                    width: 350px;
-                    margin-left: -1rem;
+                .upper-section {
+                    display: flex;
+                    gap: 2rem;
+                    width: 100%;
+                }
+
+                .announcements-section {
+                    margin-bottom: 0;
+                    width: 20%;
+                    min-width: 250px;
                 }
 
                 .gallery-section {
                     flex: 1;
+                    margin-top: 4rem;
+                }
+
+                .playlist-section {
+                    width: 350px;
+                    margin-top: 2rem;
                 }
 
                 .gallery-container {
