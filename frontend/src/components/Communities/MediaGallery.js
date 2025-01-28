@@ -95,8 +95,7 @@ const MediaGallery = ({ communityId, isCreator }) => {
 
   if (loading) return <div className="banner-placeholder">Loading gallery...</div>;
   if (error) return <div className="banner-placeholder error">{error}</div>;
-  if (images.length === 0) return null;
-
+  
   return (
     <div className="section-container">
       <div className="section-header">
@@ -125,24 +124,31 @@ const MediaGallery = ({ communityId, isCreator }) => {
         </div>
       </div>
 
-      <div className="gallery-container">
-        <div className="gallery-scroll" ref={scrollContainerRef}>
-          <div className="gallery-track">
-            {displayImages.map((image, index) => (
-              <div 
-                key={`${image.id}-${index}`} 
-                className="gallery-card"
-                onClick={() => setIsFullscreen(true)}
-              >
-                <img 
-                  src={image.image.startsWith('http') ? image.image : `http://localhost:8000${image.image}`}
-                  alt={`Gallery item ${index + 1}`}
-                />
-              </div>
-            ))}
+      {images.length === 0 ? (
+        <div className="empty-gallery">
+          <p>No images in the gallery yet.</p>
+          {isCreator && <p>Click "Add Image" to upload your first image!</p>}
+        </div>
+      ) : (
+        <div className="gallery-container">
+          <div className="gallery-scroll" ref={scrollContainerRef}>
+            <div className="gallery-track">
+              {displayImages.map((image, index) => (
+                <div 
+                  key={`${image.id}-${index}`} 
+                  className="gallery-card"
+                  onClick={() => setIsFullscreen(true)}
+                >
+                  <img 
+                    src={image.image.startsWith('http') ? image.image : `http://localhost:8000${image.image}`}
+                    alt={`Gallery item ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {isFullscreen && (
         <FullscreenGallery 
@@ -153,13 +159,15 @@ const MediaGallery = ({ communityId, isCreator }) => {
         />
       )}
 
-      <style jsx="true">{`
+      <style>{`
         .section-container {
           background: white;
           border-radius: 12px;
           padding: 1.5rem;
-          margin: 3rem 0 2rem;
+          margin-bottom: 2rem;
+          margin-top: 2rem;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          width: 100%;
         }
 
         .section-header {
@@ -205,7 +213,7 @@ const MediaGallery = ({ communityId, isCreator }) => {
 
         .gallery-container {
           position: relative;
-          margin-top: 1rem;
+          width: 100%;
           overflow: hidden;
           background: #f8f9fa;
           border-radius: 8px;
@@ -214,23 +222,15 @@ const MediaGallery = ({ communityId, isCreator }) => {
 
         .gallery-scroll {
           overflow: hidden;
+          width: 100%;
           -ms-overflow-style: none;
           scrollbar-width: none;
-        }
-
-        .gallery-scroll::-webkit-scrollbar {
-          display: none;
         }
 
         .gallery-track {
           display: flex;
           gap: 1rem;
-          width: max-content;
           animation: scroll 60s linear infinite;
-        }
-
-        .gallery-track:hover {
-          animation-play-state: paused;
         }
 
         @keyframes scroll {
@@ -261,6 +261,18 @@ const MediaGallery = ({ communityId, isCreator }) => {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+
+        .empty-gallery {
+          padding: 2rem;
+          text-align: center;
+          background: #f8f9fa;
+          border-radius: 8px;
+          color: #666;
+        }
+
+        .empty-gallery p {
+          margin: 0.5rem 0;
         }
       `}</style>
     </div>

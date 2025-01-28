@@ -6,7 +6,7 @@ import MediaGallery from './MediaGallery';
 import Resources from './Resources';
 import EditCommunityForm from './EditCommunityForm';
 import SpotifyPlayer from '../Music/SpotifyPlayer';
-import CommunityForum from './CommunityForum';
+import CommunityFeed from './CommunityFeed';
 import JoinCommunityButton from './JoinCommunityButton';
 
 const CommunityDetail = () => {
@@ -169,17 +169,13 @@ const CommunityDetail = () => {
                         </div>
                     </div>
 
-                    <div className="collections-section">
-                        <h3>Collections</h3>
-                        <Resources communityId={id} isOwner={isCreator} />
-                    </div>
-
-                    <div className="forum-section">
-                        <h3>Community Forum</h3>
-                        <CommunityForum communityId={id} />
+                    <div className="community-section">
+                        <CommunityFeed communityId={id} />
                     </div>
                 </div>
             </div>
+
+            <Resources communityId={id} isOwner={isCreator} />
 
             {showEditModal && (
                 <Modal 
@@ -207,7 +203,7 @@ const CommunityDetail = () => {
 
                 .community-banner {
                     position: relative;
-                    height: 400px;
+                    height: 300px;
                     margin-top: 64px;
                     background-image: url(${community?.banner_image || '/default-banner.jpg'});
                     background-size: cover;
@@ -367,6 +363,46 @@ const CommunityDetail = () => {
                 }
 
                 .view-all-button:hover {
+                    background: rgba(0, 97, 255, 0.1);
+                }
+
+                .collections-section {
+                    background: white;
+                    border-radius: 12px;
+                    padding: 24px;
+                    margin-bottom: 24px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                }
+
+                .collections-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+
+                .collections-header h3 {
+                    font-size: 1.5rem;
+                    color: #333;
+                    margin: 0;
+                }
+
+                .add-collection-button {
+                    color: #0061ff;
+                    background: none;
+                    border: 1px solid #0061ff;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+
+                .add-collection-button:hover {
                     background: rgba(0, 97, 255, 0.1);
                 }
             `}</style>

@@ -122,57 +122,62 @@ const Resources = ({ communityId, isOwner }) => {
 
     return (
         <div className="resources-container">
-            {isOwner && (
+            <div className="collections-header">
+                <h3>Collections</h3>
                 <button 
                     className="add-collection-button"
                     onClick={() => setShowAddCollection(true)}
                 >
-                    + Add Collection
+                    <span>+</span> Add Collection
                 </button>
-            )}
-
+            </div>
             <div className="collections-grid">
                 {collections.map(collection => (
                     <div 
                         key={collection.id} 
-                        className={`collection-card ${selectedCollection?.id === collection.id ? 'selected' : ''}`}
+                        className="collection-card"
                         onClick={() => handleCollectionClick(collection.id)}
-                        style={{ cursor: 'pointer' }}
                     >
                         {collection.preview_image && (
                             <img 
                                 src={collection.preview_image} 
-                                alt={collection.name} 
+                                alt={collection.name}
                                 className="collection-preview"
                             />
                         )}
+                        <h3>{collection.name}</h3>
+                        <p>{collection.description}</p>
+                        
                         <div className="collection-actions">
                             <button 
                                 className="actions-button"
-                                onClick={(e) => handleActionsClick(collection.id)}
-                            >
-                                Actions
-                            </button>
-                            <div className={`actions-dropdown ${activeDropdown === collection.id ? 'show' : ''}`}>
-                                <button onClick={(e) => {
+                                onClick={(e) => {
                                     e.stopPropagation();
-                                    handleEditClick(collection);
-                                }}>
-                                    Edit
-                                </button>
-                                <button 
-                                    className="delete"
-                                    onClick={(e) => {
+                                    handleActionsClick(collection.id);
+                                }}
+                            >
+                                ⋮
+                            </button>
+                            {activeDropdown === collection.id && (
+                                <div className="actions-dropdown show">
+                                    <button onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDeleteClick(collection.id);
-                                    }}
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                                        handleEditClick(collection);
+                                    }}>
+                                        Edit
+                                    </button>
+                                    <button 
+                                        className="delete"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteClick(collection.id);
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                        <h3>{collection.name}</h3>
-                        <p>{collection.description}</p>
                     </div>
                 ))}
             </div>

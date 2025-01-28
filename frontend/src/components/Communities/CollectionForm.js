@@ -18,6 +18,7 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
     const formDataToSend = new FormData();
     formDataToSend.append('name', formData.name);
     formDataToSend.append('description', formData.description);
+    formDataToSend.append('community', communityId);
     if (previewUrl) {
       formDataToSend.append('preview_image', previewUrl);
     }
@@ -31,7 +32,7 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
         {
           headers: {
             'Authorization': `Token ${token}`,
-            'community-id': communityId
+            'Content-Type': 'multipart/form-data'
           }
         }
       );

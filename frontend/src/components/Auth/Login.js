@@ -11,14 +11,27 @@ const Login = ({ setIsLoggedIn }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Attempting login with:', { username, password });
+      
       const response = await axios.post('http://localhost:8000/api/login/', {
         username,
         password,
       });
+      
+      console.log('Login response:', response.data);
+      
+      // Store user data based on the backend response structure
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('username', response.data.user.username);
+      localStorage.setItem('userId', response.data.user.id);
+      
       setIsLoggedIn(true);
       navigate('/profile');
     } catch (err) {
+      console.error('Login error:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+      }
       setError('Invalid username or password');
     }
   };

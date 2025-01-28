@@ -136,7 +136,7 @@ const CommunityList = () => {
         }
 
         .community-banner {
-          height: 160px;
+          height: 100px;
           background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
           position: relative;
         }

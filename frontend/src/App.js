@@ -10,26 +10,21 @@ import Logout from "./components/Auth/Logout";
 import CommunityList from './components/Communities/CommunityList';
 import CreateCommunity from './components/Communities/CreateCommunity';
 import CommunityDetail from './components/Communities/CommunityDetail';
+import CollectionDetailPage from './components/Communities/CollectionDetailPage';
+import { MusicProvider } from './contexts/MusicContext';
 
 function App() {
-  
-  
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-
-  // Check if token exists when the component mounts or updates
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token); // Set state to true if token exists, else false
-  }, []);
-
   return (
-    <Router>
-      <AppContent isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-    </Router>
+    <MusicProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </MusicProvider>
   );
 }
 
-function AppContent({ isLoggedIn, setIsLoggedIn }) {
+function AppContent() {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -65,6 +60,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn }) {
         <Route path="/communities" element={<CommunityList />} />
         <Route path="/create-community" element={<CreateCommunity />} />
         <Route path="/communities/:id" element={<CommunityDetail />} />
+        <Route path="/resources/categories/:collectionId" element={<CollectionDetailPage />} />
       </Routes>
     </div>
   );

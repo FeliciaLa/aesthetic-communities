@@ -6,7 +6,20 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from .models import Community, GalleryImage, ResourceCategory, Resource, ForumPost, ForumComment
+from .models import (
+    Community, 
+    GalleryImage, 
+    ResourceCategory, 
+    Resource, 
+    ForumPost, 
+    ForumComment, 
+    Vote, 
+    Reaction, 
+    Question,
+    Answer, 
+    AnswerVote,
+    QuestionVote
+)
 from .serializers import (
     CommunitySerializer, 
     UserSerializer, 
@@ -14,25 +27,41 @@ from .serializers import (
     ResourceCategorySerializer,
     ResourceSerializer,
     ForumPostSerializer,
-    ForumCommentSerializer
+    ForumCommentSerializer,
+    UserRegisterSerializer,
+    QuestionSerializer,
+    AnswerSerializer,
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from django.core.files.storage import default_storage
+from bs4 import BeautifulSoup
+import requests
+from django.http import JsonResponse
+from urllib.parse import urljoin
+from django.db.models import Sum
+from django.db.models import F
+from django.db.models import Count
+from django.db import models
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        print("Registration attempt with data:", request.data)  # Debug print
+        serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({
-                'token': token.key,
-                'user': serializer.data
-            }, status=status.HTTP_201_CREATED)
+            if user:
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'user': {
+                        'id': user.id,
+                        'username': user.username
+                    }
+                }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserLoginView(APIView):
@@ -45,10 +74,12 @@ class UserLoginView(APIView):
         
         if user:
             token, _ = Token.objects.get_or_create(user=user)
-            serializer = UserSerializer(user)
             return Response({
                 'token': token.key,
-                'user': serializer.data
+                'user': {
+                    'id': user.id,
+                    'username': user.username
+                }
             })
         return Response(
             {'error': 'Invalid credentials'}, 
@@ -209,33 +240,130 @@ class GalleryImageDetailView(APIView):
 
 class ResourceCategoryView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def get(self, request):
-        categories = ResourceCategory.objects.filter(community_id=request.query_params.get('community_id'))
-        serializer = ResourceCategorySerializer(categories, many=True)
-        return Response(serializer.data)
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request, pk=None):
+        try:
+            print("GET request received")
+            print("Query params:", request.query_params)
+            print("Community ID:", request.query_params.get('community_id'))
+            
+            if pk:
+                category = ResourceCategory.objects.get(pk=pk)
+                serializer = ResourceCategorySerializer(category)
+                return Response(serializer.data)
+            else:
+                community_id = request.query_params.get('community_id')
+                if not community_id:
+                    return Response(
+                        {"error": "community_id is required"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                print(f"Fetching collections for community_id: {community_id}")
+                collections = ResourceCategory.objects.filter(community_id=community_id)
+                print(f"Found {collections.count()} collections")
+                
+                serializer = ResourceCategorySerializer(collections, many=True)
+                return Response(serializer.data)
+                
+        except Exception as e:
+            print(f"Error in get: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request):
         try:
-            print("Received data:", request.data)  # Debug print
+            print("POST request received")
+            print("Request data:", request.data)
             
-            # Create a new data dictionary with all required fields
             data = request.data.copy()
-            data['created_by'] = request.user.id  # Add the user ID explicitly
+            data['created_by'] = request.user.id
             
-            print("Processing data:", data)  # Debug print
+            preview_image = request.FILES.get('preview_image')
+            if 'preview_image' in data:
+                del data['preview_image']
             
+            print("Data being sent to serializer:", data)
             serializer = ResourceCategorySerializer(data=data)
-            if serializer.is_valid():
-                # Pass the user directly to save method
-                category = serializer.save(created_by=request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
             
-            print("Validation errors:", serializer.errors)  # Debug print
+            if serializer.is_valid():
+                instance = serializer.save(created_by=request.user)
+                
+                if preview_image:
+                    instance.preview_image = preview_image
+                    instance.save()
+                
+                return Response(
+                    ResourceCategorySerializer(instance).data, 
+                    status=status.HTTP_201_CREATED
+                )
+            
+            print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
-            print(f"Error: {str(e)}")
+            print(f"Error in post: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def patch(self, request, pk):
+        try:
+            category = ResourceCategory.objects.get(pk=pk)
+            data = request.data.copy()
+            
+            # Handle the preview image
+            preview_image = request.FILES.get('preview_image')
+            if 'preview_image' in data:
+                del data['preview_image']
+                
+            serializer = ResourceCategorySerializer(category, data=data, partial=True)
+            if serializer.is_valid():
+                instance = serializer.save()
+                
+                if preview_image:
+                    instance.preview_image = preview_image
+                    instance.save()
+                    
+                return Response(ResourceCategorySerializer(instance).data)
+                
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except ResourceCategory.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error in patch: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def delete(self, request, pk):
+        try:
+            collection = ResourceCategory.objects.get(pk=pk)
+            
+            # Optional: Add permission check
+            if collection.created_by != request.user:
+                return Response(
+                    {"error": "You don't have permission to delete this collection"}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            collection.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+            
+        except ResourceCategory.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error in delete: {str(e)}")
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -253,8 +381,26 @@ class ResourceView(APIView):
             )
         
         resources = Resource.objects.filter(category_id=category_id)
-        serializer = ResourceSerializer(resources, many=True)
-        return Response(serializer.data)
+        resources_data = []
+
+        for resource in resources:
+            # Get vote counts
+            upvotes = Vote.objects.filter(resource=resource, vote_type='up').count()
+            downvotes = Vote.objects.filter(resource=resource, vote_type='down').count()
+            total_votes = upvotes - downvotes
+
+            # Get user's vote if exists
+            user_vote = Vote.objects.filter(resource=resource, user=request.user).first()
+            
+            # Get base resource data
+            resource_data = ResourceSerializer(resource).data
+            # Add vote information
+            resource_data['votes'] = total_votes
+            resource_data['user_vote'] = user_vote.vote_type if user_vote else None
+            
+            resources_data.append(resource_data)
+
+        return Response(resources_data)
 
     def post(self, request):
         serializer = ResourceSerializer(data=request.data)
@@ -265,65 +411,109 @@ class ResourceView(APIView):
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        user = request.user
+        # Get communities created by the user
+        created_communities = Community.objects.filter(created_by=user)
+        # Get communities the user is a member of
+        joined_communities = user.communities.all()
+
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'date_joined': user.date_joined,
+            'communities': CommunitySerializer(joined_communities, many=True).data,
+            'created_communities': CommunitySerializer(created_communities, many=True).data
+        }
+        
+        return Response(data)
 
 class ForumPostView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, community_id):
         try:
-            # First check if the community exists
+            print("Getting posts for community:", community_id)
             community = get_object_or_404(Community, id=community_id)
+            posts = ForumPost.objects.filter(community=community).prefetch_related(
+                'reactions',
+                'comments',
+                'comments__created_by',
+                'created_by'
+            ).order_by('-created_at')
             
-            # Get all posts for this community
-            posts = ForumPost.objects.filter(community=community)
-            
-            # Serialize the data
-            serializer = ForumPostSerializer(posts, many=True)
-            return Response(serializer.data)
-            
-        except Community.DoesNotExist:
-            return Response(
-                {'error': 'Community not found'}, 
-                status=status.HTTP_404_NOT_FOUND
+            serializer = ForumPostSerializer(
+                posts,
+                many=True,
+                context={'request': request}
             )
+            return Response(serializer.data)
         except Exception as e:
-            print(f"Error in ForumPostView.get: {str(e)}")  # Debug print
+            print(f"Error in ForumPostView.get: {str(e)}")
             return Response(
-                {'error': 'Internal server error', 'details': str(e)}, 
+                {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def post(self, request, community_id):
         try:
-            # First check if the community exists
+            print("Request DATA:", request.data)
+            print("Request FILES:", request.FILES)
+            
             community = get_object_or_404(Community, id=community_id)
             
-            # Prepare the data
-            data = {
-                'title': request.data.get('title'),
-                'content': request.data.get('content'),
-                'community': community.id
-            }
+            # Create mutable copy of request.data
+            data = request.data.copy()
             
-            serializer = ForumPostSerializer(data=data)
+            # Add community ID to the data
+            data['community'] = community_id
+            
+            # Ensure content is present
+            if 'content' not in data:
+                data['content'] = ''
+            
+            # Handle media file
+            if 'media' in request.FILES:
+                file = request.FILES['media']
+                data['media'] = file
+                
+                # Set media type based on file content type
+                if file.content_type.startswith('image/'):
+                    data['media_type'] = 'image'
+                elif file.content_type.startswith('video/'):
+                    data['media_type'] = 'video'
+                else:
+                    data['media_type'] = 'none'
+            else:
+                data['media_type'] = 'none'
+            
+            print("Processed data:", data)
+            
+            serializer = ForumPostSerializer(
+                data=data,
+                context={'request': request}
+            )
+            
             if serializer.is_valid():
-                serializer.save(created_by=request.user, community=community)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                post = serializer.save(
+                    created_by=request.user,
+                    community=community
+                )
+                return Response(
+                    ForumPostSerializer(post, context={'request': request}).data,
+                    status=status.HTTP_201_CREATED
+                )
+            
+            print("Serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-        except Community.DoesNotExist:
-            return Response(
-                {'error': 'Community not found'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
         except Exception as e:
-            print(f"Error in ForumPostView.post: {str(e)}")  # Debug print
+            print(f"Error in ForumPostView.post: {str(e)}")
             return Response(
-                {'error': 'Internal server error', 'details': str(e)}, 
+                {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -392,3 +582,387 @@ def update_community_banner(request, community_id):
             {'error': 'Failed to update banner'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+class CommunityMembershipView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            action = request.data.get('action')
+            
+            if action == 'join':
+                community.members.add(request.user)
+                return Response({'status': 'joined'}, status=status.HTTP_200_OK)
+            elif action == 'leave':
+                community.members.remove(request.user)
+                return Response({'status': 'left'}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': 'Invalid action'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def get(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            is_member = community.members.filter(id=request.user.id).exists()
+            return Response({'is_member': is_member})
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+def get_page_preview(request):
+    url = request.GET.get('url')
+    if not url:
+        return JsonResponse({'error': 'URL parameter is required'}, status=400)
+        
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Try different meta tags for image
+        image_url = None
+        
+        # Try OpenGraph image
+        og_image = soup.find('meta', property='og:image')
+        if og_image:
+            image_url = og_image.get('content')
+            
+        # Try Twitter image
+        if not image_url:
+            twitter_image = soup.find('meta', property='twitter:image')
+            if twitter_image:
+                image_url = twitter_image.get('content')
+        
+        # Try regular image
+        if not image_url:
+            img_tag = soup.find('img')
+            if img_tag:
+                image_url = img_tag.get('src')
+                if image_url:
+                    image_url = urljoin(url, image_url)
+        
+        return JsonResponse({'image': image_url})
+    except Exception as e:
+        print(f"Error fetching preview for {url}: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def vote_resource(request, resource_id):
+    try:
+        resource = Resource.objects.get(id=resource_id)
+        vote_type = request.data.get('vote_type')
+        
+        if vote_type not in ['up', 'down']:
+            return Response({'error': 'Invalid vote type'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if user has already voted
+        vote = Vote.objects.filter(resource=resource, user=request.user).first()
+
+        if vote:
+            if vote.vote_type == vote_type:
+                # Remove vote if clicking same button
+                vote.delete()
+            else:
+                # Change vote if clicking different button
+                vote.vote_type = vote_type
+                vote.save()
+        else:
+            # Create new vote
+            Vote.objects.create(
+                resource=resource,
+                user=request.user,
+                vote_type=vote_type
+            )
+
+        # Calculate total votes
+        upvotes = Vote.objects.filter(resource=resource, vote_type='up').count()
+        downvotes = Vote.objects.filter(resource=resource, vote_type='down').count()
+        total_votes = upvotes - downvotes
+
+        return Response({
+            'votes': total_votes,
+            'user_vote': vote_type if vote_type else None
+        })
+
+    except Resource.DoesNotExist:
+        return Response({'error': 'Resource not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_resources(request):
+    category_id = request.query_params.get('category_id')
+    resources = Resource.objects.filter(category_id=category_id)
+    resources_data = []
+
+    for resource in resources:
+        # Get vote counts
+        upvotes = Vote.objects.filter(resource=resource, vote_type='up').count()
+        downvotes = Vote.objects.filter(resource=resource, vote_type='down').count()
+        total_votes = upvotes - downvotes
+
+        # Get user's vote if exists
+        user_vote = Vote.objects.filter(resource=resource, user=request.user).first()
+        
+        resource_data = ResourceSerializer(resource).data
+        resource_data['votes'] = total_votes
+        resource_data['user_vote'] = user_vote.vote_type if user_vote else None
+        
+        resources_data.append(resource_data)
+
+    return Response(resources_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_collection_stats(request, category_id):
+    try:
+        resources = Resource.objects.filter(category_id=category_id)
+        total_resources = resources.count()
+        total_views = resources.aggregate(Sum('views'))['views__sum'] or 0
+        
+        # Get total number of vote actions (both up and down)
+        total_votes = Vote.objects.filter(resource__category_id=category_id).count()
+        
+        return Response({
+            'total_resources': total_resources,
+            'total_views': total_views,
+            'total_votes': total_votes  # This will now be the total number of vote actions
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def increment_views(request, resource_id):
+    try:
+        resource = Resource.objects.get(id=resource_id)
+        resource.views = F('views') + 1  # Use F() to avoid race conditions
+        resource.save()
+        return Response({'views': resource.views})
+    except Resource.DoesNotExist:
+        return Response({'error': 'Resource not found'}, status=404)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def increment_category_views(request, category_id):
+    try:
+        category = ResourceCategory.objects.get(id=category_id)
+        # Instead of returning the expression directly, evaluate it first
+        category.views = F('views') + 1
+        category.save()
+        
+        # Refresh from database to get the actual value
+        category.refresh_from_db()
+        
+        return Response({
+            'views': category.views,
+            'message': 'View count updated successfully'
+        })
+    except ResourceCategory.DoesNotExist:
+        return Response({'error': 'Category not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+class PostReactionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        try:
+            post = get_object_or_404(ForumPost, id=post_id)
+            reaction_type = request.data.get('reaction_type')
+            
+            if reaction_type not in dict(Reaction.REACTION_TYPES):
+                return Response(
+                    {'error': 'Invalid reaction type'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Toggle reaction
+            reaction, created = Reaction.objects.get_or_create(
+                post=post,
+                user=request.user,
+                reaction_type=reaction_type
+            )
+            
+            if not created:
+                reaction.delete()
+                action = 'removed'
+            else:
+                action = 'added'
+            
+            serializer = ForumPostSerializer(
+                post,
+                context={'request': request}
+            )
+            return Response({
+                'post': serializer.data,
+                'action': action
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class QuestionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, community_id):
+        questions = Question.objects.filter(community_id=community_id)
+        # Annotate questions with vote count and order by votes
+        questions = questions.annotate(
+            vote_count=models.Count(
+                'question_votes',
+                filter=models.Q(question_votes__vote_type='up')
+            ) - models.Count(
+                'question_votes',
+                filter=models.Q(question_votes__vote_type='down')
+            )
+        ).order_by('-vote_count', '-created_at')
+        
+        serializer = QuestionSerializer(
+            questions, 
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+    def post(self, request, community_id):
+        try:
+            # Only include necessary fields
+            data = {
+                'content': request.data.get('content'),
+                'media': request.data.get('media'),
+                'community': community_id
+            }
+            
+            serializer = QuestionSerializer(data=data, context={'request': request})
+            if serializer.is_valid():
+                question = serializer.save(
+                    created_by=request.user,
+                    community_id=community_id
+                )
+                return Response(
+                    QuestionSerializer(question, context={'request': request}).data,
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AnswerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, question_id):
+        try:
+            question = get_object_or_404(Question, id=question_id)
+            data = request.data.copy()
+            data['question'] = question_id
+            
+            serializer = AnswerSerializer(data=data, context={'request': request})
+            if serializer.is_valid():
+                answer = serializer.save(
+                    created_by=request.user,
+                    question=question
+                )
+                return Response(
+                    AnswerSerializer(answer, context={'request': request}).data,
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class AnswerVoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, answer_id):
+        try:
+            answer = get_object_or_404(Answer, id=answer_id)
+            vote_type = request.data.get('vote_type')
+            
+            if vote_type not in dict(Vote.VOTE_TYPES):
+                return Response(
+                    {'error': 'Invalid vote type'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            vote, created = AnswerVote.objects.get_or_create(
+                answer=answer,
+                user=request.user,
+                defaults={'vote_type': vote_type}
+            )
+
+            if not created:
+                if vote.vote_type == vote_type:
+                    vote.delete()
+                else:
+                    vote.vote_type = vote_type
+                    vote.save()
+
+            # Recalculate total votes
+            upvotes = AnswerVote.objects.filter(answer=answer, vote_type='up').count()
+            downvotes = AnswerVote.objects.filter(answer=answer, vote_type='down').count()
+            answer.votes = upvotes - downvotes
+            answer.save()
+
+            return Response({
+                'votes': answer.votes,
+                'user_vote': vote_type if vote_type else None
+            })
+
+        except Answer.DoesNotExist:
+            return Response({'error': 'Answer not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class QuestionVoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, question_id):
+        try:
+            question = get_object_or_404(Question, id=question_id)
+            vote_type = request.data.get('vote_type')
+            
+            if vote_type not in dict(Vote.VOTE_TYPES):
+                return Response(
+                    {'error': 'Invalid vote type'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            vote, created = QuestionVote.objects.get_or_create(
+                question=question,
+                user=request.user,
+                defaults={'vote_type': vote_type}
+            )
+
+            if not created:
+                if vote.vote_type == vote_type:
+                    vote.delete()
+                else:
+                    vote.vote_type = vote_type
+                    vote.save()
+
+            # Recalculate total votes
+            upvotes = QuestionVote.objects.filter(question=question, vote_type='up').count()
+            downvotes = QuestionVote.objects.filter(question=question, vote_type='down').count()
+            total_votes = upvotes - downvotes
+
+            return Response({
+                'votes': total_votes,
+                'user_vote': vote_type if vote_type else None
+            })
+
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)

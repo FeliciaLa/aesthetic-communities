@@ -1,40 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [createdCommunities, setCreatedCommunities] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError("Please log in to view your profile");
-        navigate("/login");
-        return;
-      }
-
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/profile/', {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        });
-        setProfile(response.data);
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
+        // Get profile and all communities
+        const [profileRes, allCommunitiesRes] = await Promise.all([
+          axios.get('http://localhost:8000/api/profile/', {
+            headers: { 'Authorization': `Token ${token}` }
+          }),
+          axios.get('http://localhost:8000/api/communities/', {
+            headers: { 'Authorization': `Token ${token}` }
+          })
+        ]);
+
+        const allCommunities = allCommunitiesRes.data;
+        
+        // Get created communities
+        const created = allCommunities.filter(
+          community => community.created_by === username
+        );
+
+        // Check membership status for each community
+        const membershipChecks = await Promise.all(
+          allCommunities.map(community =>
+            axios.get(`http://localhost:8000/api/communities/${community.id}/membership/`, {
+              headers: { 'Authorization': `Token ${token}` }
+            })
+          )
+        );
+
+        // Filter joined communities based on membership status
+        const joined = allCommunities.filter((community, index) => 
+          membershipChecks[index].data.is_member && community.created_by !== username
+        );
+
+        setProfile(profileRes.data);
+        setCreatedCommunities(created);
+        setJoinedCommunities(joined);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching profile:", err);
-        setError("Failed to fetch profile");
+        console.error('Error fetching profile data:', err);
+        setError('Failed to load profile data');
         setLoading(false);
       }
     };
 
-    fetchProfile();
-  }, [navigate]);
+    fetchData();
+  }, []);
 
   if (loading) return <div className="profile-loading">Loading profile...</div>;
   if (error) return <div className="profile-error">{error}</div>;
@@ -68,6 +93,67 @@ const Profile = () => {
                 month: 'long',
                 day: 'numeric'
               }) : 'Not available'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="communities-section">
+          <div className="profile-card">
+            <h2>Your Communities</h2>
+            <div className="communities-grid">
+              <div className="communities-column">
+                <h3>Created Communities</h3>
+                {createdCommunities.length === 0 ? (
+                  <p className="empty-message">No communities created yet</p>
+                ) : (
+                  createdCommunities.map(community => (
+                    <Link 
+                      to={`/communities/${community.id}`} 
+                      key={community.id}
+                      className="community-card"
+                    >
+                      {community.banner_image && (
+                        <img 
+                          src={community.banner_image} 
+                          alt={community.name} 
+                          className="community-banner"
+                        />
+                      )}
+                      <div className="community-info">
+                        <h4>{community.name}</h4>
+                        <p>{community.description}</p>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+              
+              <div className="communities-column">
+                <h3>Joined Communities</h3>
+                {joinedCommunities.length === 0 ? (
+                  <p className="empty-message">No communities joined yet</p>
+                ) : (
+                  joinedCommunities.map(community => (
+                    <Link 
+                      to={`/communities/${community.id}`} 
+                      key={community.id}
+                      className="community-card"
+                    >
+                      {community.banner_image && (
+                        <img 
+                          src={community.banner_image} 
+                          alt={community.name} 
+                          className="community-banner"
+                        />
+                      )}
+                      <div className="community-info">
+                        <h4>{community.name}</h4>
+                        <p>{community.description}</p>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -165,6 +251,69 @@ const Profile = () => {
 
         .profile-error {
           color: #dc3545;
+        }
+
+        .communities-section {
+          margin-top: 20px;
+        }
+
+        .communities-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-top: 20px;
+        }
+
+        .communities-column h3 {
+          color: #333;
+          margin-bottom: 15px;
+          font-size: 1.2rem;
+        }
+
+        .community-card {
+          display: block;
+          text-decoration: none;
+          background: #f8f9fa;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 15px;
+          transition: transform 0.2s;
+        }
+
+        .community-card:hover {
+          transform: translateY(-2px);
+        }
+
+        .community-banner {
+          width: 100%;
+          height: 100px;
+          object-fit: cover;
+        }
+
+        .community-info {
+          padding: 12px;
+        }
+
+        .community-info h4 {
+          margin: 0;
+          color: #333;
+          font-size: 1.1rem;
+        }
+
+        .community-info p {
+          margin: 5px 0 0;
+          color: #666;
+          font-size: 0.9rem;
+          line-height: 1.4;
+        }
+
+        .empty-message {
+          color: #666;
+          font-style: italic;
+          text-align: center;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
         }
       `}</style>
     </div>
