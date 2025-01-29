@@ -123,7 +123,7 @@ const Resources = ({ communityId, isOwner }) => {
     return (
         <div className="resources-container">
             <div className="collections-header">
-                <h3>Collections</h3>
+                <h3>Resource Collections</h3>
                 <button 
                     className="add-collection-button"
                     onClick={() => setShowAddCollection(true)}

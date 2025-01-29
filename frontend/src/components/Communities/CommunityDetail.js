@@ -9,6 +9,7 @@ import SpotifyPlayer from '../Music/SpotifyPlayer';
 import CommunityFeed from './CommunityFeed';
 import JoinCommunityButton from './JoinCommunityButton';
 import AnnouncementsDashboard from './AnnouncementsDashboard';
+import RecommendedProducts from './RecommendedProducts';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -156,22 +157,24 @@ const CommunityDetail = () => {
             <div className="content-section">
                 <div className="main-content">
                     <div className="top-section">
-                        <div className="upper-section">
-                            <div className="announcements-section">
-                                <AnnouncementsDashboard communityId={id} isCreator={isCreator} />
-                            </div>
-                            <div className="gallery-section">
-                                <MediaGallery 
-                                    communityId={id} 
-                                    isCreator={isCreator}
-                                    setIsFullscreen={setIsFullscreen}
-                                    isFullscreen={isFullscreen}
-                                />
-                            </div>
+                        <div className="announcements-section">
+                            <AnnouncementsDashboard communityId={id} isCreator={isCreator} />
+                        </div>
+                        <div className="gallery-section">
+                            <MediaGallery 
+                                communityId={id} 
+                                isCreator={isCreator}
+                                setIsFullscreen={setIsFullscreen}
+                                isFullscreen={isFullscreen}
+                            />
                         </div>
                         <div className="playlist-section">
                             <SpotifyPlayer communityId={id} isCreator={isCreator} />
                         </div>
+                    </div>
+
+                    <div className="recommended-products-section">
+                        <RecommendedProducts communityId={id} isCreator={isCreator} />
                     </div>
 
                     <div className="community-section">
@@ -291,21 +294,14 @@ const CommunityDetail = () => {
                     padding: 2rem;
                 }
 
-                .upper-section {
-                    display: flex;
-                    gap: 2rem;
-                    width: 100%;
-                }
-
                 .announcements-section {
-                    margin-bottom: 0;
                     width: 20%;
                     min-width: 250px;
                 }
 
                 .gallery-section {
-                    flex: 1;
-                    margin-top: 4rem;
+                    width: 70%;
+                    margin-top: 2rem;
                 }
 
                 .playlist-section {
@@ -422,6 +418,33 @@ const CommunityDetail = () => {
 
                 .add-collection-button:hover {
                     background: rgba(0, 97, 255, 0.1);
+                }
+
+                .recommended-products-section {
+                    margin: 2rem 0;
+                    width: 100%;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    padding: 2rem;
+                }
+
+                .recommended-products-section h2 {
+                    margin-bottom: 1.5rem;
+                    color: #333;
+                    font-size: 1.5rem;
+                }
+
+                .recommended-products-section .categories-tabs {
+                    margin-bottom: 2rem;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 1rem;
+                }
+
+                .recommended-products-section .products-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 2rem;
                 }
             `}</style>
         </div>

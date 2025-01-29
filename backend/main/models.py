@@ -1,20 +1,22 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.conf import settings
+
+User = get_user_model()
 
 class Community(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    members = models.ManyToManyField(User, related_name='communities')
     banner_image = models.ImageField(upload_to='community_banners/', null=True, blank=True)
-
-    def __str__(self):
-        return self.name
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='communities')
 
     class Meta:
         verbose_name_plural = "Communities"
+
+    def __str__(self):
+        return self.name
 
 class ResourceCategory(models.Model):
     name = models.CharField(max_length=200)
@@ -162,4 +164,53 @@ class QuestionVote(models.Model):
 
     class Meta:
         unique_together = ['question', 'user']
+
+class Poll(models.Model):
+    question = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+class PollOption(models.Model):
+    poll = models.ForeignKey(Poll, related_name='options', on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)
+    votes = models.ManyToManyField(User, through='PollVote', related_name='poll_votes')
+
+    def vote_count(self):
+        return self.votes.count()
+
+class PollVote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    option = models.ForeignKey(PollOption, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'option']
+
+class Announcement(models.Model):
+    content = models.TextField()
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='announcements')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+class RecommendedProduct(models.Model):
+    title = models.CharField(max_length=200)
+    url = models.URLField(max_length=2000)
+    comment = models.TextField(null=True, blank=True)
+    catalogue_name = models.CharField(max_length=100, null=True, blank=True)
+    community = models.ForeignKey('Community', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
 

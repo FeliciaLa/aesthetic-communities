@@ -23,7 +23,12 @@ from .views import (
     QuestionView,
     AnswerView,
     AnswerVoteView,
-    QuestionVoteView
+    QuestionVoteView,
+    PollView,
+    PollVoteView,
+    AnnouncementView,
+    recommended_products,
+    get_url_preview
 )
 from . import views
 
@@ -74,4 +79,22 @@ urlpatterns = [
 
     # Category view endpoint
     path('resources/categories/<int:category_id>/view/', views.increment_category_views, name='increment-category-views'),
+
+    # Poll endpoints
+    path('communities/<int:community_id>/forum/polls/', PollView.as_view(), name='polls'),
+    path('poll-options/<int:option_id>/vote/', PollVoteView.as_view(), name='poll-vote'),
+
+    # Announcement endpoint
+    path('communities/<int:community_id>/announcements/', AnnouncementView.as_view(), name='community-announcements'),
+
+    # Recommended products endpoint
+    path('communities/<int:community_id>/products/', recommended_products, name='recommended-products'),
+
+    # URL preview endpoint
+    path('url-preview/', get_url_preview, name='url-preview'),
 ]
+
+# Add this for debugging
+print("Available URLs:")
+for url in urlpatterns:
+    print(f"- {url.pattern}")

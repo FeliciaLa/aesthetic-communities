@@ -11,7 +11,11 @@ from .models import (
     Question,
     Answer, 
     AnswerVote,
-    QuestionVote
+    QuestionVote,
+    Poll,
+    PollOption,
+    Announcement,
+    RecommendedProduct
 )
 
 class UserSerializer(serializers.ModelSerializer):
@@ -197,4 +201,43 @@ class QuestionSerializer(serializers.ModelSerializer):
             except QuestionVote.DoesNotExist:
                 return None
         return None
+
+class PollOptionSerializer(serializers.ModelSerializer):
+    vote_count = serializers.SerializerMethodField()
+    has_voted = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PollOption
+        fields = ['id', 'text', 'vote_count', 'has_voted']
+
+    def get_vote_count(self, obj):
+        return obj.vote_count()
+
+    def get_has_voted(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.votes.filter(id=request.user.id).exists()
+        return False
+
+class PollSerializer(serializers.ModelSerializer):
+    options = PollOptionSerializer(many=True, read_only=True)
+    created_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Poll
+        fields = ['id', 'question', 'created_by', 'created_at', 'options']
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Announcement
+        fields = ['id', 'content', 'created_by', 'created_at']
+        read_only_fields = ['created_by', 'created_at']
+
+class RecommendedProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecommendedProduct
+        fields = ['id', 'title', 'url', 'comment', 'catalogue_name', 'community', 'created_by', 'created_at']
+        read_only_fields = ['created_at']
 
