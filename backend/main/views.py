@@ -1,9 +1,10 @@
+from django.db import models
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from .models import (
@@ -18,7 +19,12 @@ from .models import (
     Question,
     Answer, 
     AnswerVote,
-    QuestionVote
+    QuestionVote,
+    Poll,
+    PollOption,
+    PollVote,
+    Announcement,
+    RecommendedProduct
 )
 from .serializers import (
     CommunitySerializer, 
@@ -31,6 +37,9 @@ from .serializers import (
     UserRegisterSerializer,
     QuestionSerializer,
     AnswerSerializer,
+    PollSerializer,
+    AnnouncementSerializer,
+    RecommendedProductSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -43,7 +52,11 @@ from urllib.parse import urljoin
 from django.db.models import Sum
 from django.db.models import F
 from django.db.models import Count
+from django.db import transaction
 from django.db import models
+import re
+
+User = get_user_model()
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -824,20 +837,10 @@ class QuestionView(APIView):
         questions = Question.objects.filter(community_id=community_id)
         # Annotate questions with vote count and order by votes
         questions = questions.annotate(
-            vote_count=models.Count(
-                'question_votes',
-                filter=models.Q(question_votes__vote_type='up')
-            ) - models.Count(
-                'question_votes',
-                filter=models.Q(question_votes__vote_type='down')
-            )
+            vote_count=models.Count('question_votes')
         ).order_by('-vote_count', '-created_at')
         
-        serializer = QuestionSerializer(
-            questions, 
-            many=True,
-            context={'request': request}
-        )
+        serializer = QuestionSerializer(questions, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, community_id):
@@ -966,3 +969,191 @@ class QuestionVoteView(APIView):
 
         except Question.DoesNotExist:
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class PollView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, community_id):
+        polls = Poll.objects.filter(community_id=community_id)
+        serializer = PollSerializer(polls, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, community_id):
+        try:
+            with transaction.atomic():
+                # Create poll
+                poll = Poll.objects.create(
+                    question=request.data.get('question'),
+                    created_by=request.user,
+                    community_id=community_id
+                )
+
+                # Create options
+                options_data = request.data.get('options', [])
+                for option_text in options_data:
+                    if option_text.strip():  # Only create non-empty options
+                        PollOption.objects.create(
+                            poll=poll,
+                            text=option_text
+                        )
+
+                serializer = PollSerializer(poll, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class PollVoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, option_id):
+        try:
+            option = get_object_or_404(PollOption, id=option_id)
+            
+            # Remove any existing votes by this user for this poll
+            PollVote.objects.filter(
+                user=request.user,
+                option__poll=option.poll
+            ).delete()
+            
+            # Create new vote
+            PollVote.objects.create(
+                user=request.user,
+                option=option
+            )
+            
+            # Return updated poll data
+            serializer = PollSerializer(option.poll, context={'request': request})
+            return Response(serializer.data)
+            
+        except PollOption.DoesNotExist:
+            return Response(
+                {'error': 'Option not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class AnnouncementView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, community_id):
+        try:
+            announcements = Announcement.objects.filter(community_id=community_id)
+            serializer = AnnouncementSerializer(announcements, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            
+            # Check if user is creator - using created_by instead of creator
+            if community.created_by != request.user:
+                return Response(
+                    {'error': 'Only community creator can post announcements'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            data = {
+                'content': request.data.get('content'),
+                'community': community.id
+            }
+            
+            serializer = AnnouncementSerializer(data=data)
+            if serializer.is_valid():
+                announcement = serializer.save(
+                    created_by=request.user,
+                    community=community
+                )
+                return Response(
+                    AnnouncementSerializer(announcement).data,
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def recommended_products(request, community_id):
+    if request.method == 'GET':
+        catalogue = request.GET.get('catalogue', '')
+        products = RecommendedProduct.objects.filter(community_id=community_id)
+        if catalogue and catalogue != 'all':
+            products = products.filter(catalogue_name=catalogue)
+        serializer = RecommendedProductSerializer(products, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        print("Received data:", request.data)  # Add this line to debug
+        data = {
+            'title': request.data.get('title'),
+            'url': request.data.get('url'),
+            'comment': request.data.get('comment'),
+            'catalogue_name': request.data.get('catalogue_name'),
+            'community': community_id,
+            'created_by': request.user.id
+        }
+        print("Processed data:", data)  # Add this line to debug
+        serializer = RecommendedProductSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print("Validation errors:", serializer.errors)  # Add this line to debug
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_url_preview(request):
+    url = request.GET.get('url')
+    if not url:
+        return Response({'error': 'URL is required'}, status=400)
+    
+    try:
+        # Send request with headers to mimic a browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Try to find image in this order:
+        # 1. OpenGraph image
+        # 2. Twitter image
+        # 3. First meaningful image in the content
+        image_url = None
+        
+        # Check OpenGraph
+        og_image = soup.find('meta', property='og:image')
+        if og_image:
+            image_url = og_image.get('content')
+        
+        # Check Twitter
+        if not image_url:
+            twitter_image = soup.find('meta', {'name': 'twitter:image'})
+            if twitter_image:
+                image_url = twitter_image.get('content')
+        
+        # Find first meaningful image
+        if not image_url:
+            images = soup.find_all('img')
+            for img in images:
+                src = img.get('src')
+                if src and not re.search(r'(icon|logo|button|banner)', src, re.I):
+                    # Check if image is large enough (skip tiny images)
+                    width = img.get('width')
+                    height = img.get('height')
+                    if width and height and int(width) > 100 and int(height) > 100:
+                        image_url = src
+                        break
+        
+        # Make relative URLs absolute
+        if image_url and not image_url.startswith(('http://', 'https://')):
+            image_url = urljoin(url, image_url)
+        
+        return Response({
+            'image_url': image_url
+        })
+        
+    except Exception as e:
+        print(f"Error fetching preview: {str(e)}")
+        return Response({'error': 'Failed to fetch preview'}, status=400)

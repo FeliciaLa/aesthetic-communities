@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+export const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
 const REACTIONS = [
   { type: 'like', emoji: '👍' },
@@ -22,11 +22,20 @@ const CommunityFeed = ({ communityId }) => {
   const [error, setError] = useState(null);
   const [comments, setComments] = useState({});
   const [answers, setAnswers] = useState({});
+  const [polls, setPolls] = useState([]);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState(['', '']);
 
   useEffect(() => {
     fetchPosts();
     fetchQuestions();
   }, [communityId]);
+
+  useEffect(() => {
+    if (activeTab === 'polls') {
+      fetchPolls();
+    }
+  }, [activeTab]);
 
   const fetchPosts = async () => {
     try {
@@ -70,37 +79,42 @@ const CommunityFeed = ({ communityId }) => {
     formData.append('content', newContent);
     formData.append('community', communityId);
     if (mediaFile) {
-        formData.append('media', mediaFile);
+      formData.append('media', mediaFile);
     }
 
     try {
-        const token = localStorage.getItem('token');
-        const endpoint = activeTab === 'questions' 
-            ? `http://localhost:8000/api/communities/${communityId}/forum/questions/`
-            : `http://localhost:8000/api/communities/${communityId}/forum/posts/`;
+      const token = localStorage.getItem('token');
+      let endpoint;
+      
+      if (activeTab === 'questions') {
+        endpoint = `http://localhost:8000/api/communities/${communityId}/forum/questions/`;
+      } else {
+        endpoint = `http://localhost:8000/api/communities/${communityId}/forum/posts/`;
+      }
 
-        const response = await axios.post(
-            endpoint,
-            formData,
-            {
-                headers: {
-                    'Authorization': `Token ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            }
-        );
-
-        // Clear form and refresh
-        setNewContent('');
-        setMediaFile(null);
-        if (activeTab === 'questions') {
-            fetchQuestions();
-        } else {
-            fetchPosts();
+      await axios.post(
+        endpoint,
+        formData,
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
         }
+      );
+
+      // Clear form and refresh
+      setNewContent('');
+      setMediaFile(null);
+      
+      if (activeTab === 'questions') {
+        fetchQuestions();
+      } else {
+        fetchPosts();
+      }
     } catch (err) {
-        console.error('Error response:', err.response?.data);
-        setError(`Failed to create ${activeTab === 'questions' ? 'question' : 'post'}`);
+      console.error('Error response:', err.response?.data);
+      setError(`Failed to create ${activeTab === 'questions' ? 'question' : 'post'}`);
     }
   };
 
@@ -224,81 +238,446 @@ const CommunityFeed = ({ communityId }) => {
     }
   };
 
-  return (
-    <div className="feed-container">
-      <div className="feed-content">
-        <div className="feed-header">
-          <h2>Community Feed</h2>
-          <div className="feed-tabs">
-            <button 
-              className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('posts')}
-            >
-              Posts
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'questions' ? 'active' : ''}`}
-              onClick={() => setActiveTab('questions')}
-            >
-              Questions
-            </button>
-          </div>
-        </div>
-        
-        <div className="post-form">
-          <form onSubmit={handleSubmit}>
-            <textarea
-              placeholder={activeTab === 'questions' 
-                ? "Ask a question..." 
-                : "What's on your mind?"
-              }
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
+  const handlePollSubmit = async (e) => {
+    e.preventDefault();
+    const url = `http://localhost:8000/api/communities/${communityId}/forum/polls/`;
+    console.log('Submitting poll to:', url);
+    console.log('Poll data:', {
+      question: pollQuestion,
+      options: pollOptions.filter(option => option.trim() !== '')
+    });
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        url,
+        {
+          question: pollQuestion,
+          options: pollOptions.filter(option => option.trim() !== '')
+        },
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Poll creation response:', response.data);
+      
+      // Reset form
+      setPollQuestion('');
+      setPollOptions(['', '']);
+      
+      // Refresh polls
+      fetchPolls();
+      
+    } catch (error) {
+      console.error('Error creating poll:', error.response || error);
+    }
+  };
+
+  const handlePollVote = async (pollId, optionId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8000/api/poll-options/${optionId}/vote/`,
+        {},
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      fetchPolls();
+    } catch (err) {
+      console.error('Error voting:', err);
+      setError('Failed to register vote');
+    }
+  };
+
+  const fetchPolls = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8000/api/communities/${communityId}/forum/polls/`,
+        {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        }
+      );
+      setPolls(response.data);
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+      setError('Failed to load polls');
+    }
+  };
+
+  const renderPollsTab = () => {
+    return (
+      <div className="polls-container">
+        <div className="poll-form">
+          <form onSubmit={handlePollSubmit}>
+            <input
+              type="text"
+              placeholder="Ask a poll question..."
+              value={pollQuestion}
+              onChange={(e) => setPollQuestion(e.target.value)}
+              className="poll-question-input"
             />
-            <div className="form-actions">
-              <div className="media-upload">
-                <label htmlFor="media-input" className="media-button" title="Add media">
-                  <i className="fas fa-image"></i>
-                </label>
-                <input
-                  id="media-input"
-                  type="file"
-                  accept="image/*,video/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setMediaFile(file);
-                  }}
-                  style={{ display: 'none' }}
-                />
-              </div>
-              {mediaFile && (
-                <div className="media-preview">
-                  {mediaFile.type.startsWith('image/') ? (
-                    <img 
-                      src={URL.createObjectURL(mediaFile)} 
-                      alt="Preview" 
-                    />
-                  ) : (
-                    <video src={URL.createObjectURL(mediaFile)} controls />
+            <div className="poll-options">
+              {pollOptions.map((option, index) => (
+                <div key={index} className="poll-option-input">
+                  <input
+                    type="text"
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...pollOptions];
+                      newOptions[index] = e.target.value;
+                      setPollOptions(newOptions);
+                    }}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button 
+                      type="button"
+                      onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== index))}
+                      className="remove-option"
+                    >
+                      ×
+                    </button>
                   )}
-                  <button 
-                    type="button" 
-                    className="remove-media"
-                    onClick={() => setMediaFile(null)}
-                  >
-                    ×
-                  </button>
                 </div>
-              )}
-              <button type="submit">
-                {activeTab === 'questions' ? 'Ask Question' : 'Post'}
+              ))}
+            </div>
+            <div className="poll-form-actions">
+              <button 
+                type="button" 
+                onClick={() => setPollOptions([...pollOptions, ''])}
+                className="add-option-btn"
+              >
+                Add Option
               </button>
+              <button type="submit" className="create-poll-btn">Create Poll</button>
             </div>
           </form>
         </div>
 
-        <div className="feed-content">
-          {activeTab === 'posts' ? (
+        <div className="polls-list">
+          {polls.map((poll) => (
+            <div key={poll.id} className="poll-card">
+              <div className="poll-header">
+                <img 
+                  src={poll.created_by.avatar || DEFAULT_AVATAR} 
+                  alt="avatar" 
+                  className="avatar"
+                />
+                <div className="poll-meta">
+                  <span className="username">{poll.created_by.username}</span>
+                  <span className="timestamp">
+                    {new Date(poll.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <h3 className="poll-question">{poll.question}</h3>
+              <div className="poll-options-list">
+                {poll.options.map((option) => (
+                  <button
+                    key={option.id}
+                    className={`poll-option ${option.has_voted ? 'voted' : ''}`}
+                    onClick={() => handlePollVote(poll.id, option.id)}
+                  >
+                    <span className="option-text">{option.text}</span>
+                    <span className="vote-count">{option.vote_count} votes</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderQuestionsTab = () => {
+    return (
+      <div className="questions-container">
+        <div className="question-form">
+          <textarea
+            placeholder="Ask a question..."
+            value={newContent}
+            onChange={(e) => setNewContent(e.target.value)}
+          />
+          <button 
+            className="ask-question"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}
+          >
+            Ask Question
+          </button>
+        </div>
+        <div className="questions-list">
+          {questions.map(question => (
+            <div key={question.id} className="question-item">
+              <div className="question-main">
+                <div className="vote-section">
+                  <button 
+                    className={`vote-button upvote ${question.user_vote === 'up' ? 'active' : ''}`}
+                    onClick={() => handleQuestionVote(question.id, 'up')}
+                  >
+                    ▲
+                  </button>
+                  <span className="vote-count">{question.votes || 0}</span>
+                  <button 
+                    className={`vote-button downvote ${question.user_vote === 'down' ? 'active' : ''}`}
+                    onClick={() => handleQuestionVote(question.id, 'down')}
+                  >
+                    ▼
+                  </button>
+                </div>
+                <div className="question-header">
+                  <img 
+                    src={question.created_by.avatar || DEFAULT_AVATAR} 
+                    alt="avatar" 
+                    className="avatar"
+                  />
+                  <div className="question-meta">
+                    <span className="username">{question.created_by.username}</span>
+                    <span className="timestamp">
+                      {new Date(question.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="question-content">
+                  {question.content}
+                </div>
+              </div>
+              
+              <div className="answers-list">
+                {question.answers?.map(answer => (
+                  <div key={answer.id} className="answer-item">
+                    <div className="vote-section">
+                      <button 
+                        className={`vote-button upvote ${answer.user_vote === 'up' ? 'active' : ''}`}
+                        onClick={() => handleAnswerVote(answer.id, 'up')}
+                      >
+                        ▲
+                      </button>
+                      <span className="vote-count">{answer.votes || 0}</span>
+                      <button 
+                        className={`vote-button downvote ${answer.user_vote === 'down' ? 'active' : ''}`}
+                        onClick={() => handleAnswerVote(answer.id, 'down')}
+                      >
+                        ▼
+                      </button>
+                    </div>
+                    <div className="answer-header">
+                      <img 
+                        src={answer.created_by.avatar || DEFAULT_AVATAR} 
+                        alt="avatar" 
+                        className="avatar"
+                      />
+                      <span className="username">{answer.created_by.username}</span>
+                      <span className="timestamp">
+                        {new Date(answer.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="answer-content">
+                      {answer.content}
+                    </div>
+                  </div>
+                ))}
+                <div className="answer-form">
+                  <textarea
+                    placeholder="Write an answer..."
+                    value={answers[question.id] || ''}
+                    onChange={(e) => setAnswers(prev => ({
+                      ...prev,
+                      [question.id]: e.target.value
+                    }))}
+                  />
+                  <button onClick={() => handleAnswerSubmit(question.id)}>
+                    Submit Answer
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <style jsx>{`
+          .questions-container {
+            padding: 20px;
+          }
+          .question-item {
+            margin-bottom: 30px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 15px;
+          }
+          .question-main {
+            margin-bottom: 15px;
+          }
+          .answers-list {
+            margin-left: 30px;
+            border-left: 2px solid #e1e4e8;
+            padding-left: 15px;
+          }
+          .answer-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f6f8fa;
+            border-radius: 4px;
+          }
+          .question-header, .answer-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+          }
+          .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+          }
+          .username {
+            font-weight: 500;
+          }
+          .timestamp {
+            color: #666;
+            font-size: 0.9em;
+          }
+          .question-content, .answer-content {
+            margin: 10px 0;
+          }
+          .answer-form {
+            margin-top: 15px;
+          }
+          .answer-form textarea {
+            width: 100%;
+            min-height: 80px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          }
+          .answer-form button {
+            background: #0366d6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          .answer-form button:hover {
+            background: #0255b3;
+          }
+          .vote-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 15px;
+          }
+          .vote-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 8px;
+            color: #666;
+          }
+          .vote-button.active {
+            color: #0366d6;
+          }
+          .vote-button:hover {
+            color: #0366d6;
+          }
+          .vote-count {
+            margin: 4px 0;
+            font-weight: 500;
+          }
+          .question-main, .answer-item {
+            display: flex;
+          }
+        `}</style>
+      </div>
+    );
+  };
+
+  return (
+    <div className="community-feed">
+      <div className="feed-header">
+        <h2>Community Feed</h2>
+        <div className="feed-tabs">
+          <button 
+            onClick={() => setActiveTab('posts')} 
+            className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
+          >
+            Posts
+          </button>
+          <button 
+            onClick={() => setActiveTab('questions')} 
+            className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+          >
+            Questions
+          </button>
+          <button 
+            onClick={() => setActiveTab('polls')} 
+            className={`tab ${activeTab === 'polls' ? 'active' : ''}`}
+          >
+            Polls
+          </button>
+        </div>
+      </div>
+      <div className="feed-content">
+        {activeTab === 'posts' && (
+          <>
+            <div className="post-form">
+              <form onSubmit={handleSubmit}>
+                <textarea
+                  placeholder="What's on your mind?"
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                />
+                <div className="form-actions">
+                  <div className="media-upload">
+                    <label htmlFor="media-input" className="media-button" title="Add media">
+                      <i className="fas fa-image"></i>
+                    </label>
+                    <input
+                      id="media-input"
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        setMediaFile(file);
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                  {mediaFile && (
+                    <div className="media-preview">
+                      {mediaFile.type.startsWith('image/') ? (
+                        <img src={URL.createObjectURL(mediaFile)} alt="Preview" />
+                      ) : (
+                        <video src={URL.createObjectURL(mediaFile)} controls />
+                      )}
+                      <button 
+                        type="button" 
+                        className="remove-media"
+                        onClick={() => setMediaFile(null)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  <button type="submit">Post</button>
+                </div>
+              </form>
+            </div>
             <div className="posts-feed">
               {posts.map(post => (
                 <div key={post.id} className="post">
@@ -389,107 +768,14 @@ const CommunityFeed = ({ communityId }) => {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="questions-feed">
-              {questions.map(question => (
-                <div key={question.id} className="question-card">
-                  <div className="vote-section">
-                    <button 
-                      onClick={() => handleQuestionVote(question.id, 'up')}
-                      className={`vote-button ${question.user_vote === 'up' ? 'active' : ''}`}
-                    >
-                      ▲
-                    </button>
-                    <span className="vote-count">{question.votes}</span>
-                    <button 
-                      onClick={() => handleQuestionVote(question.id, 'down')}
-                      className={`vote-button ${question.user_vote === 'down' ? 'active' : ''}`}
-                    >
-                      ▼
-                    </button>
-                  </div>
-                  <div className="question-content">
-                    <div className="question-header">
-                      <img 
-                        src={question.created_by.avatar || DEFAULT_AVATAR} 
-                        alt="avatar" 
-                        className="avatar"
-                      />
-                      <div className="question-meta">
-                        <span className="username">{question.created_by.username}</span>
-                        <span className="timestamp">
-                          {new Date(question.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <p>{question.content}</p>
-                    {question.media && (
-                      <div className="question-media">
-                        <img src={question.media} alt="Question media" />
-                      </div>
-                    )}
-                    
-                    {/* Answers Section */}
-                    <div className="answers-section">
-                      <h4>Answers ({question.answers?.length || 0})</h4>
-                      {question.answers?.map(answer => (
-                        <div key={answer.id} className="answer">
-                          <div className="vote-buttons">
-                            <button 
-                              onClick={() => handleAnswerVote(answer.id, 'up')}
-                              className={answer.user_vote === 'up' ? 'active' : ''}
-                            >
-                              ▲
-                            </button>
-                            <span>{answer.votes}</span>
-                            <button 
-                              onClick={() => handleAnswerVote(answer.id, 'down')}
-                              className={answer.user_vote === 'down' ? 'active' : ''}
-                            >
-                              ▼
-                            </button>
-                          </div>
-                          <div className="answer-content">
-                            <div className="answer-header">
-                              <span className="username">{answer.created_by.username}</span>
-                              <span className="timestamp">
-                                {new Date(answer.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p>{answer.content}</p>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {/* Answer Form */}
-                      <form 
-                        className="answer-form"
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          handleAnswerSubmit(question.id);
-                        }}
-                      >
-                        <textarea
-                          placeholder="Write your answer..."
-                          value={answers[question.id] || ''}
-                          onChange={(e) => setAnswers(prev => ({
-                            ...prev,
-                            [question.id]: e.target.value
-                          }))}
-                        />
-                        <button type="submit">Submit Answer</button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          </>
+        )}
+        {activeTab === 'questions' && renderQuestionsTab()}
+        {activeTab === 'polls' && renderPollsTab()}
       </div>
 
       <style jsx>{`
-        .feed-container {
+        .community-feed {
           background: white;
           border: 1px solid #e1e1e1;
           border-radius: 12px;
@@ -499,6 +785,55 @@ const CommunityFeed = ({ communityId }) => {
           display: flex;
           flex-direction: column;
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .feed-header {
+          position: sticky;
+          top: 0;
+          background: white;
+          z-index: 100;
+          padding: 1rem;
+          border-bottom: 1px solid #eaeaea;
+        }
+
+        .feed-tabs {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+          position: relative;
+          z-index: 101;
+        }
+
+        .tab {
+          padding: 0.5rem 1rem;
+          border: none;
+          background: none;
+          cursor: pointer;
+          color: #666;
+          font-weight: 500;
+          position: relative;
+          transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+          color: #0061ff;
+        }
+
+        .tab.active {
+          color: #0061ff;
+          font-weight: 600;
+          background: rgba(0, 97, 255, 0.1);
+          border-radius: 4px;
+        }
+
+        .tab.active::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #0061ff;
         }
 
         .feed-content {
@@ -566,24 +901,6 @@ const CommunityFeed = ({ communityId }) => {
           background: #f8f9fa;
           border-radius: 8px;
           font-size: 0.9rem;
-        }
-
-        .feed-header {
-          padding: 15px 20px;
-          border-bottom: 1px solid #e1e1e1;
-          background: white;
-        }
-
-        .feed-header h2 {
-          margin: 0;
-          font-size: 1.5rem;
-          color: #333;
-        }
-
-        .post-form {
-          padding: 15px 20px;
-          border-bottom: 1px solid #e1e1e1;
-          background: white;
         }
 
         .posts-feed {
@@ -846,27 +1163,6 @@ const CommunityFeed = ({ communityId }) => {
           color: #666;
         }
 
-        .feed-tabs {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-
-        .tab-button {
-          padding: 0.5rem 1rem;
-          border: none;
-          background: none;
-          cursor: pointer;
-          font-size: 1rem;
-          color: #666;
-          border-bottom: 2px solid transparent;
-        }
-
-        .tab-button.active {
-          color: #0061ff;
-          border-bottom: 2px solid #0061ff;
-        }
-
         .question {
           display: flex;
           gap: 1rem;
@@ -1030,6 +1326,141 @@ const CommunityFeed = ({ communityId }) => {
         .post-form textarea {
           max-height: 150px;
           min-height: 80px;
+        }
+
+        .poll-form {
+          padding: 16px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .poll-question-input {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          font-size: 0.95rem;
+        }
+
+        .poll-options {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+
+        .poll-option-input {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .poll-option-input input {
+          flex: 1;
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 0.9rem;
+        }
+
+        .remove-option {
+          padding: 4px 8px;
+          border: none;
+          background: #ff4444;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+        }
+
+        .poll-form-actions {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .add-option-btn {
+          padding: 8px 16px;
+          background: #f0f2f5;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .create-poll-btn {
+          padding: 8px 16px;
+          background: #0061ff;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .add-option-btn:hover {
+          background: #e4e6e9;
+        }
+
+        .create-poll-btn:hover {
+          background: #0056e0;
+        }
+
+        .polls-container {
+          padding: 16px;
+        }
+        .poll-card {
+          background: white;
+          border: 1px solid #e1e1e1;
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+        .poll-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        .poll-options-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .poll-option {
+          padding: 12px 16px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background: #ffffff;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+          transition: all 0.2s ease;
+          color: #333;
+          font-size: 0.95rem;
+        }
+        .poll-option:hover {
+          background: #f0f2f5;
+          border-color: #ccc;
+        }
+        .poll-option.voted {
+          background: #e3f2fd;
+          border-color: #2196f3;
+          color: #1565c0;
+          font-weight: 500;
+        }
+        .vote-count {
+          color: #666;
+          font-size: 0.9rem;
+          margin-left: 8px;
+        }
+        .poll-question {
+          font-size: 1.1rem;
+          color: #333;
+          margin-bottom: 16px;
+          font-weight: 500;
         }
       `}</style>
     </div>

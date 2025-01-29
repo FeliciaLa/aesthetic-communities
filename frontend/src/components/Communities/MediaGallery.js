@@ -164,10 +164,11 @@ const MediaGallery = ({ communityId, isCreator }) => {
           background: white;
           border-radius: 12px;
           padding: 1.5rem;
-          margin-bottom: 2rem;
-          margin-top: 2rem;
+          margin: 4rem 0 2rem 0;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          width: 100%;
+          width: 70%;
+          display: inline-block;
+          vertical-align: top;
         }
 
         .section-header {
