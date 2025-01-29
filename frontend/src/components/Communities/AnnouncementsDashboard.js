@@ -113,15 +113,14 @@ const AnnouncementsDashboard = ({ communityId }) => {
       <style jsx>{`
         .announcements-dashboard {
           background: white;
-          border-radius: 8px;
+          border-radius: 12px;
           padding: 20px;
-          margin: 4rem 2rem 20px 0;
+          margin: 0;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          max-height: 300px;
+          height: 250px;
           overflow-y: auto;
-          width: 20%;
-          min-width: 250px;
-          flex-shrink: 0;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .section-header {

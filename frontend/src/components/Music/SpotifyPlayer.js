@@ -109,9 +109,9 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     };
 
     return (
-        <div className="section-container">
+        <div className="spotify-card">
+            <h2>Community Playlist</h2>
             <div className="section-header">
-                <h3>Community Playlist</h3>
                 {console.log('Debug values:', {
                     isCreator,
                     hasPlaylist: Boolean(playlist?.spotify_playlist_url),
@@ -190,11 +190,20 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
             )}
 
             <style jsx>{`
-                .section-container {
+                .spotify-card {
                     background: white;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     padding: 20px;
-                    margin-bottom: 20px;
+                    margin: 0;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                h2 {
+                    margin: 0 0 1rem 0;
+                    font-size: 1.5rem;
+                    color: #333;
                 }
 
                 .section-header {
@@ -219,7 +228,15 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
                 }
 
                 .playlist-container {
-                    margin-top: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .playlist-container iframe {
+                    width: 100% !important;
+                    height: 355px !important;
+                    border-radius: 8px;
+                    box-sizing: border-box;
                 }
 
                 .playlist-actions {
