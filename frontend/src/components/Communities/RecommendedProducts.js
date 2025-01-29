@@ -188,11 +188,12 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
 
             <style jsx>{`
                 .recommended-products {
-                    margin: 2rem 0;
-                    padding: 2rem;
                     background: white;
-                    border-radius: 8px;
+                    border-radius: 12px;
+                    padding: 1.5rem;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    height: 300px;
+                    overflow-y: auto;
                 }
 
                 .products-header {

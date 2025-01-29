@@ -1,7 +1,28 @@
 .resources-section {
-    display: flex;
-    gap: 2rem;
-    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 250px;
+    overflow-y: auto;
+}
+
+.resources-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.resources-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.resources-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.resources-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .resources-sidebar {

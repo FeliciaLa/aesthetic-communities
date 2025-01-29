@@ -82,18 +82,18 @@ const CommunityList = () => {
         .communities-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 2rem;
+          padding: 1.5rem;
         }
 
         .communities-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
         }
 
         .communities-header h1 {
-          font-size: 2rem;
+          font-size: 1.75rem;
           color: #333;
           margin: 0;
         }
@@ -101,10 +101,11 @@ const CommunityList = () => {
         .create-button {
           background: #0061ff;
           color: white;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
           text-decoration: none;
           transition: background 0.3s ease;
+          font-size: 0.9rem;
         }
 
         .create-button:hover {
@@ -113,8 +114,8 @@ const CommunityList = () => {
 
         .communities-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 2rem;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1.25rem;
         }
 
         .community-card-link {
@@ -124,19 +125,19 @@ const CommunityList = () => {
 
         .community-card {
           background: white;
-          border-radius: 12px;
+          border-radius: 8px;
           overflow: hidden;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .community-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          transform: translateY(-3px);
+          box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
 
         .community-banner {
-          height: 100px;
+          height: 80px;
           background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
           position: relative;
         }
@@ -153,34 +154,38 @@ const CommunityList = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 3rem;
+          font-size: 2rem;
           color: white;
         }
 
         .community-content {
-          padding: 1.5rem;
+          padding: 1rem;
         }
 
         .community-content h2 {
-          margin: 0 0 0.5rem 0;
+          margin: 0 0 0.25rem 0;
           color: #333;
-          font-size: 1.25rem;
+          font-size: 1.1rem;
         }
 
         .community-content p {
           margin: 0;
           color: #666;
-          font-size: 0.9rem;
-          line-height: 1.5;
+          font-size: 0.85rem;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .loading-state,
         .error-state,
         .empty-state {
           text-align: center;
-          padding: 3rem;
+          padding: 2rem;
           color: #666;
-          font-size: 1.1rem;
+          font-size: 1rem;
         }
 
         .error-state {
