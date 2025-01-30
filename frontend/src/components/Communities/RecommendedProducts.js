@@ -7,6 +7,7 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
     const [catalogues, setCatalogues] = useState([]);
     const [activeCatalogue, setActiveCatalogue] = useState('all');
     const [showAddProduct, setShowAddProduct] = useState(false);
+    const [savedProducts, setSavedProducts] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -60,6 +61,79 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
             throw new Error('Failed to add product');
         }
     };
+
+    const handleSaveProduct = async (productId) => {
+        try {
+            console.log('Save button clicked for product:', productId);
+            const token = localStorage.getItem('token');
+            
+            // Add error checking for token
+            if (!token) {
+                console.error('No authentication token found');
+                return;
+            }
+
+            const baseURL = 'http://localhost:8000';
+            const response = await axios.post(
+                `${baseURL}/api/saved/${productId}/save_product/`,
+                {},
+                {
+                    headers: { 
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            
+            console.log('Save product response:', response.data);
+            
+            if (response.data.status === 'saved') {
+                setSavedProducts(prev => new Set([...prev, productId]));
+                console.log('Product saved successfully');
+            } else {
+                setSavedProducts(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(productId);
+                    return newSet;
+                });
+                console.log('Product unsaved successfully');
+            }
+        } catch (error) {
+            console.error('Error saving product:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                console.error('Response status:', error.response.status);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+            } else {
+                console.error('Error setting up request:', error.message);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const fetchSavedProducts = async () => {
+            try {
+                console.log('Fetching saved products...'); // Debug log
+                const token = localStorage.getItem('token');
+                const response = await axios.get(
+                    'http://localhost:8000/api/saved/products/',
+                    {
+                        headers: { 'Authorization': `Token ${token}` }
+                    }
+                );
+                
+                console.log('Fetched saved products:', response.data); // Debug log
+                
+                setSavedProducts(new Set(response.data.map(item => item.product_id)));
+            } catch (error) {
+                console.error('Error fetching saved products:', 
+                    error.response?.data || error.message);
+            }
+        };
+
+        fetchSavedProducts();
+    }, []);
 
     const ProductCard = ({ product }) => {
         const [imageUrl, setImageUrl] = useState(null);
@@ -115,14 +189,26 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                             e.target.src = '/default-product.jpg';
                         }}
                     />
+                    <div className="product-actions">
+                        <button 
+                            className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Save button clicked for product:', product.id); // Debug log
+                                handleSaveProduct(product.id);
+                            }}
+                            title={savedProducts.has(product.id) ? 'Unsave' : 'Save'}
+                        >
+                            {savedProducts.has(product.id) ? '★' : '☆'}
+                        </button>
+                    </div>
                 </div>
                 <h3>{product.title}</h3>
+                <span className="catalogue-tag">{product.catalogue_name}</span>
                 {product.comment && (
                     <p className="product-comment">{product.comment}</p>
                 )}
-                <div className="product-meta">
-                    <span className="catalogue-tag">{product.catalogue_name}</span>
-                </div>
                 <a 
                     href={product.url} 
                     target="_blank" 
@@ -141,7 +227,7 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
     return (
         <div className="recommended-products">
             <div className="products-header">
-                <h2>Recommended Products</h2>
+                <h3>Recommended Products</h3>
                 {isCreator && (
                     <button 
                         onClick={() => setShowAddProduct(true)}
@@ -191,16 +277,26 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     background: white;
                     border-radius: 12px;
                     padding: 1.5rem;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    height: 300px;
-                    overflow-y: auto;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    width: 100%;
+                    margin: -1rem 0 0 0;
+                    box-sizing: border-box;
+                    border: 1px solid #e0e0e0;
                 }
 
                 .products-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 2rem;
+                    margin-bottom: 1rem;
+                }
+
+                .products-header h3 {
+                    font-size: 1.75rem;
+                    font-weight: 600;
+                    color: #333;
+                    margin: 0;
+                    font-family: inherit;
                 }
 
                 .add-product-button {
@@ -215,9 +311,15 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                 .catalogue-tabs {
                     display: flex;
                     gap: 1rem;
-                    margin: 1rem 0 2rem 0;
+                    margin: 0 0 1.5rem 0;
                     overflow-x: auto;
                     padding: 0.5rem 0;
+                    -ms-overflow-style: none;  /* Hide scrollbar IE and Edge */
+                    scrollbar-width: none;  /* Hide scrollbar Firefox */
+                }
+
+                .catalogue-tabs::-webkit-scrollbar {
+                    display: none;  /* Hide scrollbar Chrome, Safari, Opera */
                 }
 
                 .tab {
@@ -244,9 +346,22 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                 }
 
                 .products-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    display: flex;
                     gap: 2rem;
+                    overflow-x: auto;
+                    padding: 0.5rem 0;
+                    scroll-behavior: smooth;
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+
+                .products-grid::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .product-card {
+                    min-width: 250px;
+                    flex: 0 0 auto;
                 }
 
                 .product-image {
@@ -255,6 +370,7 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     overflow: hidden;
                     border-radius: 8px;
                     margin-bottom: 1rem;
+                    position: relative;
                 }
 
                 .product-image img {
@@ -274,7 +390,7 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     padding: 1rem;
                     display: flex;
                     flex-direction: column;
-                    gap: 0.5rem;
+                    gap: 0.75rem;
                     transition: box-shadow 0.3s ease;
                 }
 
@@ -288,17 +404,20 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     color: #333;
                 }
 
-                .product-comment {
-                    color: #666;
-                    font-size: 0.9rem;
-                }
-
                 .catalogue-tag {
+                    display: inline-block;
                     background: #f0f0f0;
                     padding: 0.25rem 0.5rem;
                     border-radius: 4px;
                     font-size: 0.8rem;
                     color: #666;
+                    width: fit-content;
+                }
+
+                .product-comment {
+                    color: #666;
+                    font-size: 0.9rem;
+                    margin: 0;
                 }
 
                 .view-product-button {
@@ -318,6 +437,42 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     padding: 1rem;
                     border-radius: 4px;
                     margin-bottom: 1rem;
+                }
+
+                .product-actions {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                }
+
+                .product-image:hover .product-actions {
+                    opacity: 1;
+                }
+
+                .save-button {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.9);
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    color: #666;
+                    transition: all 0.2s ease;
+                }
+
+                .save-button:hover {
+                    background: rgba(255, 255, 255, 1);
+                    transform: scale(1.1);
+                }
+
+                .save-button.saved {
+                    color: #ffd700;
                 }
             `}</style>
         </div>

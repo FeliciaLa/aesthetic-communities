@@ -19,6 +19,8 @@ const CollectionDetailPage = () => {
     const [previews, setPreviews] = useState({});
     const [showAddResource, setShowAddResource] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [savedResources, setSavedResources] = useState(new Set());
 
     const fetchCollection = async () => {
         try {
@@ -68,6 +70,38 @@ const CollectionDetailPage = () => {
         }
     };
 
+    const checkIfSaved = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                'http://localhost:8000/api/saved/collections/',
+                {
+                    headers: { 'Authorization': `Token ${token}` }
+                }
+            );
+            const savedCollectionIds = response.data.map(item => item.collection_id);
+            setIsSaved(savedCollectionIds.includes(Number(collectionId)));
+        } catch (error) {
+            console.error('Error checking saved status:', error);
+        }
+    };
+
+    const checkSavedResources = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+                'http://localhost:8000/api/saved/resources/',
+                {
+                    headers: { 'Authorization': `Token ${token}` }
+                }
+            );
+            const savedResourceIds = new Set(response.data.map(item => item.resource_id));
+            setSavedResources(savedResourceIds);
+        } catch (error) {
+            console.error('Error checking saved resources:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             if (collectionId) {
@@ -75,6 +109,8 @@ const CollectionDetailPage = () => {
                 await fetchResources();
                 await fetchStats();
                 await incrementCategoryViews();
+                await checkIfSaved();
+                await checkSavedResources();
             }
         };
         fetchData();
@@ -225,6 +261,49 @@ const CollectionDetailPage = () => {
         };
     }, [showActionsMenu]);
 
+    const handleSaveCollection = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(
+                `http://localhost:8000/api/saved/${collectionId}/save_collection/`,
+                {},
+                {
+                    headers: { 'Authorization': `Token ${token}` }
+                }
+            );
+            
+            setIsSaved(response.data.status === 'saved');
+            console.log(`Collection ${response.data.status}`);
+        } catch (error) {
+            console.error('Error saving collection:', error);
+        }
+    };
+
+    const handleSaveResource = async (resourceId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(
+                `http://localhost:8000/api/saved/${resourceId}/save_resource/`,
+                {},
+                {
+                    headers: { 'Authorization': `Token ${token}` }
+                }
+            );
+            
+            if (response.data.status === 'saved') {
+                setSavedResources(prev => new Set([...prev, resourceId]));
+            } else {
+                setSavedResources(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(resourceId);
+                    return newSet;
+                });
+            }
+        } catch (error) {
+            console.error('Error saving resource:', error);
+        }
+    };
+
     if (loading) return <div>Loading resources...</div>;
     if (error) return <div className="error-message">{error}</div>;
 
@@ -259,6 +338,21 @@ const CollectionDetailPage = () => {
                         <div className="stat-box">
                             <span className="stat-number">{stats?.total_views || 0}</span>
                             <span className="stat-label">VIEWS</span>
+                        </div>
+                    </div>
+                    <div className="collection-header">
+                        <div className="collection-info">
+                            <h2>{collection?.name}</h2>
+                            <p>{collection?.description}</p>
+                        </div>
+                        <div className="collection-actions">
+                            <button 
+                                onClick={handleSaveCollection}
+                                className={`save-button ${isSaved ? 'saved' : ''}`}
+                                title={isSaved ? 'Unsave Collection' : 'Save Collection'}
+                            >
+                                {isSaved ? '★' : '☆'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -355,6 +449,14 @@ const CollectionDetailPage = () => {
                                         >
                                             Visit Resource
                                         </a>
+                                    </div>
+                                    <div className="resource-actions">
+                                        <button 
+                                            onClick={() => handleSaveResource(resource.id)}
+                                            className={`save-button ${savedResources.has(resource.id) ? 'saved' : ''}`}
+                                        >
+                                            {savedResources.has(resource.id) ? 'Unsave' : 'Save'}
+                                        </button>
                                     </div>
                                 </div>
                             );
@@ -734,6 +836,51 @@ const CollectionDetailPage = () => {
                     width: 90%;
                     max-height: 90vh;
                     overflow-y: auto;
+                }
+
+                .collection-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 2rem;
+                    padding: 1rem;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+
+                .collection-info {
+                    flex: 1;
+                }
+
+                .collection-actions {
+                    display: flex;
+                    gap: 1rem;
+                }
+
+                .save-button {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: white;
+                    border: 1px solid #eee;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    color: #666;
+                    transition: all 0.2s ease;
+                }
+
+                .save-button:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+
+                .save-button.saved {
+                    color: #ffd700;
+                    border-color: #ffd700;
                 }
             `}</style>
         </div>

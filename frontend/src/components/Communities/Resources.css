@@ -335,12 +335,14 @@
 }
 
 .resources-container {
-    padding: 20px;
     background: white;
     border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 100%;
+    margin: -1rem 0 0 0;
+    box-sizing: border-box;
+    border: 1px solid #e0e0e0;
 }
 
 .collections-grid {
@@ -720,4 +722,19 @@
     width: auto !important;
     background: none !important;
     color: #666 !important;
+}
+
+.section-header h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.collections-header h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 } 

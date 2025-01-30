@@ -164,9 +164,14 @@ const MediaGallery = ({ communityId, isCreator }) => {
           background: white;
           border-radius: 12px;
           padding: 1.5rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          height: 300px;
-          overflow-y: auto;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          width: 100%;
+          margin: -1rem 0 0 0;
+          box-sizing: border-box;
+          border: 1px solid #e0e0e0;
+          height: 352px;
+          display: flex;
+          flex-direction: column;
         }
 
         .section-header {
@@ -177,10 +182,11 @@ const MediaGallery = ({ communityId, isCreator }) => {
         }
 
         .section-header h3 {
-          font-size: 1.25rem;
+          font-size: 1.75rem;
           font-weight: 600;
           color: #333;
           margin: 0;
+          font-family: inherit;
         }
 
         .gallery-actions {
@@ -211,6 +217,7 @@ const MediaGallery = ({ communityId, isCreator }) => {
         }
 
         .gallery-container {
+          flex: 1;
           position: relative;
           width: 100%;
           overflow: hidden;
@@ -272,6 +279,17 @@ const MediaGallery = ({ communityId, isCreator }) => {
 
         .empty-gallery p {
           margin: 0.5rem 0;
+        }
+
+        .media-gallery {
+          background: white;
+          border-radius: 12px;
+          padding: 1.5rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          width: 100%;
+          margin: -1rem 0 0 0;
+          box-sizing: border-box;
+          border: 1px solid #e0e0e0;
         }
       `}</style>
     </div>

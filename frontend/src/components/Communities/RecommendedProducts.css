@@ -35,6 +35,14 @@
     margin-bottom: 1rem;
 }
 
+.products-header h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    font-family: inherit;
+}
+
 .creator-actions {
     display: flex;
     gap: 10px;

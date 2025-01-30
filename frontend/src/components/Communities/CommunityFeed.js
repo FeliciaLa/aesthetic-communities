@@ -754,20 +754,55 @@ const CommunityFeed = ({ communityId }) => {
           background: white;
           border-radius: 12px;
           padding: 1.5rem;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          height: 790px;
-          overflow-y: auto;
-          overflow-x: hidden;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          width: 100%;
+          margin: -1rem 0 0 0;
           box-sizing: border-box;
+          border: 1px solid #e0e0e0;
+          height: 727px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        .section-header {
+          background: white;
+          padding-bottom: 0.5rem;
+        }
+
+        .section-header h3 {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
         }
 
         .feed-content {
           flex: 1;
           overflow-y: auto;
+          position: relative;
+        }
+
+        .feed-content::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .feed-content::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+
+        .feed-content::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 3px;
+        }
+
+        .feed-content::-webkit-scrollbar-thumb:hover {
+          background: #555;
         }
 
         .scrollable-content {
-          padding: 1rem 0;
+          padding-top: 0.5rem;
         }
 
         .posts-list {
@@ -819,27 +854,13 @@ const CommunityFeed = ({ communityId }) => {
           border-radius: 4px;
         }
 
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-        }
-
-        .section-header h3 {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #333;
-          margin: 0;
-        }
-
         .sticky-header {
           position: sticky;
           top: 0;
           background: white;
-          z-index: 1;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid #eee;
+          z-index: 10;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid #eaeaea;
         }
 
         .feed-tabs {

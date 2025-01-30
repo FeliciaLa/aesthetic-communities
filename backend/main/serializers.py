@@ -15,8 +15,13 @@ from .models import (
     Poll,
     PollOption,
     Announcement,
-    RecommendedProduct
+    RecommendedProduct,
+    SavedImage,
+    SavedResource,
+    SavedProduct,
+    SavedCollection
 )
+from .utils import get_preview_data  # Add this import at the top
 
 class UserSerializer(serializers.ModelSerializer):
     communities = serializers.SerializerMethodField()
@@ -240,4 +245,92 @@ class RecommendedProductSerializer(serializers.ModelSerializer):
         model = RecommendedProduct
         fields = ['id', 'title', 'url', 'comment', 'catalogue_name', 'community', 'created_by', 'created_at']
         read_only_fields = ['created_at']
+
+class SavedImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    community_name = serializers.SerializerMethodField()
+    community_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SavedImage
+        fields = ['id', 'image', 'image_url', 'community_name', 'community_id', 'saved_at']
+
+    def get_image_url(self, obj):
+        return obj.image.image.url if obj.image.image else None
+
+    def get_community_name(self, obj):
+        return obj.image.community.name if obj.image.community else None
+
+    def get_community_id(self, obj):
+        return obj.image.community.id if obj.image.community else None
+
+class SavedResourceSerializer(serializers.ModelSerializer):
+    resource_id = serializers.IntegerField(source='resource.id')
+    title = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+    collection_name = serializers.SerializerMethodField()
+    community_id = serializers.SerializerMethodField()
+    preview_image = serializers.SerializerMethodField()
+    preview_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SavedResource
+        fields = ['id', 'resource_id', 'title', 'url', 'collection_name', 
+                 'community_id', 'saved_at', 'preview_image', 'preview_data']
+
+    def get_preview_image(self, obj):
+        try:
+            preview_data = get_preview_data(obj.resource.url)
+            if preview_data and preview_data.get('image'):
+                return preview_data['image']
+        except Exception as e:
+            print(f"Error getting preview for {obj.resource.url}: {str(e)}")
+        return None
+
+    def get_preview_data(self, obj):
+        try:
+            return get_preview_data(obj.resource.url)
+        except Exception as e:
+            print(f"Error getting preview data for {obj.resource.url}: {str(e)}")
+        return None
+
+    def get_title(self, obj):
+        return obj.resource.title
+
+    def get_url(self, obj):
+        return obj.resource.url
+
+    def get_collection_name(self, obj):
+        return obj.resource.category.name if obj.resource.category else None
+
+    def get_community_id(self, obj):
+        return obj.resource.category.community.id
+
+class SavedProductSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source='product.id')
+    title = serializers.CharField(source='product.title')
+    url = serializers.CharField(source='product.url')
+    catalogue_name = serializers.CharField(source='product.catalogue_name')
+    community_id = serializers.IntegerField(source='product.community.id')
+
+    class Meta:
+        model = SavedProduct
+        fields = ['id', 'product_id', 'title', 'url', 'catalogue_name', 'community_id', 'saved_at']
+
+class SavedCollectionSerializer(serializers.ModelSerializer):
+    collection_id = serializers.IntegerField(source='collection.id')
+    name = serializers.CharField(source='collection.name')
+    community_id = serializers.IntegerField(source='collection.community.id')
+    community_name = serializers.CharField(source='collection.community.name')
+    resource_count = serializers.SerializerMethodField()
+    views = serializers.IntegerField(source='collection.views', default=0)
+    preview_image = serializers.CharField(source='collection.preview_image')
+
+    class Meta:
+        model = SavedCollection
+        fields = ['id', 'collection_id', 'name', 'community_id', 'community_name', 
+                 'resource_count', 'views', 'saved_at', 'preview_image']
+
+    def get_resource_count(self, obj):
+        return Resource.objects.filter(category=obj.collection).count()
 
