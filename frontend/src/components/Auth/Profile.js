@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import SavedItems from './SavedItems';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -157,6 +158,8 @@ const Profile = () => {
             </div>
           </div>
         </div>
+
+        <SavedItems />
       </div>
 
       <style jsx>{`

@@ -214,3 +214,43 @@ class RecommendedProduct(models.Model):
     def __str__(self):
         return self.title
 
+class SavedImage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_images')
+    image = models.ForeignKey(GalleryImage, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'image')
+
+class SavedResource(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_resources')
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'resource')
+
+class SavedProduct(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_products')
+    product = models.ForeignKey(RecommendedProduct, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+        ordering = ['-saved_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.product.title}"
+
+class SavedCollection(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_collections')
+    collection = models.ForeignKey(ResourceCategory, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'collection')
+        ordering = ['-saved_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.collection.name}"
+

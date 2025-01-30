@@ -24,7 +24,11 @@ from .models import (
     PollOption,
     PollVote,
     Announcement,
-    RecommendedProduct
+    RecommendedProduct,
+    SavedImage,
+    SavedResource,
+    SavedProduct,
+    SavedCollection
 )
 from .serializers import (
     CommunitySerializer, 
@@ -39,11 +43,15 @@ from .serializers import (
     AnswerSerializer,
     PollSerializer,
     AnnouncementSerializer,
-    RecommendedProductSerializer
+    RecommendedProductSerializer,
+    SavedImageSerializer,
+    SavedProductSerializer,
+    SavedCollectionSerializer,
+    SavedResourceSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes, action
 from django.core.files.storage import default_storage
 from bs4 import BeautifulSoup
 import requests
@@ -1157,3 +1165,159 @@ def get_url_preview(request):
     except Exception as e:
         print(f"Error fetching preview: {str(e)}")
         return Response({'error': 'Failed to fetch preview'}, status=400)
+
+class SavedItemsViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=['post'], url_path='save_image', url_name='save_image')
+    def save_image(self, request, pk=None):
+        try:
+            print(f"Attempting to save image with ID: {pk}")
+            image = GalleryImage.objects.get(pk=pk)
+            saved_image, created = SavedImage.objects.get_or_create(
+                user=request.user,
+                image=image
+            )
+            if created:
+                print(f"Saved image {pk} for user {request.user}")
+                return Response({'status': 'saved'})
+            else:
+                saved_image.delete()
+                print(f"Unsaved image {pk} for user {request.user}")
+                return Response({'status': 'unsaved'})
+        except GalleryImage.DoesNotExist:
+            print(f"Image {pk} not found")
+            return Response(
+                {'error': 'Image not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['get'])
+    def images(self, request):
+        """
+        Get all saved images. URL pattern: /api/saved/images/
+        """
+        saved_images = SavedImage.objects.filter(user=request.user)
+        serializer = SavedImageSerializer(saved_images, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='save_product', url_name='save_product')
+    def save_product(self, request, pk=None):
+        try:
+            print(f"Attempting to save product with ID: {pk}")
+            product = RecommendedProduct.objects.get(pk=pk)
+            saved_product, created = SavedProduct.objects.get_or_create(
+                user=request.user,
+                product=product
+            )
+            if created:
+                print(f"Saved product {pk} for user {request.user}")
+                return Response({'status': 'saved'})
+            else:
+                saved_product.delete()
+                print(f"Unsaved product {pk} for user {request.user}")
+                return Response({'status': 'unsaved'})
+        except RecommendedProduct.DoesNotExist:
+            print(f"Product {pk} not found")
+            return Response(
+                {'error': 'Product not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['get'])
+    def products(self, request):
+        try:
+            saved_products = SavedProduct.objects.filter(user=request.user).order_by('-saved_at')
+            print(f"Found {saved_products.count()} saved products")  # Debug print
+            serializer = SavedProductSerializer(saved_products, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error fetching saved products: {str(e)}")  # Debug print
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], url_path='save_collection', url_name='save_collection')
+    def save_collection(self, request, pk=None):
+        try:
+            print(f"Attempting to save collection with ID: {pk}")
+            collection = ResourceCategory.objects.get(pk=pk)
+            saved_collection, created = SavedCollection.objects.get_or_create(
+                user=request.user,
+                collection=collection
+            )
+            if created:
+                print(f"Saved collection {pk} for user {request.user}")
+                return Response({'status': 'saved'})
+            else:
+                saved_collection.delete()
+                print(f"Unsaved collection {pk} for user {request.user}")
+                return Response({'status': 'unsaved'})
+        except ResourceCategory.DoesNotExist:
+            print(f"Collection {pk} not found")
+            return Response(
+                {'error': 'Collection not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['get'])
+    def collections(self, request):
+        try:
+            saved_collections = SavedCollection.objects.filter(user=request.user).select_related(
+                'collection',
+                'collection__community'
+            )
+            print(f"Found {saved_collections.count()} saved collections")
+            for collection in saved_collections:
+                print(f"Collection {collection.id} preview image: {collection.collection.preview_image}")
+            serializer = SavedCollectionSerializer(saved_collections, many=True)
+            print("Serialized data:", serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Error in collections view: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], url_path='save_resource', url_name='save_resource')
+    def save_resource(self, request, pk=None):
+        try:
+            print(f"Attempting to save resource with ID: {pk}")
+            resource = Resource.objects.get(pk=pk)
+            saved_resource, created = SavedResource.objects.get_or_create(
+                user=request.user,
+                resource=resource
+            )
+            if created:
+                print(f"Saved resource {pk} for user {request.user}")
+                return Response({'status': 'saved'})
+            else:
+                saved_resource.delete()
+                print(f"Unsaved resource {pk} for user {request.user}")
+                return Response({'status': 'unsaved'})
+        except Resource.DoesNotExist:
+            print(f"Resource {pk} not found")
+            return Response(
+                {'error': 'Resource not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['get'])
+    def resources(self, request):
+        try:
+            saved_resources = SavedResource.objects.filter(user=request.user).select_related(
+                'resource',
+                'resource__category',
+                'resource__category__community'
+            )
+            print(f"Found {saved_resources.count()} saved resources")
+            serializer = SavedResourceSerializer(saved_resources, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in resources view: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

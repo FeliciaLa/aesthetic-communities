@@ -11,6 +11,7 @@ import JoinCommunityButton from './JoinCommunityButton';
 import AnnouncementsDashboard from './AnnouncementsDashboard';
 import RecommendedProducts from './RecommendedProducts';
 import FullscreenGallery from './FullscreenGallery';
+import GalleryView from './GalleryView';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -23,6 +24,7 @@ const CommunityDetail = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [images, setImages] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [showAddImage, setShowAddImage] = useState(false);
 
     useEffect(() => {
         const fetchCommunityDetails = async () => {
@@ -170,6 +172,11 @@ const CommunityDetail = () => {
         } catch (err) {
             console.error('Failed to delete image:', err);
         }
+    };
+
+    const handleImageClick = (index) => {
+        setIsFullscreen(true);
+        setActiveTab('gallery');
     };
 
     return (
@@ -327,11 +334,10 @@ const CommunityDetail = () => {
                 )}
                 
                 {activeTab === 'gallery' && (
-                    <FullscreenGallery 
-                        images={images} 
-                        onClose={() => setActiveTab('overview')}
-                        onDelete={handleImageDelete}
+                    <GalleryView 
+                        communityId={id} 
                         isCreator={isCreator}
+                        communityTitle={community?.name || community?.title}
                     />
                 )}
                 

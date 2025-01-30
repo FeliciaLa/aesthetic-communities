@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
     UserRegistrationView,
     UserLoginView,
@@ -28,9 +29,13 @@ from .views import (
     PollVoteView,
     AnnouncementView,
     recommended_products,
-    get_url_preview
+    get_url_preview,
+    SavedItemsViewSet
 )
 from . import views
+
+router = DefaultRouter()
+router.register('saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
     # Auth endpoints
@@ -92,6 +97,9 @@ urlpatterns = [
 
     # URL preview endpoint
     path('url-preview/', get_url_preview, name='url-preview'),
+
+    # API endpoints
+    path('api/', include(router.urls)),
 ]
 
 # Add this for debugging
