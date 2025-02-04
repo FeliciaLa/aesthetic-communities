@@ -10,47 +10,83 @@ import CommunityFeed from './CommunityFeed';
 import JoinCommunityButton from './JoinCommunityButton';
 import AnnouncementsDashboard from './AnnouncementsDashboard';
 import RecommendedProducts from './RecommendedProducts';
-import FullscreenGallery from './FullscreenGallery';
 import GalleryView from './GalleryView';
+import MembersList from './MembersList';
 
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
     const [isCreator, setIsCreator] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [refreshGallery, setRefreshGallery] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
-    const [images, setImages] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [showAddImage, setShowAddImage] = useState(false);
+
+    const trackView = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token found');
+                return;
+            }
+            
+            console.log(`Tracking view for community ${id}`);
+            const response = await axios.post(
+                `http://localhost:8000/api/communities/${id}/view/`,
+                {},
+                {
+                    headers: { 
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                }
+            );
+            console.log('View tracked successfully:', response.data);
+        } catch (error) {
+            console.error('Error tracking view:', error.response?.data || error.message);
+        }
+    };
 
     useEffect(() => {
-        const fetchCommunityDetails = async () => {
+        const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    `http://localhost:8000/api/communities/${id}/`,
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
-                );
-                setCommunity(response.data);
-                const currentUser = response.data.current_username;
-                const communityCreator = response.data.creator_name;
-                setIsCreator(currentUser === communityCreator);
+                const headers = token ? { 'Authorization': `Token ${token}` } : {};
                 
-                console.log('Community creator:', communityCreator);
-                console.log('Current user:', currentUser);
-                console.log('Setting isCreator to:', currentUser === communityCreator);
-            } catch (err) {
-                console.error('Error fetching community:', err);
-                setError('Failed to load community');
+                // Get the community info with auth token if available
+                const communityResponse = await axios.get(
+                    `http://localhost:8000/api/communities/${id}/`,
+                    { headers }
+                );
+
+                // Transform the banner_image URL
+                const communityData = {
+                    ...communityResponse.data,
+                    banner_image: communityResponse.data.banner_image ? 
+                        (communityResponse.data.banner_image.startsWith('http') ? 
+                            communityResponse.data.banner_image : 
+                            `http://localhost:8000${communityResponse.data.banner_image}`
+                        ) : '/default-banner.jpg'
+                };
+                
+                console.log('Transformed banner URL:', communityData.banner_image);
+                setCommunity(communityData);
+
+                // Handle authenticated features if user is logged in
+                if (token) {
+                    const currentUser = communityData.current_username;
+                    const communityCreator = communityData.creator_name;
+                    setIsCreator(currentUser === communityCreator);
+                    await trackView();
+                }
+            } catch (error) {
+                console.error('Error:', error.response?.data || error);
             }
         };
 
-        fetchCommunityDetails();
+        if (id) {
+            fetchData();
+        }
     }, [id]);
 
     console.log('isCreator value:', isCreator);
@@ -85,58 +121,10 @@ const CommunityDetail = () => {
                     }
                 }
             );
-            
-            // Refresh the gallery by forcing a re-render of MediaGallery
-            setRefreshGallery(prev => !prev);
         } catch (err) {
             console.error('Failed to upload image:', err);
         }
     };
-
-    useEffect(() => {
-        const checkCreator = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    console.log('No token found');
-                    return;
-                }
-
-                // Get the community info first
-                const communityResponse = await axios.get(
-                    `http://localhost:8000/api/communities/${id}/`,
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
-                );
-                
-                // Get the current user's username from localStorage or another source
-                const currentUsername = localStorage.getItem('username'); // or however you store the username
-                
-                // Compare the username with the community creator
-                const communityCreator = communityResponse.data.created_by;
-                console.log('Current username:', currentUsername);
-                console.log('Community creator:', communityCreator);
-                
-                setIsCreator(currentUsername === communityCreator);
-                
-            } catch (error) {
-                console.error('Error checking creator status:', error);
-                if (error.response) {
-                    console.log('Error response:', error.response.data);
-                }
-            }
-        };
-
-        checkCreator();
-    }, [id]);
-
-    // Add this console log to track isCreator changes
-    useEffect(() => {
-        console.log('isCreator value updated:', isCreator);
-    }, [isCreator]);
-
-    console.log('isCreator:', isCreator);
 
     const fetchImages = async () => {
         try {
@@ -147,7 +135,6 @@ const CommunityDetail = () => {
                     headers: { 'Authorization': `Token ${token}` }
                 }
             );
-            setImages(response.data);
         } catch (err) {
             console.error('Error fetching images:', err);
         }
@@ -168,15 +155,13 @@ const CommunityDetail = () => {
                     headers: { 'Authorization': `Token ${token}` }
                 }
             );
-            setImages(prevImages => prevImages.filter(img => img.id !== imageId));
         } catch (err) {
             console.error('Failed to delete image:', err);
         }
     };
 
     const handleImageClick = (index) => {
-        setIsFullscreen(true);
-        setActiveTab('gallery');
+        // Implementation needed
     };
 
     return (
@@ -248,6 +233,12 @@ const CommunityDetail = () => {
                     onClick={() => setActiveTab('products')}
                 >
                     Products
+                </button>
+                <button 
+                    className={`tab ${activeTab === 'members' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('members')}
+                >
+                    Members
                 </button>
             </div>
 
@@ -347,6 +338,10 @@ const CommunityDetail = () => {
                 
                 {activeTab === 'products' && (
                     <RecommendedProducts communityId={id} />
+                )}
+
+                {activeTab === 'members' && (
+                    <MembersList communityId={id} />
                 )}
             </div>
 
