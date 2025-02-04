@@ -1,0 +1,60 @@
+.communities-container {
+    position: relative;
+    padding-top: 200px; /* Add space for the header */
+    padding-bottom: 4rem; /* Add padding at the bottom */
+}
+
+.explore-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: linear-gradient(90deg, #0061ff 0%, #60a5fa 100%);
+    padding: 2rem;
+}
+
+.recommendations-section {
+    position: relative;
+    z-index: 1;
+    margin-top: 3rem;
+}
+
+.communities-section {
+    position: relative;
+    z-index: 1;
+    margin-top: 3rem;
+}
+
+/* Add specific spacing for the communities header */
+.communities-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    margin-bottom: 1.5rem;
+    margin-top: 6rem;  /* Increased spacing when logged out */
+}
+
+/* Adjust spacing when logged in */
+.recommendations-section + .communities-header {
+    margin-top: 3rem;  /* Keep original spacing when recommendations are present */
+}
+
+.community-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 2rem;  /* Add space after each card */
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* If you have multiple cards in a grid, also add gap */
+.communities-grid {
+    display: grid;
+    gap: 2rem;  /* Space between cards */
+    margin-bottom: 2rem;  /* Space after the grid */
+} 

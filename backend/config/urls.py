@@ -9,8 +9,8 @@ router = DefaultRouter()
 router.register(r'saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
+    path('api/', include('main.urls')),  # Move this to the top
     path('admin/', admin.site.urls),  # Admin interface
-    path('api/', include('main.urls')),  # Changed from communities to main
     path('api/', include('music.urls')),  # Remove the 'music/' prefix
     path('api/', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

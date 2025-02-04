@@ -30,7 +30,16 @@ from .views import (
     AnnouncementView,
     recommended_products,
     get_url_preview,
-    SavedItemsViewSet
+    SavedItemsViewSet,
+    CommunityViewTracker,
+    CommunityListView,
+    RecommendedCommunitiesView,
+    CommunityMembersView,
+    ProfileUpdateView,
+    RegisterView,
+    LoginView,
+    PasswordResetView,
+    PasswordResetConfirmView
 )
 from . import views
 
@@ -39,13 +48,13 @@ router.register('saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
     # Auth endpoints
-    path('register/', UserRegistrationView.as_view(), name='register'),
-    path('login/', UserLoginView.as_view(), name='login'),
+    path('auth/login/', LoginView.as_view(), name='login'),
+    path('auth/register/', RegisterView.as_view(), name='register'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('profile/', UserProfileView.as_view(), name='profile'),
     
     # Community endpoints
-    path('communities/', CommunityView.as_view(), name='community-list'),
+    path('communities/', CommunityListView.as_view(), name='community-list'),
     path('communities/<int:pk>/', CommunityDetailView.as_view(), name='community-detail'),
     path('communities/<int:community_id>/update_details/', CommunityUpdateView.as_view(), name='community-update'),
     path('communities/<int:community_id>/banner/', update_community_banner, name='update-community-banner'),
@@ -98,8 +107,21 @@ urlpatterns = [
     # URL preview endpoint
     path('url-preview/', get_url_preview, name='url-preview'),
 
-    # API endpoints
-    path('api/', include(router.urls)),
+    # View tracking endpoint
+    path('communities/<int:community_id>/view/', CommunityViewTracker.as_view(), name='community-view-tracker'),
+
+    # Recommended communities endpoint
+    path('communities/recommended/', RecommendedCommunitiesView.as_view(), name='recommended-communities'),
+
+    # Members endpoint
+    path('communities/<int:community_id>/members/', CommunityMembersView.as_view(), name='community-members'),
+
+    # Profile update endpoint
+    path('profile/update/', ProfileUpdateView.as_view(), name='profile-update'),
+
+    path('password-reset/', PasswordResetView.as_view(), name='password-reset'),
+    path('password-reset-confirm/<int:user_id>/<str:token>/', 
+         PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 ]
 
 # Add this for debugging
