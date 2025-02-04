@@ -153,8 +153,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "webmaster@localhost"
+# Email Configuration
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'almasplatforms@gmail.com'
+EMAIL_HOST_PASSWORD = 'imjc kmgr ussv pgci'
+DEFAULT_FROM_EMAIL = 'almasplatforms@gmail.com'
+
+# Frontend URL for password reset
+FRONTEND_URL = 'http://localhost:3000'
 
 # Media files configuration
 MEDIA_URL = '/media/'
@@ -206,3 +216,6 @@ LOGGING = {
         },
     },
 }
+
+AUTH_USER_MODEL = 'main.CustomUser'
+

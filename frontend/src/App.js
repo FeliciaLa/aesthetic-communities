@@ -1,69 +1,106 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import NavbarLoggedIn from "./components/Layout/NavbarLoggedIn";
-import NavbarLoggedOut from "./components/Layout/NavbarLoggedOut";
-import Register from "./components/Auth/Register";
-import Login from "./components/Auth/Login";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import NavbarLoggedIn from "./components/Navigation/NavbarLoggedIn";
+import NavbarLoggedOut from "./components/Navigation/NavbarLoggedOut";
 import Profile from "./components/Auth/Profile";
 import PrivateRoute from "./components/Auth/PrivateRoute";
-import Logout from "./components/Auth/Logout";
-import CommunityList from './components/Communities/CommunityList';
+import ExploreCommunities from './components/Communities/ExploreCommunities';
 import CreateCommunity from './components/Communities/CreateCommunity';
 import CommunityDetail from './components/Communities/CommunityDetail';
 import CollectionDetailPage from './components/Communities/CollectionDetailPage';
 import { MusicProvider } from './contexts/MusicContext';
+import AuthModal from './components/Auth/AuthModal';
+import PasswordResetConfirm from './components/Auth/PasswordResetConfirm';
+import PasswordReset from './components/Auth/PasswordReset';
+import ErrorBoundary from './components/ErrorBoundary';
 
-function App() {
-  return (
-    <MusicProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </MusicProvider>
-  );
-}
-
-function AppContent() {
+const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
+  const handleAuthClick = () => {
+    setInitialAuthMode('register');
+    setShowAuthModal(true);
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate('/');
   };
 
   return (
-    <div>
-      {/* Only show navbar when logged in */}
-      {isLoggedIn && <NavbarLoggedIn handleLogout={handleLogout} />}
-      
+    <MusicProvider>
+      {isLoggedIn ? (
+        <NavbarLoggedIn handleLogout={handleLogout} />
+      ) : (
+        <NavbarLoggedOut 
+          setShowAuthModal={setShowAuthModal} 
+          setInitialAuthMode={setInitialAuthMode}
+        />
+      )}
+
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/communities" /> : <Navigate to="/login" />} />
-        <Route path="/register" element={<Register />} />
         <Route 
-          path="/login" 
-          element={<Login setIsLoggedIn={setIsLoggedIn} />} 
+          path="/" 
+          element={
+            <ExploreCommunities 
+              setIsLoggedIn={setIsLoggedIn}
+              onAuthClick={handleAuthClick}
+            />
+          } 
+        />
+        <Route 
+          path="/communities" 
+          element={
+            <ExploreCommunities 
+              setIsLoggedIn={setIsLoggedIn}
+              onAuthClick={handleAuthClick}
+            />
+          } 
         />
         <Route
-          path="/profile"
+          path="/create-community"
           element={
-            <PrivateRoute>
-              <Profile />
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <CreateCommunity />
             </PrivateRoute>
           }
         />
-        <Route 
-          path="/logout" 
-          element={<Logout handleLogout={handleLogout} />} 
-        />
-        <Route path="/communities" element={<CommunityList />} />
-        <Route path="/create-community" element={<CreateCommunity />} />
         <Route path="/communities/:id" element={<CommunityDetail />} />
-        <Route path="/resources/categories/:collectionId" element={<CollectionDetailPage />} />
+        <Route path="/collection/:id" element={<CollectionDetailPage />} />
+        <Route path="/profile" element={
+          <PrivateRoute isLoggedIn={isLoggedIn}>
+            <Profile />
+          </PrivateRoute>
+        } />
+        <Route path="/password-reset" element={<PasswordReset />} />
+        <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
       </Routes>
-    </div>
+
+      {showAuthModal && (
+        <AuthModal
+          show={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialMode={initialAuthMode}
+          setIsLoggedIn={setIsLoggedIn}
+        />
+      )}
+    </MusicProvider>
   );
-}
+};
+
+const App = () => {
+  return (
+    <ErrorBoundary>
+      <Router>
+        <MusicProvider>
+          <AppContent />
+        </MusicProvider>
+      </Router>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

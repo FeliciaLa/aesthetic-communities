@@ -28,7 +28,10 @@ from .models import (
     SavedImage,
     SavedResource,
     SavedProduct,
-    SavedCollection
+    SavedCollection,
+    CommunityView,
+    Profile,
+    CustomUser
 )
 from .serializers import (
     CommunitySerializer, 
@@ -47,7 +50,8 @@ from .serializers import (
     SavedImageSerializer,
     SavedProductSerializer,
     SavedCollectionSerializer,
-    SavedResourceSerializer
+    SavedResourceSerializer,
+    UserLoginSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -63,8 +67,84 @@ from django.db.models import Count
 from django.db import transaction
 from django.db import models
 import re
+from django.utils import timezone
+from django.core.cache import cache
+from datetime import timedelta
+from django.db.models import Q
+import logging
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.conf import settings
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            identifier = request.data.get('identifier')  # This can be email or username
+            password = request.data.get('password')
+
+            # Try to find the user by email or username
+            user = authenticate(
+                username=identifier,  # Django's authenticate will try username first
+                password=password
+            )
+
+            if not user:
+                # If authentication with username failed, try with email
+                try:
+                    user_obj = User.objects.get(email=identifier)
+                    user = authenticate(
+                        username=user_obj.username,
+                        password=password
+                    )
+                except User.DoesNotExist:
+                    pass
+
+            if user:
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email
+                    }
+                })
+            
+            return Response(
+                {'error': 'Invalid credentials'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            
+        except Exception as e:
+            print(f"Login error: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -114,8 +194,8 @@ class UserLogoutView(APIView):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
-class CommunityView(APIView):
-    permission_classes = [IsAuthenticated]
+class CommunityListView(APIView):
+    permission_classes = [AllowAny]
 
     def get(self, request):
         communities = Community.objects.all()
@@ -123,6 +203,11 @@ class CommunityView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to create communities'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         serializer = CommunitySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(created_by=request.user)
@@ -752,7 +837,7 @@ def get_collection_stats(request, category_id):
         resources = Resource.objects.filter(category_id=category_id)
         total_resources = resources.count()
         total_views = resources.aggregate(Sum('views'))['views__sum'] or 0
-        
+
         # Get total number of vote actions (both up and down)
         total_votes = Vote.objects.filter(resource__category_id=category_id).count()
         
@@ -1320,4 +1405,245 @@ class SavedItemsViewSet(viewsets.ViewSet):
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CommunityViewTracker(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, community_id):
+        print(f"Received view tracking request for community {community_id}")
+        print(f"Request user: {request.user}")
+        print(f"Request data: {request.data}")
+        
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            print(f"Found community: {community}")
+            
+            # Try to get existing view or create new one
+            view, created = CommunityView.objects.get_or_create(
+                community=community,
+                user=request.user,
+                defaults={'viewed_at': timezone.now()}
+            )
+            print(f"View {'created' if created else 'updated'}")
+            
+            if not created:
+                # Update the viewed_at timestamp
+                view.viewed_at = timezone.now()
+                view.save()
+                print("Updated timestamp")
+            
+            return Response({'status': 'view recorded'}, status=status.HTTP_200_OK)
+            
+        except Community.DoesNotExist:
+            print(f"Community {community_id} not found")
+            return Response(
+                {'error': f'Community {community_id} not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error type: {type(e)}")
+            print(f"Error message: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class RecommendedCommunitiesView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            user = request.user
+            print(f"Finding recommendations for user: {user.username}")
+            
+            # Get communities the user is a member of
+            user_communities = Community.objects.filter(members=user)
+            print(f"User communities count: {user_communities.count()}")
+            
+            # If user has no communities, recommend trending ones
+            if not user_communities.exists():
+                print("No user communities found, getting trending ones")
+                recommended = Community.objects.annotate(
+                    recent_views=Count('views', filter=Q(
+                        views__viewed_at__gte=timezone.now() - timedelta(days=30)
+                    )),
+                    member_count=Count('members')
+                ).order_by('-recent_views', '-member_count')[:5]
+            else:
+                print("User has communities, finding similar ones based on content")
+                # Get content-based recommendations
+                user_community_names = user_communities.values_list('name', flat=True)
+                user_community_descriptions = user_communities.values_list('description', flat=True)
+                
+                # Combine all words from user's communities
+                all_words = ' '.join(list(user_community_names) + list(user_community_descriptions)).lower()
+                words_list = [word for word in all_words.split() if len(word) > 3]  # Filter out short words
+                
+                # Find communities with similar content
+                similar_communities = Community.objects.exclude(members=user)
+                
+                # Build Q objects for each significant word
+                q_objects = Q()
+                for word in set(words_list):  # Using set to avoid duplicate words
+                    q_objects |= Q(name__icontains=word) | Q(description__icontains=word)
+                
+                recommended = similar_communities.filter(q_objects).annotate(
+                    match_count=Count('id'),  # Count how many words match
+                    member_count=Count('members')
+                ).order_by('-match_count', '-member_count')[:5]
+                
+                print(f"Found {recommended.count()} content-based recommendations")
+            
+            serializer = CommunitySerializer(recommended, many=True)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error in recommendations: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class CommunityMembersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            creator = community.created_by
+            members = community.members.all()
+            
+            response_data = {
+                'creator': {
+                    'id': creator.id,
+                    'username': creator.username,
+                    'avatar': creator.profile.avatar.url if hasattr(creator, 'profile') and creator.profile.avatar else None,
+                },
+                'members': [{
+                    'id': member.id,
+                    'username': member.username,
+                    'avatar': member.profile.avatar.url if hasattr(member, 'profile') and member.profile.avatar else None,
+                    'date_joined': member.date_joined
+                } for member in members]
+            }
+            return Response(response_data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class ProfileUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+            profile = user.profile
+            return Response({
+                'username': user.username,
+                'email': user.email,
+                'date_joined': user.date_joined,
+                'avatar': profile.avatar.url if profile.avatar else None,
+                'bio': profile.bio
+            })
+        except Exception as e:
+            logger.error(f"Error getting profile: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def patch(self, request):
+        try:
+            profile = request.user.profile
+            
+            # Debug logging
+            logger.info(f"Received data: {request.data}")
+            
+            if 'bio' in request.data:
+                profile.bio = request.data['bio']
+                logger.info(f"Updating bio to: {request.data['bio']}")
+            
+            if 'avatar' in request.FILES:
+                profile.avatar = request.FILES['avatar']
+                logger.info("Updating avatar")
+            
+            profile.save()
+            
+            return Response({
+                'username': request.user.username,
+                'email': request.user.email,
+                'date_joined': request.user.date_joined,
+                'avatar': profile.avatar.url if profile.avatar else None,
+                'bio': profile.bio
+            })
+        except Exception as e:
+            logger.error(f"Error updating profile: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class PasswordResetView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        email = request.data.get('email')
+        logger.info(f"Password reset requested for email: {email}")
+        
+        try:
+            user = User.objects.get(email=email)
+            token = default_token_generator.make_token(user)
+            reset_url = f"{settings.FRONTEND_URL}/reset-password/{user.id}/{token}"
+            
+            logger.info(f"Generated reset URL: {reset_url}")
+            
+            try:
+                send_mail(
+                    'Password Reset Request',
+                    f'Click the following link to reset your password: {reset_url}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                logger.info("Password reset email sent successfully")
+            except Exception as mail_error:
+                logger.error(f"Failed to send email: {str(mail_error)}")
+                return Response(
+                    {'error': 'Failed to send email'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            return Response({'message': 'Password reset email sent'})
+        except User.DoesNotExist:
+            logger.warning(f"No user found with email: {email}")
+            return Response(
+                {'error': 'No user found with this email address'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Password reset error: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request, user_id, token):
+        try:
+            user = User.objects.get(id=user_id)
+            if default_token_generator.check_token(user, token):
+                password = request.data.get('password')
+                user.set_password(password)
+                user.save()
+                return Response({'message': 'Password reset successful'})
+            return Response(
+                {'error': 'Invalid token'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
             )

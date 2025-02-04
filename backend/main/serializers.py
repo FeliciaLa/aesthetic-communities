@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import (
     Community, 
@@ -19,9 +19,14 @@ from .models import (
     SavedImage,
     SavedResource,
     SavedProduct,
-    SavedCollection
+    SavedCollection,
+    Profile
 )
 from .utils import get_preview_data  # Add this import at the top
+from django.utils import timezone
+from datetime import timedelta
+
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     communities = serializers.SerializerMethodField()
@@ -46,35 +51,64 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password')
+        fields = ('id', 'username', 'email', 'password')
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already registered.")
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password']
-        )
-        return user
+        try:
+            user = User.objects.create_user(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password']
+            )
+            return user
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
 
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    identifier = serializers.CharField()  # This can be email or username
     password = serializers.CharField(write_only=True)
 
 class CommunitySerializer(serializers.ModelSerializer):
     is_creator = serializers.SerializerMethodField()
     created_by = serializers.ReadOnlyField(source='created_by.username')
+    member_count = serializers.SerializerMethodField()
+    recent_views = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
-        fields = ['id', 'name', 'description', 'created_by', 'created_at', 'is_creator', 'banner_image']
+        fields = ['id', 'name', 'description', 'created_by', 'created_at', 'is_creator', 'banner_image', 'member_count', 'recent_views']
 
     def get_is_creator(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.created_by == request.user
         return False
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+    def get_recent_views(self, obj):
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        return obj.views.filter(viewed_at__gte=thirty_days_ago).count()
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -333,4 +367,12 @@ class SavedCollectionSerializer(serializers.ModelSerializer):
 
     def get_resource_count(self, obj):
         return Resource.objects.filter(category=obj.collection).count()
+
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['username', 'email', 'bio', 'avatar']
 
