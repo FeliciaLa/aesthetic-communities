@@ -22,6 +22,5 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings_prod
 ENV PORT=8000
 
-# Start command
-ENTRYPOINT ["gunicorn"]
-CMD ["config.wsgi:application", "--bind", "0.0.0.0:8000"] 
+# Start command (no cd needed)
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} 
