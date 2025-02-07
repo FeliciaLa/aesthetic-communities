@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../api';
 
 const JoinCommunityButton = ({ communityId }) => {
     const [isMember, setIsMember] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        checkMembershipStatus();
-    }, [communityId]);
-
     const checkMembershipStatus = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/communities/${communityId}/membership/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
+            const response = await api.get(`/communities/${communityId}/membership/`, {
+                headers: { 
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
             setIsMember(response.data.is_member);
             setLoading(false);
         } catch (error) {
@@ -30,20 +26,24 @@ const JoinCommunityButton = ({ communityId }) => {
         try {
             const token = localStorage.getItem('token');
             const action = isMember ? 'leave' : 'join';
-            
-            await axios.post(
-                `http://localhost:8000/api/communities/${communityId}/membership/`,
+            await api.post(`/communities/${communityId}/membership/`, 
                 { action },
                 {
-                    headers: { 'Authorization': `Token ${token}` }
+                    headers: { 
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
             );
-            
             setIsMember(!isMember);
         } catch (error) {
             console.error('Error updating membership:', error);
         }
     };
+
+    useEffect(() => {
+        checkMembershipStatus();
+    }, [communityId]);
 
     if (loading) return null;
 
