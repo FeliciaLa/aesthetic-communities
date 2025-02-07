@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'http://localhost:3000';  // Or whatever your backend URL is 
+export const API_BASE_URL = 'https://aesthetic-communities-production.up.railway.app/api'; 
