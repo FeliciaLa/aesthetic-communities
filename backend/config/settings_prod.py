@@ -5,7 +5,17 @@ import dj_database_url
 
 # Basic settings
 DEBUG = True  # Temporarily set to True to see errors
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'aesthetic-communities-production.up.railway.app',  # Add your Railway domain
+    '*',  # Temporarily allow all hosts while testing
+]
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Your local frontend
+    "https://aesthetic-communities-production.up.railway.app",  # Your Railway domain
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # Database configuration using DATABASE_URL
 DATABASES = {
@@ -37,10 +47,9 @@ print(f"USER: {os.environ.get('PGUSER')}")
 print(f"HOST: {os.environ.get('PGHOST')}")
 print(f"PORT: {os.environ.get('PGPORT')}")
 
-# CORS settings if needed
-CORS_ALLOW_ALL_ORIGINS = True  # Configure this properly for production
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your frontend URL here
+# Security settings
+CSRF_TRUSTED_ORIGINS = [
+    "https://aesthetic-communities-production.up.railway.app",  # Your Railway domain
 ]
 
 # Add any other production-specific settings
