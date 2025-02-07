@@ -8,6 +8,7 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -19,8 +20,8 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
     formDataToSend.append('name', formData.name);
     formDataToSend.append('description', formData.description);
     formDataToSend.append('community', communityId);
-    if (previewUrl) {
-      formDataToSend.append('preview_image', previewUrl);
+    if (previewFile) {
+      formDataToSend.append('preview_image', previewFile);
     }
 
     try {
@@ -49,11 +50,8 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setPreviewFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 

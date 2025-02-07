@@ -61,6 +61,10 @@ export const authService = {
         try {
             const response = await axios.post(`${API_URL}password-reset/`, {
                 email: email
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
             return response.data;
         } catch (error) {
@@ -71,7 +75,7 @@ export const authService = {
     resetPassword: async (userId, token, password) => {
         try {
             const response = await axios.post(
-                `${API_URL}password-reset-confirm/${userId}/${token}/`,
+                `${API_URL}/password-reset-confirm/${userId}/${token}/`,
                 { password }
             );
             return response.data;

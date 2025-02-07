@@ -7,13 +7,8 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: white;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  background: transparent;
+  backdrop-filter: blur(8px);
   z-index: 1000;
 `;
 
@@ -21,7 +16,7 @@ const NavLeft = styled.div`
   .brand {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #0066cc;
+    color: #fa8072;
     text-decoration: none;
   }
 `;
@@ -31,31 +26,31 @@ const NavRight = styled.div`
   align-items: center;
   gap: 1rem;
 
-  button {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+  .log-in {
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    background: transparent;
+    color: #fa8072;
+    border: 1px solid #fa8072;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-weight: 500;
-  }
-
-  .login-button {
-    border: 1px solid #0066cc;
-    background: transparent;
-    color: #0066cc;
 
     &:hover {
-      background: #f0f7ff;
+      background: rgba(250, 128, 114, 0.1);
     }
   }
 
-  .signup-button {
-    border: none;
-    background: #0066cc;
+  .sign-up {
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    background: #fa8072;
     color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
     &:hover {
-      background: #0052a3;
+      background: #ff9288;
     }
   }
 `;
@@ -80,10 +75,10 @@ const NavbarLoggedOut = ({ setShowAuthModal, setInitialAuthMode }) => {
       </NavLeft>
 
       <NavRight>
-        <button onClick={handleLoginClick} className="login-button">
+        <button onClick={handleLoginClick} className="log-in">
           Log In
         </button>
-        <button onClick={handleSignUpClick} className="signup-button">
+        <button onClick={handleSignUpClick} className="sign-up">
           Sign Up
         </button>
       </NavRight>

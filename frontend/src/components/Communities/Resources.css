@@ -213,127 +213,6 @@
     text-decoration: underline;
 }
 
-.add-collection-button {
-    color: #666;
-    background: none;
-    border: 1px solid #ddd;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.75rem;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.add-collection-button:hover {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: #999;
-}
-
-.resources-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.add-resource-button {
-    padding: 0.5rem 1rem;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.add-resource-button:hover {
-    background: #0056b3;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-}
-
-.close-button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.close-button:hover {
-    background: #c82333;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
-.cancel-button {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.cancel-button:hover {
-    background: #c82333;
-}
-
-.resource-item {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-
-.resource-item h4 {
-    margin: 0 0 0.5rem 0;
-}
-
-.resource-item p {
-    margin: 0 0 0.5rem 0;
-}
-
-.resource-item a {
-    color: #007bff;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.resource-item small {
-    color: #666;
-}
-
 .resources-container {
     background: white;
     border-radius: 12px;
@@ -377,6 +256,7 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
+    background: #f5f5f5;
 }
 
 .collection-card h3 {
@@ -397,22 +277,6 @@
     margin: 8px 16px 16px;
     color: #666;
     font-size: 0.9rem;
-}
-
-.add-collection-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s;
-}
-
-.add-collection-button:hover {
-    background-color: #0056b3;
 }
 
 .edit-button {
@@ -689,52 +553,114 @@
     opacity: 0.8;
 }
 
-.collections-header {
+.collections-header,
+.media-header,
+.products-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-    position: relative;
+    margin-bottom: 0.25rem;
 }
 
-.collections-header .add-collection-button {
-    color: #666;
-    background: none;
-    border: 1px solid #ddd;
-    padding: 3px 6px;
+.collections-header h3,
+.media-header h3,
+.products-header h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    font-family: inherit;
+}
+
+.collection-placeholder,
+.media-placeholder,
+.product-placeholder {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.25rem;
+}
+
+.placeholder-content {
+    text-align: center;
+    color: #999;
+}
+
+.placeholder-content i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.placeholder-content p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* This is the only .add-collection-button style we want to keep */
+.add-collection-button {
+    padding: 4px 12px;
+    background: white;
+    color: #fa8072;
+    border: 1px solid #fa8072;
     border-radius: 4px;
+    font-size: 1.2rem;
     cursor: pointer;
-    font-size: 0.7rem;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
     line-height: 1;
+    min-width: 32px;
+    height: 32px;
+    width: auto;
 }
 
-.collections-header .add-collection-button:hover {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: #999;
+.add-collection-button:hover {
+    background: #ff9288;
+    color: white;
+    border-color: #ff9288;
 }
 
-/* Override any existing styles */
-.add-collection-button {
-    width: auto !important;
-    background: none !important;
-    color: #666 !important;
+.header-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-.section-header h3 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
+.all-collections-button {
+    padding: 4px 12px;
+    background: white;
+    color: #fa8072;
+    border: 1px solid #fa8072;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    height: 32px;
+    width: auto;
 }
 
-.collections-header h3 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+.all-collections-button:hover {
+    background: #ff9288;
+    color: white;
+    border-color: #ff9288;
+}
+
+.collection-preview-placeholder {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 0.9rem;
 } 

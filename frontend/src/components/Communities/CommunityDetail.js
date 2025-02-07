@@ -179,11 +179,16 @@ const CommunityDetail = () => {
                     <AnnouncementsDashboard communityId={id} />
                 </div>
                 <div className="sidebar-item">
-                    <SpotifyPlayer communityId={id} />
+                    <SpotifyPlayer communityId={id} isCreator={isCreator} />
                 </div>
             </div>
 
             <div className="community-banner">
+                {isCreator && (
+                    <button onClick={() => setShowEditModal(true)} className="edit-button">
+                        Edit
+                    </button>
+                )}
                 <div className="banner-overlay"></div>
                 <div className="banner-content">
                     <h1>{community?.name}</h1>
@@ -192,13 +197,7 @@ const CommunityDetail = () => {
                         Created by {community?.creator_name || 'Unknown'} • {formatDate(community?.created_at)}
                     </div>
                     <div className="banner-actions">
-                        {isCreator ? (
-                            <button onClick={() => setShowEditModal(true)} className="edit-button">
-                                Edit
-                            </button>
-                        ) : (
-                            <JoinCommunityButton communityId={id} />
-                        )}
+                        {!isCreator && <JoinCommunityButton communityId={id} />}
                     </div>
                 </div>
             </div>
@@ -234,95 +233,35 @@ const CommunityDetail = () => {
                 >
                     Products
                 </button>
-                <button 
-                    className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('members')}
-                >
-                    Members
-                </button>
             </div>
 
             <div className="tab-content">
                 {activeTab === 'overview' && (
                     <div className="overview-layout">
                         <div className="side-column">
-                            <MediaGallery communityId={id} isCreator={isCreator} />
-                            <Resources communityId={id} />
+                            <MediaGallery 
+                                communityId={id} 
+                                isCreator={isCreator}
+                                onTabChange={setActiveTab}
+                            />
+                            <Resources 
+                                communityId={id} 
+                                isCreator={isCreator}
+                                onTabChange={setActiveTab}
+                            />
+                            <RecommendedProducts 
+                                communityId={id} 
+                                isCreator={isCreator} 
+                                onTabChange={setActiveTab}
+                            />
                         </div>
                         <div className="main-column">
                             <CommunityFeed communityId={id} />
                         </div>
-                        <div className="products-column">
-                            <RecommendedProducts communityId={id} />
-                        </div>
-
-                        <style jsx>{`
-                            .overview-layout {
-                                display: grid;
-                                grid-template-columns: 1fr 1fr;
-                                grid-template-areas: 
-                                    "side feed"
-                                    "products products";
-                                gap: 2rem;
-                                padding: 0.5rem 0.5rem;
-                                max-width: 4000px;
-                                margin: 0 auto;
-                                align-items: start;
-                            }
-
-                            .side-column {
-                                grid-area: side;
-                                display: flex;
-                                flex-direction: column;
-                                gap: 22px;
-                            }
-
-                            .main-column {
-                                grid-area: feed;
-                                height: 522px;
-                            }
-
-                            .products-column {
-                                grid-area: products;
-                                margin-top: 2rem;
-                            }
-
-                            .main-column::-webkit-scrollbar {
-                                width: 6px;
-                            }
-
-                            .main-column::-webkit-scrollbar-track {
-                                background: #f1f1f1;
-                                border-radius: 3px;
-                            }
-
-                            .main-column::-webkit-scrollbar-thumb {
-                                background: #888;
-                                border-radius: 3px;
-                            }
-
-                            .main-column::-webkit-scrollbar-thumb:hover {
-                                background: #555;
-                            }
-
-                            @media (max-width: 1024px) {
-                                .overview-layout {
-                                    grid-template-columns: 1fr;
-                                }
-
-                                .main-column {
-                                    position: static;
-                                    height: auto;
-                                    order: -1;
-                                }
-                            }
-                        `}</style>
                     </div>
                 )}
                 
-                {activeTab === 'feed' && (
-                    <CommunityFeed communityId={id} />
-                )}
+                {activeTab === 'feed' && <CommunityFeed communityId={id} />}
                 
                 {activeTab === 'gallery' && (
                     <GalleryView 
@@ -333,15 +272,19 @@ const CommunityDetail = () => {
                 )}
                 
                 {activeTab === 'resources' && (
-                    <Resources communityId={id} />
+                    <Resources 
+                        communityId={id} 
+                        isCreator={isCreator}
+                        onTabChange={setActiveTab}
+                    />
                 )}
                 
                 {activeTab === 'products' && (
-                    <RecommendedProducts communityId={id} />
-                )}
-
-                {activeTab === 'members' && (
-                    <MembersList communityId={id} />
+                    <RecommendedProducts 
+                        communityId={id} 
+                        isCreator={isCreator} 
+                        onTabChange={setActiveTab}
+                    />
                 )}
             </div>
 
@@ -366,15 +309,19 @@ const CommunityDetail = () => {
                 .community-detail {
                     max-width: 1400px;
                     margin: 0 auto;
-                    padding: 0 2rem;
+                    padding: 0;
                     padding-right: ${isSidebarOpen ? '300px' : '0'};
                     transition: padding-right 0.3s ease;
                 }
 
                 .community-banner {
                     position: relative;
+                    width: 100vw;
                     height: 300px;
-                    margin-top: 64px;
+                    margin: 0;
+                    margin-left: calc(-50vw + 50%);
+                    left: 0;
+                    right: 0;
                     background-image: url(${community?.banner_image || '/default-banner.jpg'});
                     background-size: cover;
                     background-position: center;
@@ -382,6 +329,7 @@ const CommunityDetail = () => {
                     display: flex;
                     align-items: flex-end;
                     padding: 40px 24px;
+                    transform: translateX(0);
                 }
 
                 .banner-overlay {
@@ -394,11 +342,17 @@ const CommunityDetail = () => {
                 }
 
                 .banner-content {
-                    position: relative;
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 2rem;
                     z-index: 1;
                     max-width: 1200px;
                     margin: 0 auto;
                     width: 100%;
+                    color: white;
+                    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
                 }
 
                 .banner-content h1 {
@@ -424,8 +378,8 @@ const CommunityDetail = () => {
 
                 .edit-button {
                     position: absolute;
-                    top: 16px;
-                    right: 16px;
+                    top: 20px;
+                    right: 20px;
                     padding: 6px 16px;
                     background: rgba(0, 0, 0, 0.4);
                     color: white;
@@ -435,7 +389,7 @@ const CommunityDetail = () => {
                     backdrop-filter: blur(5px);
                     transition: all 0.3s ease;
                     font-size: 0.9rem;
-                    z-index: 10;
+                    z-index: 2;
                 }
 
                 .edit-button:hover {
@@ -449,7 +403,7 @@ const CommunityDetail = () => {
                     padding: 1rem;
                     background: white;
                     border-bottom: 1px solid #eaeaea;
-                    margin: 1rem 0;
+                    margin-bottom: 24px;
                 }
 
                 .tab {
@@ -464,18 +418,20 @@ const CommunityDetail = () => {
                 }
 
                 .tab:hover {
-                    color: #0061ff;
+                    color: #fa8072;
                 }
 
                 .tab.active {
-                    color: #0061ff;
+                    color: #fa8072;
                     font-weight: 600;
-                    background: rgba(0, 97, 255, 0.1);
+                    background: rgba(250, 128, 114, 0.1);
                     border-radius: 4px;
                 }
 
                 .tab-content {
-                    padding: 1rem;
+                    padding: 0;
+                    margin: 0;
+                    margin-top: 0;
                 }
 
                 .sidebar {
@@ -513,7 +469,7 @@ const CommunityDetail = () => {
                     position: fixed;
                     right: ${isSidebarOpen ? '300px' : '0'};
                     top: 300px;
-                    background: #0061ff;
+                    background: #fa8072;
                     color: white;
                     border: none;
                     border-radius: ${isSidebarOpen ? '8px 0 0 8px' : '8px'};
@@ -553,9 +509,70 @@ const CommunityDetail = () => {
 
                 .container {
                     width: 100%;
-                    max-width: 3000px;
+                    max-width: 800px;
                     margin: 0 auto;
-                    padding: 0 1rem;
+                    padding: 20px;
+                }
+
+                .feed-content {
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    padding: 20px;
+                }
+
+                :global(.community-feed) {
+                    width: 100%;
+                }
+
+                .overview-layout {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    grid-template-areas: "side feed";
+                    gap: 2rem;
+                    padding: 0 1rem 0 0;
+                    margin: 0 auto;
+                    align-items: start;
+                }
+
+                .side-column {
+                    grid-area: side;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 22px;
+                    width: 100%;
+                }
+
+                .main-column {
+                    grid-area: feed;
+                    width: 100%;
+                    min-width: 0;
+                }
+
+                @media (max-width: 1024px) {
+                    .overview-layout {
+                        grid-template-columns: 1fr;
+                        grid-template-areas: 
+                            "feed"
+                            "side";
+                    }
+
+                    .main-column {
+                        position: static;
+                        height: auto;
+                        order: -1;
+                    }
+                }
+
+                :global(body) {
+                    margin: 0;
+                    padding: 0;
+                    overflow-x: hidden;
+                }
+
+                :global(#root) {
+                    margin: 0;
+                    padding: 0;
                 }
             `}</style>
         </div>

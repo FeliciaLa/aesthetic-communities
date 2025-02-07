@@ -25,7 +25,7 @@ const PasswordResetConfirm = () => {
 
     try {
       await axios.post(
-        `http://localhost:8000/api/password-reset-confirm/${userId}/${token}/`,
+        `${process.env.REACT_APP_API_URL}/password-reset-confirm/${userId}/${token}/`,
         { password }
       );
       setSuccess(true);

@@ -35,6 +35,8 @@ const CollectionDetailPage = () => {
         } catch (err) {
             console.error('Error fetching collection:', err);
             setError('Failed to load collection');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -127,6 +129,7 @@ const CollectionDetailPage = () => {
                     }
                 }
             );
+            console.log('Resource data:', response.data);
             const sortedResources = response.data.sort((a, b) => (b.votes || 0) - (a.votes || 0));
             setResources(sortedResources);
             
@@ -194,17 +197,24 @@ const CollectionDetailPage = () => {
                 }
             );
 
-            const updatedResources = resources.map(resource => {
-                if (resource.id === resourceId) {
-                    return {
-                        ...resource,
-                        votes: response.data.total_votes,
-                        user_vote: voteType
-                    };
-                }
-                return resource;
+            // Update and sort resources immediately
+            setResources(prevResources => {
+                const updatedResources = prevResources.map(resource => {
+                    if (resource.id === resourceId) {
+                        return {
+                            ...resource,
+                            votes: response.data.votes,
+                            user_vote: response.data.user_vote
+                        };
+                    }
+                    return resource;
+                });
+                
+                // Sort the updated resources by votes
+                return updatedResources.sort((a, b) => (b.votes || 0) - (a.votes || 0));
             });
-            setResources(updatedResources);
+
+            // Update the stats after voting
             fetchStats();
         } catch (err) {
             console.error('Error voting:', err);
@@ -313,7 +323,9 @@ const CollectionDetailPage = () => {
                 {collection?.preview_image && (
                     <div className="header-background">
                         <img 
-                            src={collection.preview_image} 
+                            src={collection.preview_image.startsWith('http') 
+                                ? collection.preview_image 
+                                : `http://localhost:8000${collection.preview_image}`}
                             alt={collection.name}
                         />
                     </div>
@@ -340,137 +352,170 @@ const CollectionDetailPage = () => {
                             <span className="stat-label">VIEWS</span>
                         </div>
                     </div>
-                    <div className="collection-header">
-                        <div className="collection-info">
-                            <h2>{collection?.name}</h2>
-                            <p>{collection?.description}</p>
-                        </div>
-                        <div className="collection-actions">
-                            <button 
-                                onClick={handleSaveCollection}
-                                className={`save-button ${isSaved ? 'saved' : ''}`}
-                                title={isSaved ? 'Unsave Collection' : 'Save Collection'}
-                            >
-                                {isSaved ? '★' : '☆'}
-                            </button>
-                        </div>
-                    </div>
+                    <button 
+                        onClick={handleSaveCollection}
+                        className={`save-button ${isSaved ? 'saved' : ''}`}
+                        title={isSaved ? 'Unsave Collection' : 'Save Collection'}
+                    >
+                        {isSaved ? '★' : '☆'}
+                    </button>
                 </div>
             </div>
 
-            <div className="actions-container">
-                <div className="actions-wrapper">
-                    <button 
-                        className="actions-button"
-                        onClick={handleActionsClick}
-                        aria-label="Show actions menu"
-                    >
-                        ⋮
-                    </button>
-                    
-                    {showActionsMenu && (
-                        <div className="actions-menu" onClick={e => e.stopPropagation()}>
-                            <button onClick={() => {
-                                setShowAddResource(true);
-                                setShowActionsMenu(false);
-                            }}>
-                                Add Resource
+            <div className="content-wrapper">
+                <div className="actions-container">
+                    <div style={{ marginLeft: 'auto' }}>
+                        <button 
+                            className="add-resource-button"
+                            onClick={() => setShowAddResource(true)}
+                        >
+                            + Add Resource
+                        </button>
+                    </div>
+                </div>
+
+                {showAddResource && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <AddResourceForm
+                                categoryId={collectionId}
+                                onSuccess={(newResource) => {
+                                    setShowAddResource(false);
+                                    fetchResources();
+                                }}
+                                onClose={() => setShowAddResource(false)}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="resources">
+                    {resources.length === 0 ? (
+                        <div className="no-resources">
+                            <p>No resources yet. Add some!</p>
+                            <button 
+                                className="add-resource-button"
+                                onClick={() => setShowAddResource(true)}
+                            >
+                                + Add Resource
                             </button>
+                        </div>
+                    ) : (
+                        <div className="resources-grid">
+                            {resources.map(resource => {
+                                const isTopResource = resource.id === getTopResource(resources)?.id;
+                                return (
+                                    <div 
+                                        key={resource.id} 
+                                        className={`resource-list-item ${isTopResource ? 'top-resource' : ''}`}
+                                    >
+                                        {isTopResource && (
+                                            <div className="top-badge">
+                                                🏆 Community Favourite
+                                            </div>
+                                        )}
+                                        <div className="vote-section">
+                                            <button 
+                                                className={`vote-button upvote ${resource.user_vote === 'up' ? 'active' : ''}`}
+                                                onClick={() => handleVote(resource.id, 'up')}
+                                            >
+                                                ▲
+                                            </button>
+                                            <span className="vote-count">{resource.votes || 0}</span>
+                                            <button 
+                                                className={`vote-button downvote ${resource.user_vote === 'down' ? 'active' : ''}`}
+                                                onClick={() => handleVote(resource.id, 'down')}
+                                            >
+                                                ▼
+                                            </button>
+                                        </div>
+                                        <div className="resource-thumbnail">
+                                            <img 
+                                                src={previews[resource.id] || '/default-banner.jpg'}
+                                                alt={resource.title}
+                                                onError={(e) => {
+                                                    e.target.src = '/default-banner.jpg';
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="resource-details">
+                                            <h3 className="resource-title">{resource.title}</h3>
+                                            {resource.remark && (
+                                                <p className="resource-remarks">{resource.remark}</p>
+                                            )}
+                                            <a 
+                                                href={resource.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="visit-button"
+                                                onClick={() => handleVisit(resource.id)}
+                                            >
+                                                Visit Resource
+                                            </a>
+                                        </div>
+                                        <div className="resource-actions">
+                                            <button 
+                                                onClick={() => handleSaveResource(resource.id)}
+                                                className={`save-button ${savedResources.has(resource.id) ? 'saved' : ''}`}
+                                                title={savedResources.has(resource.id) ? 'Unsave Resource' : 'Save Resource'}
+                                            >
+                                                {savedResources.has(resource.id) ? '★' : '☆'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
             </div>
 
-            {showAddResource && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <AddResourceForm
-                            categoryId={collectionId}
-                            onSuccess={(newResource) => {
-                                setShowAddResource(false);
-                                fetchResources();
-                            }}
-                            onClose={() => setShowAddResource(false)}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Resources List */}
-            <div className="resources">
-                {resources.length === 0 ? (
-                    <p>No resources yet. Add some!</p>
-                ) : (
-                    <div className="resources-grid">
-                        {resources.map(resource => {
-                            const isTopResource = resource.id === getTopResource(resources)?.id;
-                            return (
-                                <div 
-                                    key={resource.id} 
-                                    className={`resource-list-item ${isTopResource ? 'top-resource' : ''}`}
-                                >
-                                    {isTopResource && (
-                                        <div className="top-badge">
-                                            🏆 Community Favourite
-                                        </div>
-                                    )}
-                                    <div className="vote-section">
-                                        <button 
-                                            className={`vote-button upvote ${resource.user_vote === 'up' ? 'active' : ''}`}
-                                            onClick={() => handleVote(resource.id, 'up')}
-                                        >
-                                            ▲
-                                        </button>
-                                        <span className="vote-count">{resource.votes || 0}</span>
-                                        <button 
-                                            className={`vote-button downvote ${resource.user_vote === 'down' ? 'active' : ''}`}
-                                            onClick={() => handleVote(resource.id, 'down')}
-                                        >
-                                            ▼
-                                        </button>
-                                    </div>
-                                    <div className="resource-thumbnail">
-                                        <img 
-                                            src={previews[resource.id] || '/default-banner.jpg'}
-                                            alt={resource.title}
-                                            onError={(e) => {
-                                                e.target.src = '/default-banner.jpg';
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="resource-details">
-                                        <h3 className="resource-title">{resource.title}</h3>
-                                        <a 
-                                            href={resource.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="visit-button"
-                                            onClick={() => handleVisit(resource.id)}
-                                        >
-                                            Visit Resource
-                                        </a>
-                                    </div>
-                                    <div className="resource-actions">
-                                        <button 
-                                            onClick={() => handleSaveResource(resource.id)}
-                                            className={`save-button ${savedResources.has(resource.id) ? 'saved' : ''}`}
-                                        >
-                                            {savedResources.has(resource.id) ? 'Unsave' : 'Save'}
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
             <style jsx>{`
+                .resource-page {
+                    margin-top: -70px; /* Adjust this value based on your navbar height */
+                }
+
                 .resource-header {
                     position: relative;
-                    height: 400px;  // Fixed height
+                    height: 400px;
                     overflow: hidden;
-                    border-radius: 12px;
-                    margin-bottom: 2rem;
+                    border-radius: 0; /* Remove border radius */
+                    margin: 0; /* Remove any margin */
+                }
+
+                .content-wrapper {
+                    position: relative;
+                    z-index: 2;
+                    padding: 0 2rem;
+                    margin-top: 0;
+                }
+
+                .save-button {
+                    position: absolute;
+                    top: 1rem;
+                    right: 1rem;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    color: white;
+                    transition: all 0.2s ease;
+                }
+
+                .save-button:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(1.05);
+                }
+
+                .save-button.saved {
+                    color: #ffd700;
+                    border-color: #ffd700;
                 }
 
                 .header-background {
@@ -524,11 +569,12 @@ const CollectionDetailPage = () => {
                     font-size: 0.9rem;
                     padding: 0.5rem;
                     opacity: 0.8;
-                    transition: opacity 0.2s;
+                    transition: all 0.2s;
                 }
 
                 .back-button:hover {
                     opacity: 1;
+                    background: #fa8072; /* Base coral */
                 }
 
                 .header-text {
@@ -656,6 +702,7 @@ const CollectionDetailPage = () => {
                     flex-grow: 1;
                     display: flex;
                     flex-direction: column;
+                    gap: 0.5rem;
                 }
 
                 .resource-title {
@@ -668,16 +715,19 @@ const CollectionDetailPage = () => {
                 .visit-button {
                     align-self: flex-start;
                     padding: 0.5rem 1rem;
-                    background: #007bff;
-                    color: white;
+                    background: white;
+                    color: #fa8072; /* Base coral */
+                    border: 1px solid #fa8072; /* Base coral border */
                     text-decoration: none;
                     border-radius: 4px;
                     font-size: 0.9rem;
-                    transition: background 0.2s ease;
+                    transition: all 0.2s;
                 }
 
                 .visit-button:hover {
-                    background: #0056b3;
+                    background: #ff9288; /* Lighter coral */
+                    color: white;
+                    border-color: #ff9288;
                 }
 
                 .vote-section {
@@ -758,9 +808,8 @@ const CollectionDetailPage = () => {
 
                 .actions-container {
                     display: flex;
-                    justify-content: flex-end;
-                    padding: 1rem 2rem;
-                    margin-top: -1rem;  // Pull it up slightly to overlap with banner
+                    padding: 1rem 0;
+                    margin-bottom: 2rem;
                 }
 
                 .actions-button {
@@ -838,47 +887,72 @@ const CollectionDetailPage = () => {
                     overflow-y: auto;
                 }
 
-                .collection-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-bottom: 2rem;
-                    padding: 1rem;
+                .add-resource-button {
                     background: white;
+                    color: #fa8072;
+                    border: 1px solid #fa8072;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .add-resource-button:hover {
+                    background: #ff9288;
+                    color: white;
+                    border-color: #ff9288;
+                }
+
+                .no-resources {
+                    text-align: center;
+                    padding: 3rem;
+                    background: #f8f9fa;
                     border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    margin: 2rem 0;
                 }
 
-                .collection-info {
-                    flex: 1;
+                .no-resources p {
+                    margin-bottom: 1.5rem;
+                    color: #666;
                 }
 
-                .collection-actions {
+                .resource-remarks {
+                    color: #666;
+                    font-size: 0.9rem;
+                    margin: 0.5rem 0 1rem 0;
+                    line-height: 1.4;
+                }
+
+                .resource-actions {
                     display: flex;
-                    gap: 1rem;
+                    align-items: flex-start;
+                    padding: 0.5rem;
                 }
 
-                .save-button {
+                .resource-actions .save-button {
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
                     background: white;
-                    border: 1px solid #eee;
+                    border: 1px solid #fa8072;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 24px;
-                    color: #666;
-                    transition: all 0.2s ease;
+                    color: #fa8072;
+                    transition: all 0.2s;
+                    position: relative;
                 }
 
-                .save-button:hover {
-                    transform: scale(1.05);
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                .resource-actions .save-button:hover {
+                    background: #ff9288;
+                    color: white;
+                    border-color: #ff9288;
                 }
 
-                .save-button.saved {
+                .resource-actions .save-button.saved {
                     color: #ffd700;
                     border-color: #ffd700;
                 }

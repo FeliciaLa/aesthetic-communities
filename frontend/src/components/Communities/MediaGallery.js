@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import FullscreenGallery from './FullscreenGallery';
+import MediaUploadForm from './MediaUploadForm';
 
-const MediaGallery = ({ communityId, isCreator }) => {
+const MediaGallery = ({ communityId, isCreator, onTabChange }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const scrollContainerRef = useRef(null);
+  const [showAddImage, setShowAddImage] = useState(false);
+  const [showGalleryView, setShowGalleryView] = useState(false);
 
   const displayImages = [...images, ...images, ...images, ...images, ...images, ...images];
 
@@ -103,31 +106,40 @@ const MediaGallery = ({ communityId, isCreator }) => {
         <div className="gallery-actions">
           <button 
             className="gallery-button"
-            onClick={() => setIsFullscreen(true)}
+            onClick={() => setShowAddImage(true)}
           >
-            View All Photos
+            +
           </button>
-          {isCreator && (
-            <div className="upload-container">
-              <label className="gallery-button" htmlFor="gallery-upload">
-                + Add Image
-              </label>
-              <input
-                id="gallery-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
-          )}
+          <button 
+            className="gallery-button"
+            onClick={() => onTabChange('gallery')}
+          >
+            All
+          </button>
         </div>
       </div>
 
+      {showAddImage && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <MediaUploadForm
+              communityId={communityId}
+              onSuccess={() => {
+                setShowAddImage(false);
+                fetchImages();
+              }}
+              onClose={() => setShowAddImage(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {images.length === 0 ? (
-        <div className="empty-gallery">
-          <p>No images in the gallery yet.</p>
-          {isCreator && <p>Click "Add Image" to upload your first image!</p>}
+        <div className="collection-placeholder">
+          <div className="placeholder-content">
+            <i className="far fa-folder"></i>
+            <p>No images in the gallery yet</p>
+          </div>
         </div>
       ) : (
         <div className="gallery-container">
@@ -159,14 +171,14 @@ const MediaGallery = ({ communityId, isCreator }) => {
         />
       )}
 
-      <style>{`
+      <style jsx>{`
         .section-container {
           background: white;
           border-radius: 12px;
           padding: 1.5rem;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           width: 100%;
-          margin: -1rem 0 0 0;
+          margin: 0;
           box-sizing: border-box;
           border: 1px solid #e0e0e0;
           height: 352px;
@@ -191,29 +203,39 @@ const MediaGallery = ({ communityId, isCreator }) => {
 
         .gallery-actions {
           display: flex;
-          gap: 1rem;
+          gap: 8px;
+          align-items: center;
         }
 
         .gallery-button {
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 0.9rem;
-          cursor: pointer;
+          padding: 4px 12px;
           background: white;
-          color: #0061ff;
-          border: 1px solid #0061ff;
-          transition: all 0.3s ease;
-          display: flex;
+          color: #fa8072;
+          border: 1px solid #fa8072;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          transform: translateY(0);
+          line-height: 1;
+          height: 32px;
+          width: auto;
+        }
+
+        /* Different font sizes for + and All buttons */
+        .gallery-button:first-child {
+          font-size: 1.2rem;  /* Larger size for the + button */
+        }
+
+        .gallery-button:last-child {
+          font-size: 0.85rem;  /* Smaller size for the All button, matching other sections */
         }
 
         .gallery-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 2px 8px rgba(0, 97, 255, 0.2);
-          background: #0061ff;
+          background: #ff9288;
           color: white;
+          border-color: #ff9288;
         }
 
         .gallery-container {
@@ -290,6 +312,52 @@ const MediaGallery = ({ communityId, isCreator }) => {
           margin: -1rem 0 0 0;
           box-sizing: border-box;
           border: 1px solid #e0e0e0;
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          width: 90%;
+          max-width: 500px;
+        }
+
+        .media-placeholder {
+          width: 100%;
+          height: 100%;
+          background: #f5f5f5;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .placeholder-content {
+          text-align: center;
+          color: #999;
+        }
+
+        .placeholder-content i {
+          font-size: 3rem;
+          margin-bottom: 1rem;
+        }
+
+        .placeholder-content p {
+          margin: 0;
+          font-size: 1rem;
         }
       `}</style>
     </div>
