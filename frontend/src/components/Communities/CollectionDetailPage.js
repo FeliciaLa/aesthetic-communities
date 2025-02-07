@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 import './CollectionDetailPage.css';
 import AddResourceForm from './AddResourceForm';
 
@@ -24,13 +24,7 @@ const CollectionDetailPage = () => {
 
     const fetchCollection = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/resources/categories/${collectionId}/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            const response = await api.get(`/resources/categories/${collectionId}/`);
             setCollection(response.data);
         } catch (err) {
             console.error('Error fetching collection:', err);
@@ -43,8 +37,8 @@ const CollectionDetailPage = () => {
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/resources/categories/${collectionId}/stats/`,
+            const response = await api.get(
+                `/resources/categories/${collectionId}/stats/`,
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }
@@ -59,8 +53,8 @@ const CollectionDetailPage = () => {
     const incrementCategoryViews = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(
-                `http://localhost:8000/api/resources/categories/${collectionId}/view/`,
+            await api.post(
+                `/resources/categories/${collectionId}/view/`,
                 {},
                 {
                     headers: { 'Authorization': `Token ${token}` }
@@ -75,8 +69,8 @@ const CollectionDetailPage = () => {
     const checkIfSaved = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                'http://localhost:8000/api/saved/collections/',
+            const response = await api.get(
+                '/saved/collections/',
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }
@@ -91,8 +85,8 @@ const CollectionDetailPage = () => {
     const checkSavedResources = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                'http://localhost:8000/api/saved/resources/',
+            const response = await api.get(
+                '/saved/resources/',
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }
@@ -120,7 +114,7 @@ const CollectionDetailPage = () => {
 
     const fetchResources = async () => {
         try {
-            const response = await api.get(`/resources/`, {
+            const response = await api.get('/resources/', {
                 params: { category_id: collectionId }
             });
             
@@ -157,8 +151,8 @@ const CollectionDetailPage = () => {
             // IMDB URL handling - removed since it's unreliable
             
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/preview/?url=${encodeURIComponent(url)}`,
+            const response = await api.get(
+                `/preview/?url=${encodeURIComponent(url)}`,
                 {
                     headers: { 
                         'Authorization': `Token ${token}`
@@ -255,8 +249,8 @@ const CollectionDetailPage = () => {
     const handleSaveCollection = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:8000/api/saved/${collectionId}/save_collection/`,
+            const response = await api.post(
+                `/saved/${collectionId}/save_collection/`,
                 {},
                 {
                     headers: { 'Authorization': `Token ${token}` }
@@ -273,8 +267,8 @@ const CollectionDetailPage = () => {
     const handleSaveResource = async (resourceId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:8000/api/saved/${resourceId}/save_resource/`,
+            const response = await api.post(
+                `/saved/${resourceId}/save_resource/`,
                 {},
                 {
                     headers: { 'Authorization': `Token ${token}` }

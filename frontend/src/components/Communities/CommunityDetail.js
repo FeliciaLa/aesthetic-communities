@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../../../api';
+import api from '../../api';
 import Modal from '../Common/Modal';
 import MediaGallery from './MediaGallery';
 import Resources from './Resources';
@@ -11,7 +11,7 @@ import JoinCommunityButton from './JoinCommunityButton';
 import AnnouncementsDashboard from './AnnouncementsDashboard';
 import RecommendedProducts from './RecommendedProducts';
 import GalleryView from './GalleryView';
-import MembersList from './MembersList';
+
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -101,7 +101,6 @@ const CommunityDetail = () => {
         if (!file) return;
 
         try {
-            const token = localStorage.getItem('token');
             const formData = new FormData();
             formData.append('image', file);
 
@@ -110,7 +109,6 @@ const CommunityDetail = () => {
                 formData,
                 {
                     headers: {
-                        'Authorization': `Token ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
                 }
@@ -122,13 +120,7 @@ const CommunityDetail = () => {
 
     const fetchImages = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await api.get(
-                `/communities/${id}/gallery/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            const response = await api.get(`/communities/${id}/gallery/`);
         } catch (err) {
             console.error('Error fetching images:', err);
         }
@@ -142,13 +134,7 @@ const CommunityDetail = () => {
 
     const handleImageDelete = async (imageId) => {
         try {
-            const token = localStorage.getItem('token');
-            await api.delete(
-                `/communities/${id}/gallery/${imageId}/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            await api.delete(`/communities/${id}/gallery/${imageId}/`);
         } catch (err) {
             console.error('Failed to delete image:', err);
         }

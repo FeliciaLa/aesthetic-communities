@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const AddResourceForm = ({ categoryId, onSuccess, onClose }) => {
     const [formData, setFormData] = useState({
@@ -16,23 +16,12 @@ const AddResourceForm = ({ categoryId, onSuccess, onClose }) => {
         setError(null);
 
         try {
-            const token = localStorage.getItem('token');
             const requestData = {
                 ...formData,
                 category: categoryId
             };
             
-            const response = await axios.post(
-                'http://localhost:8000/api/resources/',
-                requestData,
-                {
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
+            const response = await api.post('/resources/', requestData);
             onSuccess(response.data);
             onClose();
         } catch (err) {

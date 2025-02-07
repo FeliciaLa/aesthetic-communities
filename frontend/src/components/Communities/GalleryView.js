@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FullscreenGallery from './FullscreenGallery';
-import api from '../../../api';
+import api from '../../api';
 
 const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => {
     const [images, setImages] = useState([]);
@@ -12,12 +12,9 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
         const fetchImages = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    `http://localhost:8000/api/communities/${communityId}/gallery/`,
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
-                );
+                const response = await api.get(`/communities/${communityId}/gallery/`, {
+                    headers: { 'Authorization': `Token ${token}` }
+                });
                 setImages(response.data || []);
             } catch (error) {
                 console.error('Error fetching images:', error);
@@ -31,12 +28,9 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
         const fetchSavedImages = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    'http://localhost:8000/api/saved/images/',
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
-                );
+                const response = await api.get('/saved/images/', {
+                    headers: { 'Authorization': `Token ${token}` }
+                });
                 setSavedImages(new Set(response.data.map(item => item.image_id)));
             } catch (error) {
                 console.error('Error fetching saved images:', error);

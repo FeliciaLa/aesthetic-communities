@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const MediaUploadForm = ({ communityId, onSuccess, onClose }) => {
   const [file, setFile] = useState(null);
@@ -46,12 +46,11 @@ const MediaUploadForm = ({ communityId, onSuccess, onClose }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/communities/${communityId}/gallery/`,
+      await api.post(
+        `/communities/${communityId}/gallery/`,
         formData,
         {
           headers: {
-            'Authorization': `Token ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         }

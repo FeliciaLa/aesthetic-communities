@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const FullscreenGallery = ({ images, onClose, onDelete, isCreator, title }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -8,8 +8,8 @@ const FullscreenGallery = ({ images, onClose, onDelete, isCreator, title }) => {
   const handleSaveImage = async (imageId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:8000/api/saved/${imageId}/save_image/`,
+      const response = await api.post(
+        `/saved/${imageId}/save_image/`,
         {},
         {
           headers: { 
@@ -37,8 +37,8 @@ const FullscreenGallery = ({ images, onClose, onDelete, isCreator, title }) => {
     const fetchSavedImages = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(
-          'http://localhost:8000/api/saved/images/',
+        const response = await api.get(
+          '/saved/images/',
           {
             headers: { 'Authorization': `Token ${token}` }
           }

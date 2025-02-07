@@ -12,7 +12,7 @@ const EditCollectionForm = ({ collection, onSuccess, onClose }) => {
     collection.preview_image?.startsWith('http') 
       ? collection.preview_image 
       : collection.preview_image 
-        ? `http://localhost:8000${collection.preview_image}`
+        ? `${api.defaults.baseURL}${collection.preview_image}`
         : null
   );
   
