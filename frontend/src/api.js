@@ -15,15 +15,20 @@ const api = axios.create({
     }
 });
 
-// Add token to requests if it exists
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Token ${token}`;
+// Add a request interceptor to add the auth token
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Token ${token}`;
+        }
+        console.log('Making request to:', config.url, 'with headers:', config.headers); // Debug log
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-    console.log('Making request to:', config.url, 'with headers:', config.headers); // Debug log
-    return config;
-});
+);
 
 // Add response interceptor for debugging
 api.interceptors.response.use(

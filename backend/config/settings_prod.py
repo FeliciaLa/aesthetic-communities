@@ -32,14 +32,14 @@ ALLOWED_HOSTS = [
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Your local frontend
-    "https://aesthetic-communities-production.up.railway.app",  # Your Railway backend
-    "https://aesthetic-communities.vercel.app",  # Your Vercel frontend
-    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app",  # Add this
-    # Add any other domains you're using
+    "http://localhost:3000",
+    "https://aesthetic-communities-production.up.railway.app",
+    "https://aesthetic-communities.vercel.app",
+    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app"
 ]
+
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for debugging
+CORS_ALLOW_ALL_ORIGINS = False  # Change this to False
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -52,6 +52,10 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Add these settings
+CORS_EXPOSE_HEADERS = ['content-type', 'x-csrftoken']
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Database configuration
 DATABASES = {
