@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ChevronLeft, ChevronRight } from 'react-feather';
 import './RecommendedCommunities.css';
+import api from '../../api';
 
 const CarouselContainer = styled.div`
   position: relative;

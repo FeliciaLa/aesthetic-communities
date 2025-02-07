@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { DEFAULT_AVATAR } from '../Communities/CommunityFeed';
 import EditProfileModal from './EditProfileModal';
 import api from '../../api';
+import SavedItems from './SavedItems';
 
 const ProfileCard = styled.div`
   background: white;
