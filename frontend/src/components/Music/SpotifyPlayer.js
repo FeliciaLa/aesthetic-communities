@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { musicService } from '../../services/musicService';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import api from '../../api';
 
 const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [playlist, setPlaylist] = useState(null);
@@ -11,8 +10,8 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
     const fetchPlaylist = async () => {
         try {
-            const data = await musicService.getSpotifyPlaylist(communityId);
-            setPlaylist(data);
+            const response = await api.get(`/communities/${communityId}/spotify/`);
+            setPlaylist(response.data);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching playlist:', error);
@@ -44,20 +43,16 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         }
 
         try {
-            console.log('Submitting playlist:', {
-                communityId,
-                playlistId: playlist?.id,
-                url: cleanedUrl
-            });
-
             if (playlist?.id) {
-                await musicService.updateSpotifyPlaylist(
-                    communityId,
-                    playlist.id,
-                    cleanedUrl
+                await api.put(
+                    `/communities/${communityId}/spotify/${playlist.id}/`,
+                    { spotify_playlist_url: cleanedUrl }
                 );
             } else {
-                await musicService.setSpotifyPlaylist(communityId, cleanedUrl);
+                await api.post(
+                    `/communities/${communityId}/spotify/`,
+                    { spotify_playlist_url: cleanedUrl }
+                );
             }
 
             await fetchPlaylist();

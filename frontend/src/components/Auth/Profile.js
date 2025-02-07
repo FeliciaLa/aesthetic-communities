@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-import SavedItems from './SavedItems';
 import styled from 'styled-components';
 import { DEFAULT_AVATAR } from '../Communities/CommunityFeed';
 import EditProfileModal from './EditProfileModal';
-import api from '../../services/api';
+import api from '../../api';
 
 const ProfileCard = styled.div`
   background: white;
@@ -105,8 +103,8 @@ const Profile = () => {
     }
 
     try {
-        const response = await axios.patch(
-            'http://localhost:8000/api/profile/update/',
+        const response = await api.patch(
+            '/profile/update/',
             formData,
             {
                 headers: {
@@ -131,8 +129,8 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(
-          'http://localhost:8000/api/profile/update/',
+        const response = await api.get(
+          '/profile/update/',
           {
             headers: {
               'Authorization': `Token ${token}`

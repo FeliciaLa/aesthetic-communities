@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -28,8 +28,8 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
     }
 
     try {
-      const response = await axios.patch(
-        'http://localhost:8000/api/profile/update/',
+      const response = await api.patch(
+        '/profile/update/',
         data,
         {
           headers: {
