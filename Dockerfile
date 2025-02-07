@@ -22,5 +22,8 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings_prod
 ENV PORT=8000
 
-# Start command (no cd needed)
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} 
+# Add a health check
+HEALTHCHECK CMD curl --fail http://localhost:8000/ || exit 1
+
+# Run migrations and start with more verbose output
+CMD python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --log-level debug 

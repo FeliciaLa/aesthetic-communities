@@ -1,9 +1,9 @@
 from .settings import *
 import os
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['*']  # Be more specific in production
+# Basic settings
+DEBUG = True  # Temporarily set to True to see errors
+ALLOWED_HOSTS = ['*']
 
 # Database configuration
 DATABASES = {
@@ -18,11 +18,18 @@ DATABASES = {
 }
 
 # Security settings
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-secret-key')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
 
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Print environment variables for debugging (will be removed later)
+print("DATABASE SETTINGS:")
+print(f"NAME: {os.environ.get('PGDATABASE')}")
+print(f"USER: {os.environ.get('PGUSER')}")
+print(f"HOST: {os.environ.get('PGHOST')}")
+print(f"PORT: {os.environ.get('PGPORT')}")
 
 # CORS settings if needed
 CORS_ALLOW_ALL_ORIGINS = True  # Configure this properly for production
