@@ -1,23 +1,16 @@
 import axios from "axios";
 
-// Add console log to check environment
-console.log('Current NODE_ENV:', process.env.NODE_ENV);
+// Force production URL for Vercel deployment
+const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
 
-const baseURL = process.env.NODE_ENV === 'production'
-    ? 'https://aesthetic-communities-production.up.railway.app/api/'
-    : 'http://localhost:8000/api/';
-
-// Add console log to check baseURL
-console.log('Selected baseURL:', baseURL);
+console.log('Using baseURL:', baseURL);
 
 const api = axios.create({
     baseURL,
-    timeout: 5000,
-    withCredentials: true,  // Important for cookies/sessions
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Accept': 'application/json'
     }
 });
 
