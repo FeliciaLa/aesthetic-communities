@@ -1,5 +1,6 @@
 from .settings import *
 import os
+from decouple import config
 
 # Basic settings
 DEBUG = True  # Temporarily set to True to see errors
@@ -16,6 +17,14 @@ DATABASES = {
         'PORT': os.environ.get('PGPORT'),
     }
 }
+
+# Email settings with defaults
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Just log emails to console for now
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
 # Security settings
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
