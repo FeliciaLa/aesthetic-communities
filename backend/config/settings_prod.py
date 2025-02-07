@@ -35,9 +35,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your local frontend
     "https://aesthetic-communities-production.up.railway.app",  # Your Railway backend
     "https://aesthetic-communities.vercel.app",  # Your Vercel frontend
+    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app",  # Add this
     # Add any other domains you're using
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for debugging
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
     'accept',
