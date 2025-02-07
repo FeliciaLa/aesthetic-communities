@@ -22,5 +22,6 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings_prod
 ENV PORT=8000
 
-# Run migrations and start the application
-CMD /bin/sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:\$PORT" 
+# Start command
+ENTRYPOINT ["gunicorn"]
+CMD ["config.wsgi:application", "--bind", "0.0.0.0:8000"] 
