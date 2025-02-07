@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './ExploreCommunities.css';
-import axios from 'axios';
+import api from '../../api';  // Import our configured api instance
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'react-feather';
@@ -438,31 +438,23 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   const fetchCommunities = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { 'Authorization': `Token ${token}` } : {};
-      const baseURL = process.env.NODE_ENV === 'production'
-        ? 'https://aesthetic-communities-production.up.railway.app/api'
-        : 'http://localhost:8000/api';
-      
-      const response = await axios.get(
-        `${baseURL}/communities/`,
-        { headers }
-      );
+      setLoading(true);
+      const response = await api.get('/communities/');
       
       const communitiesWithFullUrls = response.data.map(community => ({
         ...community,
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `http://localhost:8000${community.banner_image}`
+            `${api.defaults.baseURL}${community.banner_image}`
           ) : null
       }));
 
       setCommunities(communitiesWithFullUrls);
-      setLoading(false);
     } catch (err) {
       console.error('Error fetching communities:', err);
       setError('Failed to fetch communities');
+    } finally {
       setLoading(false);
     }
   };
