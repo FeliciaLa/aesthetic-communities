@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './ExploreCommunities.css';
-import api from '../../../api';  // Verify this path
+import api from '../../../api';  // Make sure this path is correct
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'react-feather';
@@ -439,29 +439,29 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      // Add debug logs
+      // Add more detailed logging
+      console.log('Environment:', process.env.NODE_ENV);
       console.log('API instance:', api);
       console.log('API baseURL:', api.defaults.baseURL);
+      console.log('Making request to:', `${api.defaults.baseURL}/communities/`);
       
       const response = await api.get('/communities/');
-      console.log('Communities response:', response);
+      console.log('Response:', response);
       
       const communitiesWithFullUrls = response.data.map(community => ({
         ...community,
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `https://aesthetic-communities-production.up.railway.app/api${community.banner_image}`
+            `${api.defaults.baseURL}${community.banner_image}`
           ) : null
       }));
 
       setCommunities(communitiesWithFullUrls);
     } catch (err) {
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response,
-        config: err.config
-      });
+      console.error('Full error:', err);
+      console.error('Error config:', err.config);
+      console.error('Error response:', err.response);
       setError('Failed to fetch communities');
     } finally {
       setLoading(false);
@@ -469,6 +469,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   };
 
   const refreshCommunities = useCallback(() => {
+    console.log('Component mounted, fetching communities...'); // Debug log
     fetchCommunities();
   }, []);
 
