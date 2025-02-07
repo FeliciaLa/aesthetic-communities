@@ -8,20 +8,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set work directory
-WORKDIR /app/backend
-
-# Install pip first
-RUN python -m ensurepip && \
-    python -m pip install --upgrade pip setuptools wheel
-
-# Copy only requirements first
-COPY backend/requirements.txt /app/backend/
-
-# Install Python dependencies
-RUN pip install -r requirements.txt
+WORKDIR /app
 
 # Copy backend files
-COPY backend/ /app/backend/
+COPY backend/ .
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
