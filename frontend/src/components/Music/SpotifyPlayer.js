@@ -192,25 +192,28 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
             <style jsx>{`
                 .spotify-card {
                     background: white;
-                    border-radius: 12px;
+                    border-radius: 8px;
                     padding: 20px;
-                    margin: 0;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    width: 100%;
-                    box-sizing: border-box;
+                    margin-bottom: 20px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    height: auto;  /* Allow container to grow */
+                    min-height: 600px;  /* Minimum height to show playlist */
+                    display: flex;
+                    flex-direction: column;
                 }
 
-                h2 {
-                    margin: 0 0 1rem 0;
-                    font-size: 1.5rem;
-                    color: #333;
+                .spotify-embed {
+                    flex: 1;
+                    width: 100%;
+                    min-height: 500px;  /* Ensure enough space for playlist */
+                    margin-top: 15px;
                 }
 
                 .section-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
                 }
 
                 .edit-button, .add-playlist-button {

@@ -7,13 +7,8 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: white;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  background: transparent;
+  backdrop-filter: blur(8px);
   z-index: 1000;
 `;
 
@@ -21,7 +16,7 @@ const NavLeft = styled.div`
   .brand {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #0066cc;
+    color: #fa8072;
     text-decoration: none;
   }
 `;
@@ -32,36 +27,34 @@ const NavRight = styled.div`
   gap: 1.5rem;
 
   .nav-link {
-    color: #333;
+    color: #fa8072;
     text-decoration: none;
     font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
     transition: all 0.2s ease;
 
     &:hover {
-      background: #f0f7ff;
-      color: #0066cc;
+      background: rgba(250, 128, 114, 0.1);
     }
 
     &.active {
-      background: #0066cc;
+      background: #fa8072;
       color: white;
     }
   }
 
   .logout-button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #0066cc;
-    border-radius: 4px;
+    padding: 0.5rem 1.5rem;
+    border: 1px solid #fa8072;
+    border-radius: 20px;
     background: transparent;
-    color: #0066cc;
+    color: #fa8072;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-      background: #0066cc;
-      color: white;
+      background: rgba(250, 128, 114, 0.1);
     }
   }
 `;

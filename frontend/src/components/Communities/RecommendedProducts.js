@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './RecommendedProducts.css';
 import AddProductModal from './AddProductModal';
 
-const RecommendedProducts = ({ communityId, isCreator }) => {
+const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [products, setProducts] = useState([]);
     const [catalogues, setCatalogues] = useState([]);
     const [activeCatalogue, setActiveCatalogue] = useState('all');
@@ -137,42 +138,76 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
 
     const ProductCard = ({ product }) => {
         const [imageUrl, setImageUrl] = useState(null);
+        const [loading, setLoading] = useState(true);
 
         useEffect(() => {
             const fetchPreview = async () => {
+                if (!product.url) {
+                    setLoading(false);
+                    return;
+                }
+
                 try {
-                    // First try client-side extraction
-                    const response = await fetch(product.url);
-                    const text = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-                    
-                    // Try to find meta og:image first
-                    let img = doc.querySelector('meta[property="og:image"]');
-                    if (img) {
-                        setImageUrl(img.getAttribute('content'));
-                        return;
-                    }
-
-                    // If client-side fails, try server-side proxy
-                    const token = localStorage.getItem('token');
-                    const proxyResponse = await axios.get(
-                        `http://localhost:8000/api/url-preview/`,
-                        {
-                            params: { url: product.url },
-                            headers: { 'Authorization': `Token ${token}` }
+                    // Special handling for known domains
+                    if (product.url.includes('youtube.com') || product.url.includes('youtu.be')) {
+                        const videoId = product.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
+                        if (videoId) {
+                            setImageUrl(`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
+                            setLoading(false);
+                            return;
                         }
-                    );
-
-                    if (proxyResponse.data.image_url) {
-                        setImageUrl(proxyResponse.data.image_url);
-                    } else {
-                        setImageUrl('/default-product.jpg');
                     }
+
+                    // Try multiple approaches to get the image
+                    const token = localStorage.getItem('token');
+                    let attempts = [
+                        // First attempt: Direct preview API
+                        async () => {
+                            const response = await axios.get(
+                                `http://localhost:8000/api/preview/?url=${encodeURIComponent(product.url)}`,
+                                {
+                                    headers: { 'Authorization': `Token ${token}` }
+                                }
+                            );
+                            return response.data.image;
+                        },
+                        // Second attempt: Try metadata API
+                        async () => {
+                            const response = await axios.post(
+                                `http://localhost:8000/api/products/fetch-metadata/`,
+                                { url: product.url },
+                                {
+                                    headers: {
+                                        'Authorization': `Token ${token}`,
+                                        'Content-Type': 'application/json'
+                                    }
+                                }
+                            );
+                            return response.data.image_url;
+                        }
+                    ];
+
+                    for (let attempt of attempts) {
+                        try {
+                            const image = await attempt();
+                            if (image) {
+                                setImageUrl(image);
+                                setLoading(false);
+                                return;
+                            }
+                        } catch (err) {
+                            console.log('Attempt failed, trying next method...');
+                        }
+                    }
+
+                    // If all attempts fail, set default image
+                    setImageUrl('/default-product.jpg');
 
                 } catch (err) {
                     console.error('Error fetching image:', err);
                     setImageUrl('/default-product.jpg');
+                } finally {
+                    setLoading(false);
                 }
             };
 
@@ -181,96 +216,113 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
 
         return (
             <div className="product-card">
-                <div className="product-image">
-                    <img 
-                        src={imageUrl || '/default-product.jpg'} 
-                        alt={product.title}
-                        onError={(e) => {
-                            e.target.src = '/default-product.jpg';
-                        }}
-                    />
-                    <div className="product-actions">
-                        <button 
-                            className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Save button clicked for product:', product.id); // Debug log
-                                handleSaveProduct(product.id);
-                            }}
-                            title={savedProducts.has(product.id) ? 'Unsave' : 'Save'}
-                        >
-                            {savedProducts.has(product.id) ? '★' : '☆'}
-                        </button>
-                    </div>
+                <div className="product-image-container">
+                    {loading ? (
+                        <div className="product-image-placeholder">
+                            <div className="loading-spinner"></div>
+                        </div>
+                    ) : imageUrl ? (
+                        <img 
+                            src={imageUrl} 
+                            alt={product.title} 
+                            className="product-image"
+                            onError={() => setImageUrl('/default-product.jpg')}
+                        />
+                    ) : (
+                        <div className="product-image-placeholder">
+                            No image available
+                        </div>
+                    )}
                 </div>
-                <h3>{product.title}</h3>
-                <span className="catalogue-tag">{product.catalogue_name}</span>
-                {product.comment && (
-                    <p className="product-comment">{product.comment}</p>
-                )}
-                <a 
-                    href={product.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="view-product-button"
-                >
-                    View Product
-                </a>
+                <div className="product-info">
+                    <h3>{product.title}</h3>
+                    <p className="product-category">{product.catalogue_name}</p>
+                    {product.comment && (
+                        <p className="product-description">{product.comment}</p>
+                    )}
+                    <a 
+                        href={product.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="view-product-button"
+                    >
+                        View Product
+                    </a>
+                </div>
             </div>
         );
+    };
+
+    const handleAllClick = () => {
+        setActiveCatalogue('all');
+        if (onTabChange) {
+            onTabChange('products');
+        }
     };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
 
     return (
-        <div className="recommended-products">
-            <div className="products-header">
-                <h3>Recommended Products</h3>
-                {isCreator && (
-                    <button 
-                        onClick={() => setShowAddProduct(true)}
-                        className="add-product-button"
-                    >
-                        Add Product
-                    </button>
+        <div style={{ padding: '0 0 2rem 0' }}>
+            <div className="recommended-products">
+                <div className="products-header">
+                    <h3>Recommended Products</h3>
+                    <div className="header-buttons">
+                        {isCreator && (
+                            <button 
+                                className="add-product-button"
+                                onClick={() => setShowAddProduct(true)}
+                            >
+                                +
+                            </button>
+                        )}
+                        <button 
+                            className="all-button"
+                            onClick={handleAllClick}
+                        >
+                            All
+                        </button>
+                    </div>
+                </div>
+
+                <div className="catalogue-tabs">
+                    {catalogues.map(catalogue => (
+                        <button
+                            key={catalogue}
+                            className={`tab ${activeCatalogue === catalogue ? 'active' : ''}`}
+                            onClick={() => setActiveCatalogue(catalogue)}
+                        >
+                            {catalogue}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="products-grid">
+                    {products.length === 0 ? (
+                        <div className="product-placeholder">
+                            <div className="placeholder-content">
+                                <i className="fas fa-box"></i>
+                                <p>No products added yet</p>
+                            </div>
+                        </div>
+                    ) : (
+                        products
+                            .filter(product => activeCatalogue === 'all' || product.catalogue_name === activeCatalogue)
+                            .map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))
+                    )}
+                </div>
+
+                {showAddProduct && (
+                    <AddProductModal
+                        catalogues={catalogues}
+                        onSubmit={handleAddProduct}
+                        onClose={() => setShowAddProduct(false)}
+                    />
                 )}
             </div>
-
-            <div className="catalogue-tabs">
-                <button
-                    className={`tab ${activeCatalogue === 'all' ? 'active' : ''}`}
-                    onClick={() => setActiveCatalogue('all')}
-                >
-                    All
-                </button>
-                {catalogues.map(catalogue => (
-                    <button
-                        key={catalogue}
-                        className={`tab ${activeCatalogue === catalogue ? 'active' : ''}`}
-                        onClick={() => setActiveCatalogue(catalogue)}
-                    >
-                        {catalogue}
-                    </button>
-                ))}
-            </div>
-
-            <div className="products-grid">
-                {products
-                    .filter(product => activeCatalogue === 'all' || product.catalogue_name === activeCatalogue)
-                    .map(product => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
-            </div>
-
-            {showAddProduct && (
-                <AddProductModal
-                    catalogues={catalogues}
-                    onSubmit={handleAddProduct}
-                    onClose={() => setShowAddProduct(false)}
-                />
-            )}
 
             <style jsx>{`
                 .recommended-products {
@@ -288,7 +340,7 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 1rem;
+                    margin-bottom: 0.1rem;
                 }
 
                 .products-header h3 {
@@ -360,38 +412,52 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
                 }
 
                 .product-card {
-                    min-width: 250px;
-                    flex: 0 0 auto;
+                    background: white;
+                    border-radius: 8px;
+                    padding: 1rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    position: relative;
+                }
+
+                .product-image-container {
+                    width: 100%;
+                    height: 200px;
+                    background: #f5f5f5;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
                 }
 
                 .product-image {
                     width: 100%;
-                    height: 200px;
-                    overflow: hidden;
-                    border-radius: 8px;
-                    margin-bottom: 1rem;
-                    position: relative;
-                }
-
-                .product-image img {
-                    width: 100%;
                     height: 100%;
                     object-fit: cover;
-                    transition: transform 0.3s ease;
                 }
 
-                .product-card:hover .product-image img {
-                    transform: scale(1.05);
+                .product-image-placeholder {
+                    color: #999;
+                    font-size: 0.9rem;
                 }
 
-                .product-card {
-                    border: 1px solid #eee;
-                    border-radius: 8px;
-                    padding: 1rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                    transition: box-shadow 0.3s ease;
+                .placeholder-content {
+                    text-align: center;
+                    color: #999;
+                }
+
+                .placeholder-content i {
+                    font-size: 3rem;
+                    margin-bottom: 1rem;
+                }
+
+                .placeholder-content p {
+                    margin: 0;
+                    font-size: 1rem;
+                }
+
+                .product-info {
+                    margin-top: 1rem;
                 }
 
                 .product-card:hover {
@@ -422,13 +488,12 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
 
                 .view-product-button {
                     display: inline-block;
-                    padding: 0.5rem 1rem;
+                    padding: 8px 16px;
                     background: #0061ff;
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
-                    text-align: center;
-                    margin-top: auto;
+                    margin-top: 1rem;
                 }
 
                 .error-message {
@@ -473,6 +538,20 @@ const RecommendedProducts = ({ communityId, isCreator }) => {
 
                 .save-button.saved {
                     color: #ffd700;
+                }
+
+                .loading-spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 3px solid #f3f3f3;
+                    border-top: 3px solid #0061ff;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
             `}</style>
         </div>

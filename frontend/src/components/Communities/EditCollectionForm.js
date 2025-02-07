@@ -7,7 +7,15 @@ const EditCollectionForm = ({ collection, onSuccess, onClose }) => {
     description: collection.description,
     preview_image: null
   });
-  const [previewUrl, setPreviewUrl] = useState(collection.preview_image);
+  
+  const [previewUrl, setPreviewUrl] = useState(
+    collection.preview_image?.startsWith('http') 
+      ? collection.preview_image 
+      : collection.preview_image 
+        ? `http://localhost:8000${collection.preview_image}`
+        : null
+  );
+  
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 

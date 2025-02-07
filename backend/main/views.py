@@ -75,6 +75,7 @@ import logging
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+import json
 
 User = get_user_model()
 
@@ -731,35 +732,64 @@ def get_page_preview(request):
         return JsonResponse({'error': 'URL parameter is required'}, status=400)
         
     try:
+        # Add more headers to mimic a real browser
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Referer': 'https://www.google.com/',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+            'Cache-Control': 'max-age=0',
         }
-        response = requests.get(url, headers=headers, timeout=5)
+        
+        response = requests.get(url, headers=headers, timeout=10, verify=False)
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Try different meta tags for image
+        # Try multiple methods to find image
         image_url = None
         
-        # Try OpenGraph image
-        og_image = soup.find('meta', property='og:image')
-        if og_image:
-            image_url = og_image.get('content')
-            
-        # Try Twitter image
+        # Method 1: OpenGraph
+        if not image_url:
+            og_image = soup.find('meta', property='og:image')
+            if og_image:
+                image_url = og_image.get('content')
+        
+        # Method 2: Twitter Card
         if not image_url:
             twitter_image = soup.find('meta', property='twitter:image')
             if twitter_image:
                 image_url = twitter_image.get('content')
         
-        # Try regular image
+        # Method 3: Schema.org
         if not image_url:
-            img_tag = soup.find('img')
-            if img_tag:
-                image_url = img_tag.get('src')
-                if image_url:
-                    image_url = urljoin(url, image_url)
+            schema = soup.find('script', type='application/ld+json')
+            if schema:
+                try:
+                    data = json.loads(schema.string)
+                    image_url = data.get('image')
+                except:
+                    pass
         
+        # Method 4: First large image
+        if not image_url:
+            images = soup.find_all('img')
+            for img in images:
+                src = img.get('src')
+                if src and (src.endswith('.jpg') or src.endswith('.png')):
+                    image_url = src
+                    break
+        
+        if image_url:
+            # Ensure absolute URL
+            image_url = urljoin(url, image_url)
+            
         return JsonResponse({'image': image_url})
+        
     except Exception as e:
         print(f"Error fetching preview for {url}: {str(e)}")
         return JsonResponse({'error': str(e)}, status=400)
@@ -1219,29 +1249,20 @@ def get_url_preview(request):
         og_image = soup.find('meta', property='og:image')
         if og_image:
             image_url = og_image.get('content')
-        
+            
         # Check Twitter
         if not image_url:
-            twitter_image = soup.find('meta', {'name': 'twitter:image'})
+            twitter_image = soup.find('meta', property='twitter:image')
             if twitter_image:
                 image_url = twitter_image.get('content')
         
-        # Find first meaningful image
+        # Try regular image
         if not image_url:
-            images = soup.find_all('img')
-            for img in images:
-                src = img.get('src')
-                if src and not re.search(r'(icon|logo|button|banner)', src, re.I):
-                    # Check if image is large enough (skip tiny images)
-                    width = img.get('width')
-                    height = img.get('height')
-                    if width and height and int(width) > 100 and int(height) > 100:
-                        image_url = src
-                        break
-        
-        # Make relative URLs absolute
-        if image_url and not image_url.startswith(('http://', 'https://')):
-            image_url = urljoin(url, image_url)
+            img_tag = soup.find('img')
+            if img_tag:
+                image_url = img_tag.get('src')
+                if image_url:
+                    image_url = urljoin(url, image_url)
         
         return Response({
             'image_url': image_url
@@ -1588,14 +1609,16 @@ class PasswordResetView(APIView):
     
     def post(self, request):
         email = request.data.get('email')
-        logger.info(f"Password reset requested for email: {email}")
+        print(f"DEBUG: Received password reset request for email: {email}")  # Add this line
         
         try:
             user = User.objects.get(email=email)
+            print(f"DEBUG: Found user: {user.username}")  # Add this line
             token = default_token_generator.make_token(user)
             reset_url = f"{settings.FRONTEND_URL}/reset-password/{user.id}/{token}"
             
-            logger.info(f"Generated reset URL: {reset_url}")
+            print(f"DEBUG: Reset URL generated: {reset_url}")  # Add this line
+            print(f"DEBUG: Email settings - HOST:{settings.EMAIL_HOST}, PORT:{settings.EMAIL_PORT}, USER:{settings.EMAIL_HOST_USER}")  # Add this line
             
             try:
                 send_mail(
@@ -1605,23 +1628,23 @@ class PasswordResetView(APIView):
                     [email],
                     fail_silently=False,
                 )
-                logger.info("Password reset email sent successfully")
+                print("DEBUG: Email sent successfully")  # Add this line
+                return Response({'message': 'Password reset email sent'})
             except Exception as mail_error:
-                logger.error(f"Failed to send email: {str(mail_error)}")
+                print(f"DEBUG: Email error: {str(mail_error)}")  # Add this line
                 return Response(
-                    {'error': 'Failed to send email'},
+                    {'error': f'Failed to send email: {str(mail_error)}'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
-            return Response({'message': 'Password reset email sent'})
         except User.DoesNotExist:
-            logger.warning(f"No user found with email: {email}")
+            print(f"DEBUG: No user found with email: {email}")  # Add this line
             return Response(
                 {'error': 'No user found with this email address'},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            logger.error(f"Password reset error: {str(e)}")
+            print(f"DEBUG: Unexpected error: {str(e)}")  # Add this line
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST

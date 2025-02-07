@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
+import { authService } from "../../services/authService";
 
 const Container = styled.div`
   display: flex;
@@ -64,12 +65,9 @@ const PasswordReset = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:8000/api/password-reset/", {
-        email
-      });
-      
-      if (response.data.message) {
-        navigate("/login", { 
+      const response = await authService.requestPasswordReset(email);
+      if (response.message) {
+        navigate("/", { 
           state: { message: "Password reset instructions sent to your email." }
         });
       }

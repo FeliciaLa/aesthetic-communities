@@ -2,6 +2,69 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import SavedItems from './SavedItems';
+import styled from 'styled-components';
+import { DEFAULT_AVATAR } from '../Communities/CommunityFeed';
+import EditProfileModal from './EditProfileModal';
+
+const ProfileCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+
+  .profile-info {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+    background: #f0f0f0;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .edit-profile-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #FF7F6F;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #ff9288;
+    }
+  }
+
+  .hubs-section {
+    text-align: left;
+    margin-bottom: 2rem;
+    border: none;
+  }
+
+  .communities-content,
+  .communities-grid,
+  .empty-community {
+    border: none;
+  }
+`;
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -13,6 +76,12 @@ const Profile = () => {
   const [bio, setBio] = useState('');
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [activeCommunitiesTab, setActiveCommunitiesTab] = useState('joined');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [activeSavedTab, setActiveSavedTab] = useState('images');
+  const [savedImages, setSavedImages] = useState([]);
+  const [savedResources, setSavedResources] = useState([]);
+  const [savedProducts, setSavedProducts] = useState([]);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
@@ -69,6 +138,12 @@ const Profile = () => {
             }
           }
         );
+        
+        // Make sure the avatar URL is complete when loading profile
+        if (response.data.avatar && !response.data.avatar.startsWith('http')) {
+          response.data.avatar = `http://localhost:8000${response.data.avatar}`;
+        }
+        
         setProfile(response.data);
         setBio(response.data.bio || '');
         setLoading(false);
@@ -138,361 +213,312 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <div className="profile-header">
-        <div className="profile-avatar-section">
-          <div className="profile-avatar-container">
-            {previewImage || profile?.avatar ? (
-              <img 
-                src={previewImage || profile.avatar} 
-                alt={profile.username} 
-                className="profile-avatar"
-              />
-            ) : (
-              <div className="default-avatar">
-                {profile?.username?.[0]?.toUpperCase()}
-              </div>
-            )}
-            {editMode && (
-              <label className="change-photo-button">
-                <input
-                  type="file"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  style={{ display: 'none' }}
+      <div className="profile-layout">
+        <ProfileCard>
+          <div className="profile-info">
+            <div className="profile-avatar">
+              {previewImage || profile?.avatar ? (
+                <img 
+                  src={previewImage || profile.avatar} 
+                  alt={profile.username}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = DEFAULT_AVATAR;
+                  }}
                 />
-                <span>Change Photo</span>
-              </label>
-            )}
-          </div>
-        </div>
-        <h1 className="profile-username">{profile?.username}</h1>
-        <button 
-          className="edit-profile-btn"
-          onClick={() => setEditMode(!editMode)}
-        >
-          {editMode ? 'Cancel' : 'Edit Profile'}
-        </button>
-      </div>
-      
-      <div className="profile-content">
-        <div className="profile-card">
-          <h2>Profile Information</h2>
-          {editMode ? (
-            <form onSubmit={handleSubmit} className="edit-form">
-              <div className="form-group">
-                <label>Bio</label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us about yourself..."
-                  maxLength={500}
-                />
-              </div>
-              <button type="submit" className="save-btn">Save Changes</button>
-            </form>
-          ) : (
-            <div className="profile-info">
-              <div className="info-group">
-                <label>Bio</label>
-                <p>{profile.bio || 'No bio provided'}</p>
-              </div>
-              <div className="info-group">
-                <label>Username</label>
-                <p>{profile.username}</p>
-              </div>
-              <div className="info-group">
-                <label>Email</label>
-                <p>{profile.email || 'No email provided'}</p>
-              </div>
-              <div className="info-group">
-                <label>Member Since</label>
-                <p>{profile.date_joined ? new Date(profile.date_joined).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }) : 'Not available'}</p>
-              </div>
+              ) : (
+                <img src={DEFAULT_AVATAR} alt="Default profile" />
+              )}
             </div>
-          )}
-        </div>
+            <h1>{profile?.username}</h1>
+            <p>{profile?.bio || "Hi, I'm " + profile?.username + "!"}</p>
+            <button 
+              onClick={() => setShowEditModal(true)} 
+              className="edit-profile-button"
+            >
+              Edit Profile
+            </button>
+          </div>
 
-        <div className="communities-section">
-          <div className="profile-card">
-            <h2>Your Communities</h2>
-            <div className="communities-grid">
-              <div className="communities-column">
-                <h3>Created Communities</h3>
-                {createdCommunities.length === 0 ? (
-                  <p className="empty-message">No communities created yet</p>
-                ) : (
-                  createdCommunities.map(community => (
-                    <Link 
-                      to={`/communities/${community.id}`} 
-                      key={community.id}
-                      className="community-card"
-                    >
-                      {community.banner_image && (
-                        <img 
-                          src={community.banner_image} 
-                          alt={community.name} 
-                          className="community-banner"
-                        />
-                      )}
-                      <div className="community-info">
-                        <h4>{community.name}</h4>
+          <div className="hubs-section">
+            <h2>Your Hubs</h2>
+            <div className="tabs">
+              <button 
+                className={`tab ${activeCommunitiesTab === 'joined' ? 'active' : ''}`}
+                onClick={() => setActiveCommunitiesTab('joined')}
+              >
+                Joined
+              </button>
+              <button 
+                className={`tab ${activeCommunitiesTab === 'created' ? 'active' : ''}`}
+                onClick={() => setActiveCommunitiesTab('created')}
+              >
+                Created
+              </button>
+            </div>
+
+            <div className="communities-content">
+              {activeCommunitiesTab === 'joined' && (
+                <div className="communities-grid">
+                  {joinedCommunities?.length === 0 ? (
+                    <div className="empty-community">
+                      <h3>No hubs joined yet</h3>
+                      <p>Join hubs to connect with others and share inspiration</p>
+                      <Link to="/communities" className="explore-button">
+                        Explore Hubs
+                      </Link>
+                    </div>
+                  ) : (
+                    joinedCommunities?.map(community => (
+                      <Link 
+                        to={`/communities/${community.id}`} 
+                        key={community.id}
+                        className="community-card"
+                      >
+                        <h3>{community.name}</h3>
                         <p>{community.description}</p>
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-              
-              <div className="communities-column">
-                <h3>Joined Communities</h3>
-                {joinedCommunities.length === 0 ? (
-                  <p className="empty-message">No communities joined yet</p>
-                ) : (
-                  joinedCommunities.map(community => (
-                    <Link 
-                      to={`/communities/${community.id}`} 
-                      key={community.id}
-                      className="community-card"
-                    >
-                      {community.banner_image && (
-                        <img 
-                          src={community.banner_image} 
-                          alt={community.name} 
-                          className="community-banner"
-                        />
-                      )}
-                      <div className="community-info">
-                        <h4>{community.name}</h4>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeCommunitiesTab === 'created' && (
+                <div className="communities-grid">
+                  {createdCommunities?.length === 0 ? (
+                    <div className="empty-community">
+                      <h3>No hubs created yet</h3>
+                      <p>Create your first hub to connect with others</p>
+                      <Link to="/create-community" className="create-button">
+                        Create Hub
+                      </Link>
+                    </div>
+                  ) : (
+                    createdCommunities?.map(community => (
+                      <Link 
+                        to={`/communities/${community.id}`} 
+                        key={community.id}
+                        className="community-card"
+                      >
+                        <h3>{community.name}</h3>
                         <p>{community.description}</p>
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
-        <SavedItems />
+          <div className="saved-items-section">
+            <SavedItems /> 
+          </div>
+        </ProfileCard>
       </div>
+
+      {showEditModal && (
+        <EditProfileModal
+          show={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          profile={profile}
+          onSuccess={(updatedProfile) => {
+            setProfile(updatedProfile);
+            setShowEditModal(false);
+          }}
+        />
+      )}
 
       <style jsx>{`
         .profile-container {
-          min-height: calc(100vh - 64px); /* Adjust for navbar height */
+          min-height: calc(100vh - 64px);
           background-color: #f5f5f5;
+          padding: 2rem;
         }
 
-        .profile-header {
-          background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
-          color: white;
-          padding: 80px 20px;
-          text-align: center;
-          position: relative;
-        }
-
-        .profile-avatar-section {
-          position: relative;
-          margin-bottom: 20px;
-        }
-
-        .profile-avatar-container {
-          position: relative;
-          width: 150px;
-          height: 150px;
-          margin: 0 auto;
-          border-radius: 50%;
-          overflow: hidden;
-          background: #f0f2f5;
-        }
-
-        .profile-avatar {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .default-avatar {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 48px;
-          color: #666;
-          background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-        }
-
-        .change-photo-button {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 8px 0;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: center;
-        }
-
-        .change-photo-button:hover {
-          background: rgba(0, 0, 0, 0.8);
-        }
-
-        .profile-username {
-          font-size: 24px;
-          font-weight: 600;
-          margin: 15px 0;
-          color: #333;
-        }
-
-        .edit-profile-btn {
-          background: #0061ff;
-          color: white;
-          border: none;
-          padding: 8px 20px;
-          border-radius: 20px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: background-color 0.2s ease;
-        }
-
-        .edit-profile-btn:hover {
-          background: #0056e0;
-        }
-
-        .profile-content {
+        .profile-layout {
           max-width: 800px;
-          margin: -60px auto 0;
-          padding: 20px;
-          position: relative;
-          z-index: 1;
+          margin: 0 auto;
+          padding: 2rem;
         }
 
         .profile-card {
+          width: 100%;
+          min-width: 0;
+          height: 100%;
+        }
+
+        .content-card {
           background: white;
           border-radius: 12px;
-          padding: 30px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          padding: 2rem;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
         }
 
-        .profile-info {
-          margin-top: 30px;
-        }
-
-        .info-group {
-          margin-bottom: 25px;
-        }
-
-        .info-group:last-child {
-          margin-bottom: 0;
-        }
-
-        .info-group label {
-          display: block;
-          color: #666;
-          font-size: 0.9rem;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .info-group p {
-          color: #333;
-          font-size: 1.1rem;
-          margin: 0;
-          font-weight: 500;
-        }
-
-        h1 {
-          margin: 0;
-          font-size: 2.5rem;
-          font-weight: 600;
-        }
-
-        h2 {
-          margin: 0;
-          color: #333;
+        .content-card h2 {
           font-size: 1.5rem;
-          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
         }
 
-        .profile-loading, .profile-error {
-          text-align: center;
-          padding: 40px;
-          font-size: 1.2rem;
+        .tabs {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 1rem;
         }
 
-        .profile-error {
-          color: #dc3545;
+        .tab {
+          padding: 0.5rem 1.5rem;
+          border: none;
+          background: none;
+          cursor: pointer;
+          color: #666;
+          border-bottom: 2px solid transparent;
+          transition: all 0.3s ease;
+          outline: none;
         }
 
-        .communities-section {
-          margin-top: 20px;
+        .tab:focus {
+          outline: none;
+          box-shadow: none;
+        }
+
+        .tab.active {
+          background-color: #FF7F6F;
+          color: white !important;
+          border-radius: 20px;
+          border-bottom: none;
+        }
+
+        .tab:hover {
+          background-color: #FF7F6F;
+          color: white;
         }
 
         .communities-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          margin-top: 20px;
-        }
-
-        .communities-column h3 {
-          color: #333;
-          margin-bottom: 15px;
-          font-size: 1.2rem;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1.5rem;
         }
 
         .community-card {
-          display: block;
-          text-decoration: none;
-          background: #f8f9fa;
+          background: white;
+          border: 1px solid #eee;
           border-radius: 8px;
-          overflow: hidden;
-          margin-bottom: 15px;
-          transition: transform 0.2s;
+          padding: 1.5rem;
+          text-decoration: none;
+          color: inherit;
+          transition: transform 0.2s ease;
         }
 
         .community-card:hover {
           transform: translateY(-2px);
-        }
-
-        .community-banner {
-          width: 100%;
-          height: 100px;
-          object-fit: cover;
-        }
-
-        .community-info {
-          padding: 12px;
-        }
-
-        .community-info h4 {
-          margin: 0;
-          color: #333;
-          font-size: 1.1rem;
-        }
-
-        .community-info p {
-          margin: 5px 0 0;
-          color: #666;
-          font-size: 0.9rem;
-          line-height: 1.4;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .empty-message {
-          color: #666;
-          font-style: italic;
           text-align: center;
-          padding: 20px;
-          background: #f8f9fa;
+          color: #666;
+          padding: 0.5rem;
+        }
+
+        .empty-community {
+          text-align: center;
+          border: 1px dashed #eee;
+          background: #fafafa;
+          padding: 2rem;
           border-radius: 8px;
+        }
+
+        .empty-community h3 {
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+
+        .empty-community p {
+          color: #666;
+          margin-bottom: 1.5rem;
+        }
+
+        .explore-button {
+          display: inline-block;
+          padding: 0.5rem 1.5rem;
+          background: #FF7F6F;
+          color: white;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+
+        .explore-button:hover {
+          background: #ff9288;
+        }
+
+        .create-button {
+          display: inline-block;
+          padding: 0.5rem 1.5rem;
+          background: #FF7F6F;
+          color: white;
+          text-decoration: none;
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+
+        .create-button:hover {
+          background: #ff9288;
+        }
+
+        .empty-saved {
+          text-align: center;
+          border: 1px dashed #eee;
+          background: #fafafa;
+          padding: 2rem;
+          border-radius: 8px;
+          margin: 1rem;
+        }
+
+        .empty-saved h3 {
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+
+        .empty-saved p {
+          color: #666;
+          margin-bottom: 1.5rem;
+        }
+
+        .saved-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .tabs {
+          display: flex;
+          border-bottom: 1px solid #eee;
+          margin-bottom: 1rem;
+        }
+
+        .tab {
+          padding: 0.5rem 1rem;
+          border: none;
+          background: none;
+          cursor: pointer;
+          color: #666;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s ease;
+        }
+
+        .tab.active {
+          color: #FF7F6F;
+          border-bottom-color: #FF7F6F;
+        }
+
+        .tab:hover {
+          color: #FF7F6F;
         }
       `}</style>
     </div>

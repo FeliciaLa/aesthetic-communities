@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './ExploreCommunities.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,19 +9,38 @@ import RecommendedCommunities from './RecommendedCommunities';
 
 // Styled Components
 const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10px;
+  width: 100%;
+  box-sizing: border-box;
+
   .explore-container {
-    margin-top: ${props => props.isLoggedIn ? '20px' : 0};
-    padding-top: ${props => props.isLoggedIn ? '20px' : 0};
+    margin-top: ${props => props.isLoggedIn ? '20px' : '40px'};
+    padding-top: ${props => props.isLoggedIn ? '20px' : '40px'};
   }
 `;
 
 const ExploreHeader = styled.div`
-  padding: 40px 20px;
-  background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 50px 0;
   color: white;
   text-align: center;
   margin-bottom: 30px;
-  margin-top: 64px;
+  margin-top: 0;
+  z-index: 10;
+  background-image: 
+    linear-gradient(90deg, 
+      rgba(0, 0, 0, 0.5) 0%, 
+      rgba(0, 0, 0, 0.3) 100%),
+    url('/Bannerbackground.png');
+  background-size: cover;
+  background-position: center;
 
   h1 {
     font-size: 2.5rem;
@@ -36,8 +56,11 @@ const ExploreHeader = styled.div`
 
 const SearchContainer = styled.div`
   position: relative;
-  max-width: 800px;
+  max-width: 610px;
   margin: 0 auto;
+  width: 70%;
+  margin-right: auto;
+  margin-left: 25%;
   
   svg {
     position: absolute;
@@ -135,8 +158,7 @@ const CommunitiesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  padding: 0 6rem;
-  margin: 0 3rem;
+  width: 100%;
   margin-bottom: 2rem;
 
   @media (max-width: 1024px) {
@@ -148,12 +170,18 @@ const CommunitiesGrid = styled.div`
   }
 `;
 
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+`;
+
 const CommunityCard = styled.div`
   background: white;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 
   &:hover {
     transform: translateY(-3px);
@@ -201,8 +229,25 @@ const CommunityCard = styled.div`
     .community-stats {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.8rem;
       color: #888;
+    }
+
+    .view-button {
+      padding: 0.3rem 1rem;
+      background: transparent;
+      color: #fa8072;
+      border: 1px solid #fa8072;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #fa8072;
+        color: white;
+      }
     }
   }
 `;
@@ -213,7 +258,7 @@ const LoadMoreContainer = styled.div`
 
   button {
     padding: 12px 24px;
-    background: #0061ff;
+    background: #fa8072;
     color: white;
     border: none;
     border-radius: 6px;
@@ -222,7 +267,7 @@ const LoadMoreContainer = styled.div`
     transition: background 0.2s ease;
 
     &:hover {
-      background: #0056b3;
+      background: #ff9288;
     }
   }
 `;
@@ -258,8 +303,8 @@ const BottomAuthPrompt = styled.div`
 
 const CarouselContainer = styled.div`
   position: relative;
-  padding: 0 6rem;
-  margin: 0 6rem 2rem 6rem;
+  width: 100%;
+  margin-bottom: 2rem;
   overflow: hidden;
   background: #f8f9fa;
   border-radius: 8px;
@@ -271,9 +316,14 @@ const CarouselTrack = styled.div`
   padding: 1rem 0;
   animation: scroll 60s linear infinite;
   
+  > a {
+    flex: 0 0 300px;
+    width: 300px;
+  }
+  
   @keyframes scroll {
     0% {
-      transform: translateX(calc(-350px * ${props => props.itemCount / 2}));
+      transform: translateX(calc(-300px * ${props => props.itemCount / 2}));
     }
     100% {
       transform: translateX(0);
@@ -314,12 +364,55 @@ const CarouselButton = styled.button`
   }
 `;
 
+const GetStartedSection = styled.div`
+  background: #fff;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin: 2rem 0;
+
+  h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  button {
+    background: #fa8072;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #ff9288;
+    }
+  }
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 2rem auto 1rem auto;
+  padding: 0 1.5rem;
+
+  h2 {
+    margin: 0;
+  }
+`;
+
 const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeView, setActiveView] = useState('trending');
+  const [activeView, setActiveView] = useState('alphabetical');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(9);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -335,6 +428,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   ];
 
   const viewOptions = {
+    alphabetical: 'A to Z',
     trending: 'Trending',
     newest: 'Newest',
     oldest: 'Oldest',
@@ -422,8 +516,11 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
         filtered.sort((a, b) => a.member_count - b.member_count);
         break;
       case 'trending':
-      default:
         // Add your trending logic here if needed
+        break;
+      case 'alphabetical':
+      default:
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
         break;
     }
     
@@ -456,18 +553,15 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
           // Logged out view
           <>
             {/* Trending Carousel */}
-            <h2 style={{ padding: '0 6rem', margin: '0 3rem 1rem 3rem' }}>Trending Hubs</h2>
+            <h2 style={{ maxWidth: '1200px', margin: '0 auto 1rem auto', padding: '0 1.5rem' }}>Trending Hubs</h2>
             <CarouselContainer>
-              <CarouselTrack itemCount={communities.length}>
-                {[...communities, ...communities]
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .slice(0, 12)
+              <CarouselTrack itemCount={10}>
+                {[...communities]
+                  .sort((a, b) => b.member_count - a.member_count)
+                  .slice(0, 10)
+                  .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
                   .map(community => (
-                    <Link 
-                      to={`/communities/${community.id}`} 
-                      key={community.id}
-                      style={{ flex: '0 0 350px' }}
-                    >
+                    <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
                       <CommunityCard>
                         <div className="community-banner">
                           {community.banner_image ? (
@@ -483,22 +577,48 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                           <p>{community.description}</p>
                           <div className="community-stats">
                             <span>{community.member_count} members</span>
-                            <span>Created {new Date(community.created_at).toLocaleDateString()}</span>
+                            <button className="view-button">View Hub</button>
                           </div>
                         </div>
                       </CommunityCard>
-                    </Link>
+                    </StyledLink>
                   ))}
               </CarouselTrack>
             </CarouselContainer>
 
             {/* All Hubs Section */}
-            <h2 style={{ padding: '0 6rem', margin: '0 3rem 1rem 3rem' }}>All Hubs</h2>
+            <SectionHeader>
+              <h2>All Hubs</h2>
+              <ViewOptions>
+                <ViewSelector>
+                  <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+                    {viewOptions[activeView]}
+                    <ChevronDown size={16} />
+                  </DropdownButton>
+                  {dropdownOpen && (
+                    <DropdownMenu>
+                      {Object.entries(viewOptions).map(([key, label]) => (
+                        <button
+                          key={key}
+                          className={activeView === key ? 'active' : ''}
+                          onClick={() => {
+                            setActiveView(key);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </DropdownMenu>
+                  )}
+                </ViewSelector>
+              </ViewOptions>
+            </SectionHeader>
             <CommunitiesGrid>
               {communities
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map(community => (
-                  <Link to={`/communities/${community.id}`} key={community.id}>
+                  <StyledLink to={`/communities/${community.id}`} key={community.id}>
                     <CommunityCard>
                       <div className="community-banner">
                         {community.banner_image ? (
@@ -514,24 +634,118 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                         <p>{community.description}</p>
                         <div className="community-stats">
                           <span>{community.member_count} members</span>
-                          <span>Created {new Date(community.created_at).toLocaleDateString()}</span>
+                          <button className="view-button">View Hub</button>
                         </div>
                       </div>
                     </CommunityCard>
-                  </Link>
+                  </StyledLink>
                 ))}
             </CommunitiesGrid>
 
-            <BottomAuthPrompt>
-              <p>Join almas to create and participate in communities</p>
-              <button onClick={handleAuthClick} className="login-button">
-                Get Started
-              </button>
-            </BottomAuthPrompt>
+            <GetStartedSection>
+              <h3>Join almas to create and participate in communities</h3>
+              <button onClick={handleAuthClick}>Get Started</button>
+            </GetStartedSection>
           </>
         ) : (
           <>
             <RecommendedCommunities />
+            
+            {/* Trending Section */}
+            <h2 style={{ maxWidth: '1200px', margin: '2rem auto 1rem auto', padding: '0 1.5rem' }}>Trending Hubs</h2>
+            <CarouselContainer>
+              <CarouselTrack itemCount={10}>
+                {[...communities]
+                  .sort((a, b) => b.member_count - a.member_count)
+                  .slice(0, 10)
+                  .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
+                  .map(community => (
+                    <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
+                      <CommunityCard>
+                        <div className="community-banner">
+                          {community.banner_image ? (
+                            <img src={community.banner_image} alt={community.name} />
+                          ) : (
+                            <div className="placeholder-banner">
+                              {community.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="community-content">
+                          <h2>{community.name}</h2>
+                          <p>{community.description}</p>
+                          <div className="community-stats">
+                            <span>{community.member_count} members</span>
+                            <button className="view-button">View Hub</button>
+                          </div>
+                        </div>
+                      </CommunityCard>
+                    </StyledLink>
+                  ))}
+              </CarouselTrack>
+            </CarouselContainer>
+
+            {/* All Hubs Section */}
+            <SectionHeader>
+              <h2>All Hubs</h2>
+              <ViewOptions>
+                <ViewSelector>
+                  <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+                    {viewOptions[activeView]}
+                    <ChevronDown size={16} />
+                  </DropdownButton>
+                  {dropdownOpen && (
+                    <DropdownMenu>
+                      {Object.entries(viewOptions).map(([key, label]) => (
+                        <button
+                          key={key}
+                          className={activeView === key ? 'active' : ''}
+                          onClick={() => {
+                            setActiveView(key);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </DropdownMenu>
+                  )}
+                </ViewSelector>
+              </ViewOptions>
+            </SectionHeader>
+            <CommunitiesGrid>
+              {getFilteredCommunities()
+                .slice(0, displayLimit)
+                .map(community => (
+                  <StyledLink to={`/communities/${community.id}`} key={community.id}>
+                    <CommunityCard>
+                      <div className="community-banner">
+                        {community.banner_image ? (
+                          <img src={community.banner_image} alt={community.name} />
+                        ) : (
+                          <div className="placeholder-banner">
+                            {community.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="community-content">
+                        <h2>{community.name}</h2>
+                        <p>{community.description}</p>
+                        <div className="community-stats">
+                          <span>{community.member_count} members</span>
+                          <button className="view-button">View Hub</button>
+                        </div>
+                      </div>
+                    </CommunityCard>
+                  </StyledLink>
+                ))}
+            </CommunitiesGrid>
+
+            {filteredCommunities.length > displayLimit && (
+              <LoadMoreContainer>
+                <button onClick={loadMore}>Load More</button>
+              </LoadMoreContainer>
+            )}
           </>
         )}
       </Container>

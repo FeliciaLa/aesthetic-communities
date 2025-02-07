@@ -68,21 +68,24 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   return (
     <div className="announcements-dashboard">
-      <div className="section-header">
-        <h3>Announcements</h3>
-      </div>
-      
+      <h2>Announcements</h2>
       {isCreator && (
-        <form onSubmit={handleSubmit} className="announcement-form">
+        <div className="announcement-form">
           <textarea
-            placeholder="Create a new announcement..."
             value={newAnnouncement}
             onChange={(e) => setNewAnnouncement(e.target.value)}
+            placeholder="Create a new announcement..."
+            className="announcement-input"
           />
-          <button type="submit">Post Announcement</button>
-        </form>
+          <button 
+            onClick={handleSubmit}
+            className="post-button"
+          >
+            Post Announcement
+          </button>
+        </div>
       )}
-
+      
       <div className="announcements-list">
         {announcements.map(announcement => (
           <div key={announcement.id} className="announcement-item">
@@ -112,25 +115,20 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
       <style jsx>{`
         .announcements-dashboard {
+          padding-right: 80px;
+          padding-left: 20px;
           background: white;
           border-radius: 12px;
-          padding: 20px;
-          margin: 0;
+          padding: 0px;
+          margin: 20;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          height: 250px;
+          height: 400px;
           overflow-y: auto;
           width: 100%;
           box-sizing: border-box;
         }
 
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        h3 {
+        h2 {
           margin: 0;
           color: #333;
         }
@@ -139,24 +137,27 @@ const AnnouncementsDashboard = ({ communityId }) => {
           margin-bottom: 20px;
         }
 
-        .announcement-form textarea {
-          width: calc(100% - 20px);
-          min-height: 40px;
-          max-height: 80px;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          margin: 0 10px 10px 10px;
+        .announcement-input {
+          width: calc(100% - 24px);
+          padding: 12px;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          margin-bottom: 10px;
           resize: vertical;
+          min-height: 80px;
         }
 
-        .announcement-form button {
-          background: #1DB954;
+        .post-button {
+          padding: 8px 16px;
+          background-color: #ff6b6b;
           color: white;
           border: none;
-          padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
+        }
+
+        .post-button:hover {
+          background-color: #ff5252;
         }
 
         .announcement-item {

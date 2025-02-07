@@ -33,18 +33,18 @@ const CreateCommunity = () => {
 
     return (
         <div className="create-community-container">
-            <h1>Create a New Community</h1>
+            <h1>Create a New Hub</h1>
             {error && <div className="error-message">{error}</div>}
             
             <form onSubmit={handleSubmit} className="create-community-form">
                 <div className="form-group">
-                    <label>Community Name</label>
+                    <label>Hub Name</label>
                     <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         required
-                        placeholder="Enter community name"
+                        placeholder="Enter hub name"
                     />
                 </div>
 
@@ -54,7 +54,7 @@ const CreateCommunity = () => {
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                         required
-                        placeholder="Describe your community"
+                        placeholder="Describe your hub"
                     />
                 </div>
 
@@ -67,8 +67,24 @@ const CreateCommunity = () => {
                     />
                 </div>
 
-                <button type="submit" className="submit-button">
-                    Create Community
+                <button 
+                    type="submit" 
+                    className="submit-button"
+                    style={{
+                        background: '#fa8072',  // Coral color
+                        color: 'white',
+                        border: 'none',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        fontSize: '16px',
+                        transition: 'background 0.2s ease',
+                    }}
+                    onMouseOver={(e) => e.target.style.background = '#ff9288'}  // Lighter coral on hover
+                    onMouseOut={(e) => e.target.style.background = '#fa8072'}
+                >
+                    Create Hub
                 </button>
             </form>
 

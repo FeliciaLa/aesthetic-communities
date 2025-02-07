@@ -37,14 +37,14 @@ const Form = styled.form`
 
   button {
     padding: 0.5rem;
-    background: #0066cc;
+    background: #fa8072;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 
     &:hover {
-      background: #0052a3;
+      background: #fa8072;
     }
   }
 `;
@@ -161,7 +161,7 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
                 display: 'block',
                 textAlign: 'center',
                 marginTop: '0.5rem',
-                color: '#0066cc',
+                color: '#fa8072',
                 textDecoration: 'none',
                 fontSize: '0.9rem'
               }}
@@ -199,7 +199,7 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
             marginTop: '1rem',
             background: 'transparent',
             border: 'none',
-            color: '#0066cc',
+            color: 'black',
             cursor: 'pointer'
           }}
         >

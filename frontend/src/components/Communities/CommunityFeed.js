@@ -15,8 +15,8 @@ const REACTIONS = [
 
 const CommunityFeed = ({ communityId }) => {
   const isAuthenticated = !!localStorage.getItem('token');
-  const [activeTab, setActiveTab] = useState('posts');
-  const [posts, setPosts] = useState([]);
+  const [activeTab, setActiveTab] = useState('questions');
+  const [contributions, setContributions] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [newContent, setNewContent] = useState('');
   const [mediaFile, setMediaFile] = useState(null);
@@ -27,9 +27,10 @@ const CommunityFeed = ({ communityId }) => {
   const [polls, setPolls] = useState([]);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
+  const [replies, setReplies] = useState([]);
 
   useEffect(() => {
-    fetchPosts();
+    fetchContributions();
     fetchQuestions();
   }, [communityId]);
 
@@ -39,21 +40,21 @@ const CommunityFeed = ({ communityId }) => {
     }
   }, [activeTab]);
 
-  const fetchPosts = async () => {
+  const fetchContributions = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
         `http://localhost:8000/api/communities/${communityId}/forum/posts/`,
         {
-          headers: { 'Authorization': `Token ${token}` }
+          headers: {
+            'Authorization': `Token ${token}`
+          }
         }
       );
-      setPosts(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error:', err.response?.data || err);
-      setError('Failed to load posts');
-      setLoading(false);
+      setContributions(response.data);
+    } catch (error) {
+      console.error('Error fetching contributions:', error);
+      setError('Failed to load contributions');
     }
   };
 
@@ -112,7 +113,7 @@ const CommunityFeed = ({ communityId }) => {
       if (activeTab === 'questions') {
         fetchQuestions();
       } else {
-        fetchPosts();
+        fetchContributions();
       }
     } catch (err) {
       console.error('Error response:', err.response?.data);
@@ -130,7 +131,7 @@ const CommunityFeed = ({ communityId }) => {
           headers: { 'Authorization': `Token ${token}` }
         }
       );
-      fetchPosts();
+      fetchContributions();
     } catch (err) {
       setError('Failed to like post');
     }
@@ -146,7 +147,7 @@ const CommunityFeed = ({ communityId }) => {
           headers: { 'Authorization': `Token ${token}` }
         }
       );
-      fetchPosts();
+      fetchContributions();
     } catch (err) {
       setError('Failed to add reaction');
     }
@@ -168,31 +169,103 @@ const CommunityFeed = ({ communityId }) => {
       
       // Clear the comment input and refresh posts
       setComments(prev => ({ ...prev, [postId]: '' }));
-      fetchPosts();
+      fetchContributions();
     } catch (err) {
       setError('Failed to add comment');
     }
   };
 
-  const handleAnswerVote = async (answerId, voteType) => {
+  const handleQuestionVote = async (questionId, voteType) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:8000/api/answers/${answerId}/vote/`,
+      
+      // Optimistically update UI first
+      setQuestions(prevQuestions => prevQuestions.map(question => {
+        if (question.id === questionId) {
+          let voteChange = 0;
+          let newUserVote = voteType;
+
+          // If clicking the same vote type, remove the vote
+          if (question.user_vote === voteType) {
+            voteChange = voteType === 'up' ? -1 : 1;
+            newUserVote = null;
+          } 
+          // If changing vote from opposite type
+          else if (question.user_vote) {
+            voteChange = voteType === 'up' ? 2 : -2;
+          }
+          // If voting for the first time
+          else {
+            voteChange = voteType === 'up' ? 1 : -1;
+          }
+
+          return {
+            ...question,
+            votes: question.votes + voteChange,
+            user_vote: newUserVote
+          };
+        }
+        return question;
+      }));
+
+      // Make API call
+      await axios.post(
+        `http://localhost:8000/api/questions/${questionId}/vote/`,
         { vote_type: voteType },
         {
-          headers: {
+          headers: { 
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
           }
         }
       );
-      
-      // Refresh questions to get updated votes
+
+    } catch (error) {
+      console.error('Error voting:', error);
+      // Revert optimistic update on error
       fetchQuestions();
-    } catch (err) {
-      console.error('Error voting:', err);
       setError('Failed to register vote');
+    }
+  };
+
+  const handleAnswerVote = async (answerId, voteType) => {
+    // Immediately update the vote count and reorder
+    const updatedQuestions = questions.map(question => {
+      const updatedAnswers = question.answers?.map(answer => {
+        if (answer.id === answerId) {
+          return {
+            ...answer,
+            votes: answer.votes + (voteType === 'up' ? 1 : -1)
+          };
+        }
+        return answer;
+      });
+
+      // Sort answers by votes if they exist
+      if (updatedAnswers) {
+        updatedAnswers.sort((a, b) => b.votes - a.votes);
+      }
+
+      return {
+        ...question,
+        answers: updatedAnswers
+      };
+    });
+    
+    setQuestions(updatedQuestions);
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8000/api/answers/${answerId}/vote/`,
+        { vote_type: voteType },
+        {
+          headers: { 'Authorization': `Token ${token}` }
+        }
+      );
+    } catch (error) {
+      console.error('Error voting:', error);
+      fetchQuestions();
     }
   };
 
@@ -218,41 +291,29 @@ const CommunityFeed = ({ communityId }) => {
     }
   };
 
-  const handleQuestionVote = async (questionId, voteType) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:8000/api/questions/${questionId}/vote/`,
-        { vote_type: voteType },
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      // Refresh questions to get updated votes
-      fetchQuestions();
-    } catch (err) {
-      console.error('Error voting:', err);
-      setError('Failed to register vote');
-    }
-  };
-
   const handlePollSubmit = async (e) => {
     e.preventDefault();
-    const url = `http://localhost:8000/api/communities/${communityId}/forum/polls/`;
-    console.log('Submitting poll to:', url);
-    console.log('Poll data:', {
-      question: pollQuestion,
-      options: pollOptions.filter(option => option.trim() !== '')
-    });
+    console.log('Attempting to create poll...');
+    
+    // Validate inputs
+    if (!pollQuestion.trim() || pollOptions.filter(opt => opt.trim()).length < 2) {
+      console.log('Validation failed:', {
+        question: pollQuestion,
+        options: pollOptions
+      });
+      setError('Please provide a question and at least 2 options');
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
+      console.log('Making API request with:', {
+        question: pollQuestion,
+        options: pollOptions.filter(option => option.trim() !== '')
+      });
+      
       const response = await axios.post(
-        url,
+        `http://localhost:8000/api/communities/${communityId}/forum/polls/`,
         {
           question: pollQuestion,
           options: pollOptions.filter(option => option.trim() !== '')
@@ -265,9 +326,9 @@ const CommunityFeed = ({ communityId }) => {
         }
       );
       
-      console.log('Poll creation response:', response.data);
+      console.log('Poll created successfully:', response.data);
       
-      // Reset form
+      // Reset form on success
       setPollQuestion('');
       setPollOptions(['', '']);
       
@@ -275,7 +336,8 @@ const CommunityFeed = ({ communityId }) => {
       fetchPolls();
       
     } catch (error) {
-      console.error('Error creating poll:', error.response || error);
+      console.error('Error creating poll:', error);
+      setError('Failed to create poll. Please try again.');
     }
   };
 
@@ -321,50 +383,54 @@ const CommunityFeed = ({ communityId }) => {
     return (
       <div className="polls-container">
         <div className="poll-form">
-          <form onSubmit={handlePollSubmit}>
-            <input
-              type="text"
-              placeholder="Ask a poll question..."
-              value={pollQuestion}
-              onChange={(e) => setPollQuestion(e.target.value)}
-              className="poll-question-input"
-            />
-            <div className="poll-options">
-              {pollOptions.map((option, index) => (
-                <div key={index} className="poll-option-input">
-                  <input
-                    type="text"
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...pollOptions];
-                      newOptions[index] = e.target.value;
-                      setPollOptions(newOptions);
-                    }}
-                  />
-                  {pollOptions.length > 2 && (
-                    <button 
-                      type="button"
-                      onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== index))}
-                      className="remove-option"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="poll-form-actions">
-              <button 
-                type="button" 
-                onClick={() => setPollOptions([...pollOptions, ''])}
-                className="add-option-btn"
-              >
-                Add Option
-              </button>
-              <button type="submit" className="create-poll-btn">Create Poll</button>
-            </div>
-          </form>
+          <input
+            type="text"
+            placeholder="Ask a poll question..."
+            value={pollQuestion}
+            onChange={(e) => setPollQuestion(e.target.value)}
+            className="poll-question-input"
+          />
+          <div className="poll-options">
+            {pollOptions.map((option, index) => (
+              <div key={index} className="poll-option-input">
+                <input
+                  type="text"
+                  placeholder={`Option ${index + 1}`}
+                  value={option}
+                  onChange={(e) => {
+                    const newOptions = [...pollOptions];
+                    newOptions[index] = e.target.value;
+                    setPollOptions(newOptions);
+                  }}
+                />
+                {pollOptions.length > 2 && (
+                  <button 
+                    type="button"
+                    onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== index))}
+                    className="remove-option"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="poll-form-actions">
+            <button 
+              type="button" 
+              onClick={() => setPollOptions([...pollOptions, ''])}
+              className="add-option-btn"
+            >
+              Add Option
+            </button>
+            <button 
+              type="button"
+              onClick={handlePollSubmit}
+              className="create-poll-btn"
+            >
+              Create Poll
+            </button>
+          </div>
         </div>
 
         <div className="polls-list">
@@ -414,7 +480,7 @@ const CommunityFeed = ({ communityId }) => {
             className="question-form textarea"
           />
           <button 
-            className="ask-question"
+            className="ask-question-button"
             onClick={(e) => {
               e.preventDefault();
               handleSubmit(e);
@@ -427,21 +493,6 @@ const CommunityFeed = ({ communityId }) => {
           {questions.map(question => (
             <div key={question.id} className="question-item">
               <div className="question-main">
-                <div className="vote-section">
-                  <button 
-                    className={`vote-button upvote ${question.user_vote === 'up' ? 'active' : ''}`}
-                    onClick={() => handleQuestionVote(question.id, 'up')}
-                  >
-                    ▲
-                  </button>
-                  <span className="vote-count">{question.votes || 0}</span>
-                  <button 
-                    className={`vote-button downvote ${question.user_vote === 'down' ? 'active' : ''}`}
-                    onClick={() => handleQuestionVote(question.id, 'down')}
-                  >
-                    ▼
-                  </button>
-                </div>
                 <div className="question-header">
                   <img 
                     src={question.created_by.avatar || DEFAULT_AVATAR} 
@@ -495,18 +546,23 @@ const CommunityFeed = ({ communityId }) => {
                   </div>
                 ))}
                 <div className="answer-form">
-                  <textarea
-                    placeholder="Write an answer..."
-                    value={answers[question.id] || ''}
-                    onChange={(e) => setAnswers(prev => ({
-                      ...prev,
-                      [question.id]: e.target.value
-                    }))}
-                    className="answer-form textarea"
-                  />
-                  <button onClick={() => handleAnswerSubmit(question.id)}>
-                    Submit Answer
-                  </button>
+                  <div className="answer-input-container">
+                    <textarea
+                      placeholder="Write an answer..."
+                      value={answers[question.id] || ''}
+                      onChange={(e) => setAnswers(prev => ({
+                        ...prev,
+                        [question.id]: e.target.value
+                      }))}
+                      className="answer-form textarea"
+                    />
+                    <button 
+                      onClick={() => handleAnswerSubmit(question.id)}
+                      className="submit-arrow"
+                    >
+                      <i className="fas fa-arrow-up"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -566,29 +622,45 @@ const CommunityFeed = ({ communityId }) => {
           .question-content, .answer-content {
             margin: 10px 0;
           }
-          .answer-form {
-            margin-top: 15px;
+          .answer-input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 24px;
           }
           .answer-form textarea {
             width: 100%;
             min-height: 80px;
-            margin-bottom: 10px;
             padding: 12px;
+            padding-right: 38px;
             border: 1px solid #ddd;
             border-radius: 8px;
             resize: vertical;
-            box-sizing: border-box;
           }
-          .answer-form button {
-            background: #0366d6;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+          .submit-arrow {
+            position: absolute;
+            bottom: 16px;
+            right: -4px;
+            background: white;
+            border: 1px solid #fa8072;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            z-index: 1;
           }
-          .answer-form button:hover {
-            background: #0255b3;
+          .submit-arrow i {
+            color: #fa8072;
+            font-size: 1rem;
+          }
+          .submit-arrow:hover {
+            background: #fff1f0;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           }
           .vote-section {
             display: flex;
@@ -626,16 +698,48 @@ const CommunityFeed = ({ communityId }) => {
             resize: vertical;
             box-sizing: border-box;
           }
-          .ask-question {
+          .ask-question-button {
             padding: 8px 16px;
-            background: #0061ff;
+            background: #fa8072;  /* Coral color */
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.2s ease;
           }
-          .ask-question:hover {
-            background: #0056e0;
+          .ask-question-button:hover {
+            background: #ff9288;  /* Lighter coral on hover */
+          }
+          .add-option-btn,
+          .create-poll-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .add-option-btn {
+            background: white;
+            color: #fa8072;
+            border: 1px solid #fa8072;
+          }
+
+          .add-option-btn:hover {
+            background: #fff1f0;
+          }
+
+          .create-poll-btn {
+            background: #fa8072;
+            color: white;
+          }
+
+          .create-poll-btn:hover {
+            background: #ff9288;
+          }
+
+          .question-form {
+            margin-bottom: 24px;
           }
         `}</style>
       </div>
@@ -645,122 +749,541 @@ const CommunityFeed = ({ communityId }) => {
   return (
     <div className="community-feed">
       {isAuthenticated ? (
-        <form onSubmit={handleSubmit}>
-          <div className="feed-section-container">
-            <div className="section-header">
-              <h3>Community Feed</h3>
-            </div>
-            
-            <div className="feed-content">
-              <div className="sticky-header">
-                <div className="feed-tabs">
-                  <button 
-                    onClick={() => setActiveTab('posts')} 
-                    className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
-                  >
-                    Posts
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('questions')} 
-                    className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                  >
-                    Questions
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('polls')} 
-                    className={`tab ${activeTab === 'polls' ? 'active' : ''}`}
-                  >
-                    Polls
-                  </button>
+        <>
+          <h2>Community Feed</h2>
+          <div className="feed-tabs">
+            <button 
+              className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('questions')}
+            >
+              Questions
+            </button>
+            <button 
+              className={`tab ${activeTab === 'polls' ? 'active' : ''}`}
+              onClick={() => setActiveTab('polls')}
+            >
+              Polls
+            </button>
+            <button 
+              className={`tab ${activeTab === 'contributions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('contributions')}
+            >
+              Contributions
+            </button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            {activeTab === 'contributions' && (
+              <>
+                <div className="post-input-container">
+                  <textarea
+                    placeholder="What's on your mind?"
+                    value={newContent}
+                    onChange={(e) => setNewContent(e.target.value)}
+                    className="post-input"
+                  />
                 </div>
-              </div>
+                <div className="post-actions">
+                  <div className="media-upload">
+                    <label htmlFor="media-input" className="media-button" title="Add media">
+                      <i className="fas fa-image"></i>
+                    </label>
+                    <input
+                      id="media-input"
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        setMediaFile(file);
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                  {mediaFile && (
+                    <div className="media-preview">
+                      {mediaFile.type.startsWith('image/') ? (
+                        <img src={URL.createObjectURL(mediaFile)} alt="Preview" />
+                      ) : (
+                        <video src={URL.createObjectURL(mediaFile)} controls />
+                      )}
+                      <button 
+                        type="button" 
+                        className="remove-media"
+                        onClick={() => setMediaFile(null)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  <button type="submit" className="post-button">Post</button>
+                </div>
 
-              <div className="scrollable-content">
-                {activeTab === 'posts' && (
-                  <>
-                    <div className="post-form">
-                      <textarea
-                        placeholder="What's on your mind?"
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
-                      />
-                      <div className="form-actions">
-                        <div className="media-upload">
-                          <label htmlFor="media-input" className="media-button" title="Add media">
-                            <i className="fas fa-image"></i>
-                          </label>
-                          <input
-                            id="media-input"
-                            type="file"
-                            accept="image/*,video/*"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              setMediaFile(file);
-                            }}
-                            style={{ display: 'none' }}
+                <div className="feed-content">
+                  {contributions.map((contribution) => (
+                    <div key={contribution.id} className="contribution-card">
+                      <div className="contribution-header">
+                        <div className="user-section">
+                          <img 
+                            src={contribution.created_by.avatar || DEFAULT_AVATAR} 
+                            alt="avatar" 
+                            className="avatar"
                           />
-                        </div>
-                        {mediaFile && (
-                          <div className="media-preview">
-                            {mediaFile.type.startsWith('image/') ? (
-                              <img src={URL.createObjectURL(mediaFile)} alt="Preview" />
-                            ) : (
-                              <video src={URL.createObjectURL(mediaFile)} controls />
-                            )}
-                            <button 
-                              type="button" 
-                              className="remove-media"
-                              onClick={() => setMediaFile(null)}
-                            >
-                              ×
-                            </button>
+                          <div className="user-info">
+                            <span className="username">{contribution.created_by.username}</span>
+                            <span className="date">
+                              {new Date(contribution.created_at).toLocaleDateString()}
+                            </span>
                           </div>
-                        )}
-                        <button type="submit">Post</button>
+                        </div>
+                      </div>
+                      <div className="contribution-body">
+                        {contribution.content}
                       </div>
                     </div>
-
-                    <div className="posts-list">
-                      {posts.map(post => (
-                        <div key={post.id} className="post-card">
-                          <div className="post-header">
-                            <img 
-                              src={post.created_by.avatar || DEFAULT_AVATAR} 
-                              alt="avatar" 
-                              className="avatar"
-                            />
-                            <div className="post-meta">
-                              <span className="username">{post.created_by.username}</span>
-                              <span className="timestamp">
-                                {new Date(post.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="post-content">{post.content}</div>
-                          {post.media && (
-                            <div className="post-media">
-                              <img src={post.media} alt="Post media" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {activeTab === 'questions' && renderQuestionsTab()}
-                {activeTab === 'polls' && renderPollsTab()}
-              </div>
-            </div>
-          </div>
-        </form>
+                  ))}
+                </div>
+              </>
+            )}
+            {activeTab === 'questions' && renderQuestionsTab()}
+            {activeTab === 'polls' && renderPollsTab()}
+          </form>
+        </>
       ) : (
         <div className="auth-prompt">
           <p>Sign in to participate in this community</p>
           <Link to="/login" className="login-button">Sign In</Link>
         </div>
       )}
+
+      <style jsx>{`
+        .community-feed {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          width: 100%;
+          margin-bottom: 20px;
+          box-sizing: border-box;
+          border: 1px solid #e0e0e0;
+          overflow: hidden;
+        }
+
+        h2 {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 20px 0;
+        }
+
+        .feed-tabs {
+          margin-bottom: 20px;
+        }
+
+        .post-input-container {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 1rem;
+          margin: 0;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .post-input {
+          width: 100%;
+          min-height: 100px;
+          padding: 1rem;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          resize: none;
+          font-size: 0.95rem;
+          background: white;
+          transition: border-color 0.2s ease;
+          box-sizing: border-box;
+        }
+
+        .post-input:focus {
+          outline: none;
+          border-color: #FF7F6F;
+        }
+
+        .post-actions {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+        }
+
+        .media-upload {
+          display: flex;
+          align-items: center;
+        }
+
+        .media-button {
+          padding: 0.5rem 1rem;
+          background: #f1f1f1;
+          border: 1px solid #e0e0e0;
+          border-radius: 20px;
+          cursor: pointer;
+          color: #666;
+          transition: all 0.2s ease;
+        }
+
+        .media-button:hover {
+          background: #e0e0e0;
+        }
+
+        .post-button {
+          padding: 0.5rem 1.5rem;
+          background: #FF7F6F;
+          color: white;
+          border: none;
+          border-radius: 20px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .post-button:hover {
+          background: #ff9288;
+          transform: translateY(-1px);
+        }
+
+        .post-button:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+        }
+
+        .post {
+          margin-bottom: 1.5rem;
+          padding: 1rem;
+          background: white;
+          border-radius: 8px;
+          border: 1px solid #e0e0e0;
+        }
+
+        .post-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        .post-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+        }
+
+        .post-info {
+          display: flex;
+          align-items: center;
+        }
+
+        .username {
+          font-weight: 500;
+          color: #333;
+          margin-right: 0.75rem;
+        }
+
+        .date {
+          color: #666;
+          font-size: 0.9rem;
+          position: relative;
+          padding-left: 1.25rem;
+        }
+
+        .date::before {
+          content: '+';
+          position: absolute;
+          left: 0.5rem;
+          color: #666;
+        }
+
+        .post-content {
+          margin-top: 0.5rem;
+          color: #333;
+          line-height: 1.5;
+        }
+
+        .post-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid #eee;
+        }
+
+        .reply-button {
+          background: none;
+          border: none;
+          color: #666;
+          font-size: 0.9rem;
+          padding: 0.25rem 0.5rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .reply-button:hover {
+          color: #FF7F6F;
+        }
+
+        .replies-container {
+          margin-left: 3.5rem;
+          margin-top: 1rem;
+          padding-left: 1rem;
+          border-left: 2px solid #eee;
+        }
+
+        .reply-form {
+          margin: 10px 0;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          position: relative;
+        }
+
+        .answer-input-container {
+          position: relative;
+          width: 100%;
+        }
+
+        .reply-form textarea {
+          width: 100%;
+          min-height: 50px;
+          max-height: 150px;
+          padding: 12px;
+          padding-right: 48px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          resize: vertical;
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+
+        .submit-arrow {
+          position: absolute;
+          bottom: 8px;
+          right: 8px;
+          background: white;
+          border: 1px solid #fa8072;
+          border-radius: 50%;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+          z-index: 1;
+        }
+
+        .submit-arrow i {
+          color: #fa8072;
+          font-size: 1rem;
+        }
+
+        .submit-arrow:hover {
+          background: #fff1f0;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .submit-arrow:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .poll-form {
+          padding: 20px;
+          background: white;
+          border-radius: 8px;
+        }
+
+        .poll-question-input {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 16px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 1rem;
+        }
+
+        .poll-options {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .poll-option-input {
+          display: flex;
+          gap: 8px;
+        }
+
+        .poll-option-input input {
+          flex: 1;
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+
+        .poll-form-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-start;
+        }
+
+        .poll-card {
+          background: white;
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 16px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .poll-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+        }
+
+        .poll-meta {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .username {
+          font-weight: 600;
+          color: #333;
+        }
+
+        .timestamp {
+          font-size: 0.9rem;
+          color: #666;
+        }
+
+        .poll-question {
+          font-size: 1.1rem;
+          margin: 0 0 16px 0;
+          color: #333;
+        }
+
+        .poll-options-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .poll-option {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          background: white;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.2s ease;
+        }
+
+        .poll-option:hover {
+          background: #f8f9fa;
+          border-color: #fa8072;
+        }
+
+        .poll-option.voted {
+          background: #fff1f0;
+          border-color: #fa8072;
+          color: #fa8072;
+        }
+
+        .option-text {
+          font-weight: 500;
+        }
+
+        .vote-count {
+          font-size: 0.9rem;
+          color: #666;
+        }
+
+        .feed-content {
+          padding: 20px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .contribution-card {
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          margin-bottom: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          border: 1px solid #eee;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .contribution-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .contribution-header {
+          margin-bottom: 16px;
+        }
+
+        .user-section {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .username {
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 15px;
+        }
+
+        .date {
+          font-size: 13px;
+          color: #94a3b8;
+        }
+
+        .contribution-body {
+          color: #334155;
+          line-height: 1.6;
+          font-size: 15px;
+          padding-left: 56px;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default CommunityFeed; 
+export default CommunityFeed;

@@ -159,26 +159,26 @@ const SavedItems = () => {
     return (
         <div className="saved-items-section">
             <div className="profile-card">
-                <h2>Saved Items</h2>
+                <h2 style={{ textAlign: 'left', marginBottom: '1rem' }}>Saved Items</h2>
                 
                 <div className="tabs">
                     <button 
                         className={`tab ${activeTab === 'images' ? 'active' : ''}`}
                         onClick={() => setActiveTab('images')}
                     >
-                        Images ({savedImages.length})
+                        Images
                     </button>
                     <button 
                         className={`tab ${activeTab === 'resources' ? 'active' : ''}`}
                         onClick={() => setActiveTab('resources')}
                     >
-                        Resources ({savedResources.length})
+                        Resources
                     </button>
                     <button 
                         className={`tab ${activeTab === 'products' ? 'active' : ''}`}
                         onClick={() => setActiveTab('products')}
                     >
-                        Products ({savedProducts.length})
+                        Products
                     </button>
                 </div>
 
@@ -299,13 +299,14 @@ const SavedItems = () => {
 
             <style jsx>{`
                 .saved-items-section {
-                    margin-top: 2rem;
+                    border-top: none;
                 }
 
                 .tabs {
                     display: flex;
                     gap: 1rem;
                     margin-bottom: 1.5rem;
+                    border-bottom: none;
                 }
 
                 .tab {
@@ -453,7 +454,7 @@ const SavedItems = () => {
                 .empty-message {
                     text-align: center;
                     color: #666;
-                    padding: 2rem;
+                    padding: 0.5rem;
                 }
 
                 .saved-product {
@@ -519,6 +520,11 @@ const SavedItems = () => {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                }
+
+                h2 {
+                    text-align: left;
+                    margin-bottom: 1rem;
                 }
             `}</style>
         </div>
