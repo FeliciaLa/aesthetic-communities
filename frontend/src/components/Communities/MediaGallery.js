@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../../../api';
 import FullscreenGallery from './FullscreenGallery';
 import MediaUploadForm from './MediaUploadForm';
 
@@ -23,8 +23,8 @@ const MediaGallery = ({ communityId, isCreator, onTabChange }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      await axios.post(
-        `http://localhost:8000/api/communities/${communityId}/gallery/`,
+      await api.post(
+        `/communities/${communityId}/gallery/`,
         formData,
         {
           headers: {
@@ -47,43 +47,16 @@ const MediaGallery = ({ communityId, isCreator, onTabChange }) => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      console.log('Attempting to delete image:', imageId);
-      console.log('URL:', `http://localhost:8000/api/communities/${communityId}/gallery/${imageId}/`);
-      
-      const response = await axios.delete(
-        `http://localhost:8000/api/communities/${communityId}/gallery/${imageId}/`,
-        {
-          headers: { 
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('Delete response:', response);
-
-      if (response.status === 204 || response.status === 200) {
-        setImages(prevImages => prevImages.filter(img => img.id !== imageId));
-        setIsFullscreen(false);
-      }
+      await api.delete(`/communities/${communityId}/gallery/${imageId}/`);
+      fetchImages();
     } catch (err) {
-      console.error('Delete request failed:', err.response || err);
-      console.error('Status:', err.response?.status);
-      console.error('Data:', err.response?.data);
-      alert('Failed to delete image. Please check the console for details.');
+      setError('Failed to delete image');
     }
   };
 
   const fetchImages = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/gallery/`,
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/gallery/`);
       setImages(response.data);
       setLoading(false);
     } catch (err) {

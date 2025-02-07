@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../api';
 import Modal from '../Common/Modal';
 import MediaGallery from './MediaGallery';
 import Resources from './Resources';
@@ -30,8 +30,8 @@ const CommunityDetail = () => {
             }
             
             console.log(`Tracking view for community ${id}`);
-            const response = await axios.post(
-                `http://localhost:8000/api/communities/${id}/view/`,
+            const response = await api.post(
+                `/communities/${id}/view/`,
                 {},
                 {
                     headers: { 
@@ -53,11 +53,7 @@ const CommunityDetail = () => {
                 const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Token ${token}` } : {};
                 
-                // Get the community info with auth token if available
-                const communityResponse = await axios.get(
-                    `http://localhost:8000/api/communities/${id}/`,
-                    { headers }
-                );
+                const communityResponse = await api.get(`/communities/${id}/`);
 
                 // Transform the banner_image URL
                 const communityData = {
@@ -65,14 +61,12 @@ const CommunityDetail = () => {
                     banner_image: communityResponse.data.banner_image ? 
                         (communityResponse.data.banner_image.startsWith('http') ? 
                             communityResponse.data.banner_image : 
-                            `http://localhost:8000${communityResponse.data.banner_image}`
+                            `${api.defaults.baseURL}${communityResponse.data.banner_image}`
                         ) : '/default-banner.jpg'
                 };
                 
-                console.log('Transformed banner URL:', communityData.banner_image);
                 setCommunity(communityData);
 
-                // Handle authenticated features if user is logged in
                 if (token) {
                     const currentUser = communityData.current_username;
                     const communityCreator = communityData.creator_name;
@@ -111,8 +105,8 @@ const CommunityDetail = () => {
             const formData = new FormData();
             formData.append('image', file);
 
-            await axios.post(
-                `http://localhost:8000/api/communities/${id}/gallery/`,
+            await api.post(
+                `/communities/${id}/gallery/`,
                 formData,
                 {
                     headers: {
@@ -129,8 +123,8 @@ const CommunityDetail = () => {
     const fetchImages = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/communities/${id}/gallery/`,
+            const response = await api.get(
+                `/communities/${id}/gallery/`,
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }
@@ -149,8 +143,8 @@ const CommunityDetail = () => {
     const handleImageDelete = async (imageId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(
-                `http://localhost:8000/api/communities/${id}/gallery/${imageId}/`,
+            await api.delete(
+                `/communities/${id}/gallery/${imageId}/`,
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }

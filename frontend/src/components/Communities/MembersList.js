@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../api';
 
 // Use a data URL for the default avatar to avoid external service dependencies
 const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRTJFOEYwIi8+CjxwYXRoIGQ9Ik0yNSAxOUMyNi42NTY5IDE5IDI4IDIwLjM0MzEgMjggMjJDMjggMjMuNjU2OSAyNi42NTY5IDI1IDI1IDI1QzIzLjM0MzEgMjUgMjIgMjMuNjU2OSAyMiAyMkMyMiAyMC4zNDMxIDIzLjM0MzEgMTkgMjUgMTlaIiBmaWxsPSIjQTBBRkJBIi8+CjxwYXRoIGQ9Ik0zMyAzM0MzMyAyOS42ODYzIDI5LjMxMzcgMjcgMjUgMjdDMjAuNjg2MyAyNyAxNyAyOS42ODYzIDE3IDMzSDMzWiIgZmlsbD0iI0EwQUZCQSIvPgo8L3N2Zz4K';
@@ -14,11 +14,8 @@ const MembersList = ({ communityId }) => {
         const fetchMembers = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    `http://localhost:8000/api/communities/${communityId}/members/`,
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
+                const response = await api.get(
+                    `/communities/${communityId}/members/`
                 );
                 setCreator(response.data.creator);
                 setMembers(response.data.members);

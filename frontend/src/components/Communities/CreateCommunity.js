@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../../api';
 import { useNavigate } from 'react-router-dom';
 
 const CreateCommunity = () => {
@@ -14,17 +14,11 @@ const CreateCommunity = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                'http://localhost:8000/api/communities/',
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
+            const response = await api.post('/communities/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-            );
+            });
             navigate(`/communities/${response.data.id}`);
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to create community');

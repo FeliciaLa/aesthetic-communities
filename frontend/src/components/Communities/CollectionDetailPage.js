@@ -120,15 +120,10 @@ const CollectionDetailPage = () => {
 
     const fetchResources = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/resources/?category_id=${collectionId}`,
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`
-                    }
-                }
-            );
+            const response = await api.get(`/resources/`, {
+                params: { category_id: collectionId }
+            });
+            
             console.log('Resource data:', response.data);
             const sortedResources = response.data.sort((a, b) => (b.votes || 0) - (a.votes || 0));
             setResources(sortedResources);
@@ -185,16 +180,9 @@ const CollectionDetailPage = () => {
 
     const handleVote = async (resourceId, voteType) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:8000/api/resources/${resourceId}/vote/`,
-                { vote_type: voteType },
-                {
-                    headers: {
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
+            const response = await api.post(
+                `/resources/${resourceId}/vote/`,
+                { vote_type: voteType }
             );
 
             // Update and sort resources immediately
@@ -223,14 +211,7 @@ const CollectionDetailPage = () => {
 
     const handleVisit = async (resourceId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(
-                `http://localhost:8000/api/resources/${resourceId}/view/`,
-                {},
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            await api.post(`/resources/${resourceId}/view/`);
             fetchStats();
         } catch (err) {
             console.error('Error incrementing views:', err);

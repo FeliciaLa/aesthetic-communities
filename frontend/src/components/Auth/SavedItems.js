@@ -71,6 +71,8 @@ const SavedItems = () => {
     const [savedCollections, setSavedCollections] = useState([]);
     const [previews, setPreviews] = useState({});
     const [collectionPreviews, setCollectionPreviews] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const getPreviewImage = async (url) => {
         try {
@@ -104,55 +106,55 @@ const SavedItems = () => {
         return '/default-banner.jpg';
     };
 
+    const fetchSavedItems = async () => {
+        try {
+            // Fetch saved images
+            const imagesRes = await axios.get('http://localhost:8000/api/saved/images/', {
+                headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
+            });
+            setSavedImages(imagesRes.data);
+
+            // Fetch saved products
+            const productsRes = await axios.get('http://localhost:8000/api/saved/products/', {
+                headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
+            });
+            setSavedProducts(productsRes.data);
+
+            // Fetch saved collections
+            const collectionsRes = await axios.get('http://localhost:8000/api/saved/collections/', {
+                headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
+            });
+            console.log('Saved collections data:', collectionsRes.data);
+            setSavedCollections(collectionsRes.data);
+
+            // Fetch saved resources
+            const resourcesRes = await axios.get('http://localhost:8000/api/saved/resources/', {
+                headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
+            });
+            console.log('Saved resources:', resourcesRes.data);
+            setSavedResources(resourcesRes.data);
+
+            // Get previews for resources
+            const previewPromises = resourcesRes.data.map(async (resource) => {
+                console.log('Getting preview for URL:', resource.url);
+                const previewUrl = await getPreviewImage(resource.url);
+                console.log('Preview URL result:', previewUrl);
+                return [resource.id, previewUrl];
+            });
+            
+            const previewResults = await Promise.all(previewPromises);
+            console.log('Preview results:', previewResults);
+            const previewMap = Object.fromEntries(previewResults);
+            setPreviews(previewMap);
+        } catch (error) {
+            console.error('Error fetching saved items:', error);
+            setError('Failed to load saved items');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchSavedItems = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                
-                // Fetch saved images
-                const imagesRes = await axios.get('http://localhost:8000/api/saved/images/', {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
-                setSavedImages(imagesRes.data);
-
-                // Fetch saved products
-                const productsRes = await axios.get('http://localhost:8000/api/saved/products/', {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
-                setSavedProducts(productsRes.data);
-
-                // Fetch saved collections
-                const collectionsRes = await axios.get('http://localhost:8000/api/saved/collections/', {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
-                console.log('Saved collections data:', collectionsRes.data);
-                setSavedCollections(collectionsRes.data);
-
-                // Fetch saved resources
-                const resourcesRes = await axios.get('http://localhost:8000/api/saved/resources/', {
-                    headers: { 'Authorization': `Token ${token}` }
-                });
-                console.log('Saved resources:', resourcesRes.data);
-                setSavedResources(resourcesRes.data);
-
-                // Get previews for resources
-                const previewPromises = resourcesRes.data.map(async (resource) => {
-                    console.log('Getting preview for URL:', resource.url);
-                    const previewUrl = await getPreviewImage(resource.url);
-                    console.log('Preview URL result:', previewUrl);
-                    return [resource.id, previewUrl];
-                });
-                
-                const previewResults = await Promise.all(previewPromises);
-                console.log('Preview results:', previewResults);
-                const previewMap = Object.fromEntries(previewResults);
-                setPreviews(previewMap);
-
-            } catch (error) {
-                console.error('Error fetching saved items:', error);
-            }
-        };
-
         fetchSavedItems();
     }, []);
 

@@ -5,6 +5,7 @@ import SavedItems from './SavedItems';
 import styled from 'styled-components';
 import { DEFAULT_AVATAR } from '../Communities/CommunityFeed';
 import EditProfileModal from './EditProfileModal';
+import api from '../../services/api';
 
 const ProfileCard = styled.div`
   background: white;
@@ -165,12 +166,8 @@ const Profile = () => {
 
         // Get profile and all communities
         const [profileRes, allCommunitiesRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/profile/', {
-            headers: { 'Authorization': `Token ${token}` }
-          }),
-          axios.get('http://localhost:8000/api/communities/', {
-            headers: { 'Authorization': `Token ${token}` }
-          })
+          api.get('/profile/'),
+          api.get('/communities/')
         ]);
 
         const allCommunities = allCommunitiesRes.data;
@@ -183,9 +180,7 @@ const Profile = () => {
         // Check membership status for each community
         const membershipChecks = await Promise.all(
           allCommunities.map(community =>
-            axios.get(`http://localhost:8000/api/communities/${community.id}/membership/`, {
-              headers: { 'Authorization': `Token ${token}` }
-            })
+            api.get(`/communities/${community.id}/membership/`)
           )
         );
 

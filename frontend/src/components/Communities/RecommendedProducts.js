@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './RecommendedProducts.css';
 import AddProductModal from './AddProductModal';
+import api from '../../../api';
 
 const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [products, setProducts] = useState([]);
@@ -41,20 +42,13 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
 
     const handleAddProduct = async (productData) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(
-                `http://localhost:8000/api/communities/${communityId}/products/`,
-                {
-                    title: productData.title,
-                    url: productData.url,
-                    comment: productData.comment,
-                    catalogue_name: productData.catalogue_name,
-                    community: communityId
-                },
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            await api.post(`/communities/${communityId}/products/`, {
+                title: productData.title,
+                url: productData.url,
+                comment: productData.comment,
+                catalogue_name: productData.catalogue_name,
+                community: communityId
+            });
             fetchProducts();
             setShowAddProduct(false);
         } catch (err) {
@@ -65,50 +59,19 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
 
     const handleSaveProduct = async (productId) => {
         try {
-            console.log('Save button clicked for product:', productId);
-            const token = localStorage.getItem('token');
-            
-            // Add error checking for token
-            if (!token) {
-                console.error('No authentication token found');
-                return;
-            }
-
-            const baseURL = 'http://localhost:8000';
-            const response = await axios.post(
-                `${baseURL}/api/saved/${productId}/save_product/`,
-                {},
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            
-            console.log('Save product response:', response.data);
+            const response = await api.post(`/saved/${productId}/save_product/`);
             
             if (response.data.status === 'saved') {
                 setSavedProducts(prev => new Set([...prev, productId]));
-                console.log('Product saved successfully');
             } else {
                 setSavedProducts(prev => {
                     const newSet = new Set(prev);
                     newSet.delete(productId);
                     return newSet;
                 });
-                console.log('Product unsaved successfully');
             }
         } catch (error) {
             console.error('Error saving product:', error);
-            if (error.response) {
-                console.error('Response data:', error.response.data);
-                console.error('Response status:', error.response.status);
-            } else if (error.request) {
-                console.error('No response received:', error.request);
-            } else {
-                console.error('Error setting up request:', error.message);
-            }
         }
     };
 
@@ -116,16 +79,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         const fetchSavedProducts = async () => {
             try {
                 console.log('Fetching saved products...'); // Debug log
-                const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    'http://localhost:8000/api/saved/products/',
-                    {
-                        headers: { 'Authorization': `Token ${token}` }
-                    }
-                );
-                
+                const response = await api.get('/saved/products/');
                 console.log('Fetched saved products:', response.data); // Debug log
-                
                 setSavedProducts(new Set(response.data.map(item => item.product_id)));
             } catch (error) {
                 console.error('Error fetching saved products:', 

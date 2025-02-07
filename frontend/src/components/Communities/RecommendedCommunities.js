@@ -152,18 +152,14 @@ const RecommendedCommunities = () => {
 
     const fetchRecommendations = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-                'http://localhost:8000/api/communities/recommended/',
-                { headers: { 'Authorization': `Token ${token}` } }
-            );
+            const response = await api.get('/communities/recommended/');
 
             const recommendationsWithFullUrls = response.data.map(community => ({
                 ...community,
                 banner_image: community.banner_image ? 
                     (community.banner_image.startsWith('http') ? 
                         community.banner_image : 
-                        `http://localhost:8000${community.banner_image}`
+                        `${api.defaults.baseURL}${community.banner_image}`
                     ) : null
             }));
 

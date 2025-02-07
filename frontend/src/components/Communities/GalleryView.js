@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FullscreenGallery from './FullscreenGallery';
+import api from '../../../api';
 
 const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => {
     const [images, setImages] = useState([]);
@@ -52,13 +53,11 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
         formData.append('image', file);
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:8000/api/communities/${communityId}/gallery/`,
+            const response = await api.post(
+                `/communities/${communityId}/gallery/`,
                 formData,
                 {
                     headers: {
-                        'Authorization': `Token ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
                 }
@@ -71,13 +70,7 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
 
     const handleImageDelete = async (imageId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(
-                `http://localhost:8000/api/communities/${communityId}/gallery/${imageId}/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
+            await api.delete(`/communities/${communityId}/gallery/${imageId}/`);
             setImages(images.filter(img => img.id !== imageId));
         } catch (error) {
             console.error('Error deleting image:', error);
@@ -86,20 +79,7 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
 
     const handleSaveImage = async (imageId) => {
         try {
-            console.log('Attempting to save image:', imageId);
-            const token = localStorage.getItem('token');
-            const response = await axios.post(
-                `http://localhost:8000/api/saved/${imageId}/save_image/`,
-                {},
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            
-            console.log('Save image response:', response.data);
+            const response = await api.post(`/saved/${imageId}/save_image/`);
             
             if (response.data.status === 'saved') {
                 setSavedImages(prev => new Set([...prev, imageId]));

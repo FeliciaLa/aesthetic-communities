@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../../services/api';
 
 const EditCommunityForm = ({ community, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
@@ -12,16 +13,9 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/communities/${community.id}/update_details/`,
-        formData,
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json',
-          }
-        }
+      await api.post(
+        `/communities/${community.id}/update_details/`,
+        formData
       );
       onSuccess();
       onClose();
@@ -39,13 +33,11 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
     formData.append('banner_image', file);
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://localhost:8000/api/communities/${community.id}/banner/`,
+      await api.put(
+        `/communities/${community.id}/banner/`,
         formData,
         {
           headers: {
-            'Authorization': `Token ${token}`,
             'Content-Type': 'multipart/form-data',
           }
         }

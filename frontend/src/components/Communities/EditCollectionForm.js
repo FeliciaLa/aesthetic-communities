@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const EditCollectionForm = ({ collection, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
@@ -33,7 +33,6 @@ const EditCollectionForm = ({ collection, onSuccess, onClose }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
       const formDataToSend = new FormData();
       
       formDataToSend.append('name', formData.name);
@@ -43,12 +42,11 @@ const EditCollectionForm = ({ collection, onSuccess, onClose }) => {
         formDataToSend.append('preview_image', formData.preview_image);
       }
 
-      const response = await axios.patch(
-        `http://localhost:8000/api/resources/categories/${collection.id}/`,
+      const response = await api.patch(
+        `/resources/categories/${collection.id}/`,
         formDataToSend,
         {
           headers: {
-            'Authorization': `Token ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         }

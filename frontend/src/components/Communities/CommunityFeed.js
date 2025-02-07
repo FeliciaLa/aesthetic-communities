@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import api from '../../../api';
 
 export const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
@@ -42,15 +43,7 @@ const CommunityFeed = ({ communityId }) => {
 
   const fetchContributions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/forum/posts/`,
-        {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/forum/posts/`);
       setContributions(response.data);
     } catch (error) {
       console.error('Error fetching contributions:', error);
@@ -60,13 +53,7 @@ const CommunityFeed = ({ communityId }) => {
 
   const fetchQuestions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/forum/questions/`,
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/forum/questions/`);
       setQuestions(response.data);
     } catch (err) {
       console.error('Error:', err.response?.data || err);
@@ -86,27 +73,16 @@ const CommunityFeed = ({ communityId }) => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      let endpoint;
-      
-      if (activeTab === 'questions') {
-        endpoint = `http://localhost:8000/api/communities/${communityId}/forum/questions/`;
-      } else {
-        endpoint = `http://localhost:8000/api/communities/${communityId}/forum/posts/`;
-      }
+      const endpoint = activeTab === 'questions' 
+        ? `/communities/${communityId}/forum/questions/`
+        : `/communities/${communityId}/forum/posts/`;
 
-      await axios.post(
-        endpoint,
-        formData,
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
+      await api.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
-      );
+      });
 
-      // Clear form and refresh
       setNewContent('');
       setMediaFile(null);
       
@@ -116,21 +92,13 @@ const CommunityFeed = ({ communityId }) => {
         fetchContributions();
       }
     } catch (err) {
-      console.error('Error response:', err.response?.data);
       setError(`Failed to create ${activeTab === 'questions' ? 'question' : 'post'}`);
     }
   };
 
   const handleLike = async (postId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/forum/posts/${postId}/like/`,
-        {},
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      await api.post(`/forum/posts/${postId}/like/`);
       fetchContributions();
     } catch (err) {
       setError('Failed to like post');
@@ -139,14 +107,7 @@ const CommunityFeed = ({ communityId }) => {
 
   const handleReaction = async (postId, reactionType) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/forum/posts/${postId}/react/`,
-        { reaction_type: reactionType },
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      await api.post(`/forum/posts/${postId}/react/`, { reaction_type: reactionType });
       fetchContributions();
     } catch (err) {
       setError('Failed to add reaction');
@@ -157,17 +118,8 @@ const CommunityFeed = ({ communityId }) => {
     try {
       const comment = comments[postId];
       if (!comment?.trim()) return;
-
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/forum/posts/${postId}/comments/`,
-        { content: comment },
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
       
-      // Clear the comment input and refresh posts
+      await api.post(`/forum/posts/${postId}/comments/`, { content: comment });
       setComments(prev => ({ ...prev, [postId]: '' }));
       fetchContributions();
     } catch (err) {
@@ -177,52 +129,9 @@ const CommunityFeed = ({ communityId }) => {
 
   const handleQuestionVote = async (questionId, voteType) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      // Optimistically update UI first
-      setQuestions(prevQuestions => prevQuestions.map(question => {
-        if (question.id === questionId) {
-          let voteChange = 0;
-          let newUserVote = voteType;
-
-          // If clicking the same vote type, remove the vote
-          if (question.user_vote === voteType) {
-            voteChange = voteType === 'up' ? -1 : 1;
-            newUserVote = null;
-          } 
-          // If changing vote from opposite type
-          else if (question.user_vote) {
-            voteChange = voteType === 'up' ? 2 : -2;
-          }
-          // If voting for the first time
-          else {
-            voteChange = voteType === 'up' ? 1 : -1;
-          }
-
-          return {
-            ...question,
-            votes: question.votes + voteChange,
-            user_vote: newUserVote
-          };
-        }
-        return question;
-      }));
-
-      // Make API call
-      await axios.post(
-        `http://localhost:8000/api/questions/${questionId}/vote/`,
-        { vote_type: voteType },
-        {
-          headers: { 
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
+      await api.post(`/questions/${questionId}/vote/`, { vote_type: voteType });
     } catch (error) {
       console.error('Error voting:', error);
-      // Revert optimistic update on error
       fetchQuestions();
       setError('Failed to register vote');
     }
@@ -255,14 +164,7 @@ const CommunityFeed = ({ communityId }) => {
     setQuestions(updatedQuestions);
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/answers/${answerId}/vote/`,
-        { vote_type: voteType },
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      await api.post(`/answers/${answerId}/vote/`, { vote_type: voteType });
     } catch (error) {
       console.error('Error voting:', error);
       fetchQuestions();
@@ -274,14 +176,7 @@ const CommunityFeed = ({ communityId }) => {
       const answer = answers[questionId];
       if (!answer?.trim()) return;
 
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/questions/${questionId}/answers/`,
-        { content: answer },
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      await api.post(`/questions/${questionId}/answers/`, { content: answer });
       
       // Clear the answer input and refresh questions
       setAnswers(prev => ({ ...prev, [questionId]: '' }));
@@ -306,27 +201,10 @@ const CommunityFeed = ({ communityId }) => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      console.log('Making API request with:', {
+      await api.post(`/communities/${communityId}/forum/polls/`, {
         question: pollQuestion,
         options: pollOptions.filter(option => option.trim() !== '')
       });
-      
-      const response = await axios.post(
-        `http://localhost:8000/api/communities/${communityId}/forum/polls/`,
-        {
-          question: pollQuestion,
-          options: pollOptions.filter(option => option.trim() !== '')
-        },
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log('Poll created successfully:', response.data);
       
       // Reset form on success
       setPollQuestion('');
@@ -343,17 +221,7 @@ const CommunityFeed = ({ communityId }) => {
 
   const handlePollVote = async (pollId, optionId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8000/api/poll-options/${optionId}/vote/`,
-        {},
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await api.post(`/poll-options/${optionId}/vote/`);
       fetchPolls();
     } catch (err) {
       console.error('Error voting:', err);
@@ -363,15 +231,7 @@ const CommunityFeed = ({ communityId }) => {
 
   const fetchPolls = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/forum/polls/`,
-        {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/forum/polls/`);
       setPolls(response.data);
     } catch (error) {
       console.error('Error fetching polls:', error);

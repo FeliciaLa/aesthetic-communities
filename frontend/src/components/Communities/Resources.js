@@ -25,17 +25,12 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
 
     const fetchCollections = async () => {
         try {
-            const token = localStorage.getItem('token');
             console.log('Fetching collections for community:', communityId);
             
             const response = await axios.get(
-                'http://localhost:8000/api/resources/categories/',
+                '/resources/categories/',
                 {
-                    params: { community_id: communityId },
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    params: { community_id: communityId }
                 }
             );
             

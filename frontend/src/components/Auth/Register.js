@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api";  // Updated path to match your structure
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -36,7 +36,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/register/", {
+      const response = await api.post("/register/", {
         username: formData.username,
         email: formData.email,
         password: formData.password
