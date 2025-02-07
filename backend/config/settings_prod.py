@@ -1,15 +1,11 @@
 from .settings import *
+import os
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*.railway.app', 'localhost', '0.0.0.0']
+ALLOWED_HOSTS = ['*']  # Be more specific in production
 
-# Use environment variables for sensitive data
-import os
-
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', SECRET_KEY)
-
-# Database configuration for Railway
+# Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -21,9 +17,20 @@ DATABASES = {
     }
 }
 
+# Security settings
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-secret-key')
+
 # Static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# CORS settings if needed
+CORS_ALLOW_ALL_ORIGINS = True  # Configure this properly for production
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Add your frontend URL here
+]
+
+# Add any other production-specific settings
 
 # Security settings
 SECURE_SSL_REDIRECT = True
