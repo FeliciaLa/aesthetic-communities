@@ -1,4 +1,4 @@
-import api from '../api';  // Update to use configured api instance
+import api from '../api';
 
 const API_URL = process.env.NODE_ENV === 'production' 
     ? 'https://aesthetic-communities-production.up.railway.app/api/'
@@ -13,10 +13,9 @@ export const authService = {
             });
             const { token, user } = response.data;
             
-            // Store both token and user ID
             localStorage.setItem('token', token);
             localStorage.setItem('userId', user.id.toString());
-            console.log('Stored user ID:', user.id); // Debug log
+            console.log('Stored user ID:', user.id);
             
             return response.data;
         } catch (error) {
