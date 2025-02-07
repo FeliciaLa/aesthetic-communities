@@ -440,9 +440,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
+      const baseURL = process.env.NODE_ENV === 'production'
+        ? 'https://aesthetic-communities-production.up.railway.app/api'
+        : 'http://localhost:8000/api';
       
       const response = await axios.get(
-        'http://localhost:8000/api/communities/',
+        `${baseURL}/communities/`,
         { headers }
       );
       
