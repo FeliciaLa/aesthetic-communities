@@ -1,9 +1,9 @@
 import axios from "axios";
 
-// Force production URL for Vercel deployment
+// Force production URL and add debug logging
 const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
-
-console.log('Using baseURL:', baseURL);
+console.log('API Configuration:');
+console.log('- baseURL:', baseURL);
 
 const api = axios.create({
     baseURL,
@@ -14,16 +14,14 @@ const api = axios.create({
     }
 });
 
-// Add a request interceptor to add the auth token
+// Add request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Add console log to check each request URL
-        console.log('Making request to:', config.baseURL + config.url);
+        console.log('Making request to:', config.url);
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-        console.log('Making request to:', config.url, 'with headers:', config.headers); // Debug log
         return config;
     },
     (error) => {
@@ -33,12 +31,12 @@ api.interceptors.request.use(
 
 // Add response interceptor for debugging
 api.interceptors.response.use(
-    response => {
-        console.log('Response from:', response.config.url, response.data); // Debug log
+    (response) => {
+        console.log('Received response:', response.status);
         return response;
     },
-    error => {
-        console.error('API Error:', error.response?.status, error.response?.data || error.message);
+    (error) => {
+        console.error('API Error:', error);
         return Promise.reject(error);
     }
 );
