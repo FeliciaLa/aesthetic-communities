@@ -5,21 +5,20 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    postgresql-client \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY backend/requirements.txt .
+# Copy the entire project first
+COPY . .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
-COPY backend/ .
+RUN cd backend && pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=config.settings_prod
 ENV PORT=8000
 
-# Run the application
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT 
+# Run migrations and start the application
+CMD cd backend && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT 
