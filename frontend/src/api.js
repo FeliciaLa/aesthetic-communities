@@ -12,6 +12,8 @@ const api = axios.create({
     withCredentials: true,  // Important for cookies/sessions
     headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*'
     }
 });
 

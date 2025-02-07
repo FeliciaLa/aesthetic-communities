@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './ExploreCommunities.css';
-import api from '../../../api';  // Update import path
+import api from '../../../api';  // Verify this path
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'react-feather';
@@ -439,7 +439,9 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
+      console.log('Fetching communities...'); // Add debug log
       const response = await api.get('/communities/');
+      console.log('Response:', response); // Add debug log
       
       const communitiesWithFullUrls = response.data.map(community => ({
         ...community,
