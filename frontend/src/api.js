@@ -1,15 +1,14 @@
 import axios from "axios";
 
 // Force production URL and add debug logging
-const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
+const baseURL = 'https://aesthetic-communities-production.up.railway.app/api';
 console.log('API Configuration:', {
     baseURL: baseURL,
     environment: process.env.NODE_ENV
 });
 
 const api = axios.create({
-    baseURL,
-    withCredentials: true,
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'

@@ -439,30 +439,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      // Add more detailed logging
-      console.log('Environment:', process.env.NODE_ENV);
-      console.log('API instance:', api);
-      console.log('API baseURL:', api.defaults.baseURL);
-      console.log('Making request to:', `${api.defaults.baseURL}/communities/`);
-      
       const response = await api.get('/communities/');
-      console.log('Response:', response);
-      
-      const communitiesWithFullUrls = response.data.map(community => ({
-        ...community,
-        banner_image: community.banner_image ? 
-          (community.banner_image.startsWith('http') ? 
-            community.banner_image : 
-            `${api.defaults.baseURL}${community.banner_image}`
-          ) : null
-      }));
-
-      setCommunities(communitiesWithFullUrls);
-    } catch (err) {
-      console.error('Full error:', err);
-      console.error('Error config:', err.config);
-      console.error('Error response:', err.response);
-      setError('Failed to fetch communities');
+      console.log('Communities response:', response.data);
+      setCommunities(response.data);
+    } catch (error) {
+      console.error('Error fetching communities:', error);
+      setError('Failed to load communities');
     } finally {
       setLoading(false);
     }
