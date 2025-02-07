@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import FullscreenGallery from './FullscreenGallery';
 import api from '../../api';
 
+const getImageUrl = (image) => {
+    return image.startsWith('http') 
+        ? image 
+        : `${api.defaults.baseURL}${image}`;
+};
+
 const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => {
     const [images, setImages] = useState([]);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -124,10 +130,7 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     <div key={`${image.id}-${index}`} className="gallery-item">
                         <div className="image-container">
                             <img 
-                                src={image.image.startsWith('http') 
-                                    ? image.image 
-                                    : `http://localhost:8000${image.image}`
-                                }
+                                src={getImageUrl(image.image)}
                                 alt={`Gallery item ${index + 1}`}
                             />
                             <div className="image-actions">

@@ -27,6 +27,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 DEBUG = True
 ALLOWED_HOSTS = [
     'aesthetic-communities-production.up.railway.app',
+    'aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
     '*',
 ]
 
@@ -35,11 +36,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://aesthetic-communities-production.up.railway.app",
     "https://aesthetic-communities.vercel.app",
-    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app"
+    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app",
+    "https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app"
 ]
 
+# Add these important settings
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = False  # Change this to False
+CORS_ALLOW_ALL_ORIGINS = False  # Keep this False for security
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -53,7 +56,7 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Add these settings
+# Add these additional settings
 CORS_EXPOSE_HEADERS = ['content-type', 'x-csrftoken']
 CORS_PREFLIGHT_MAX_AGE = 86400
 
