@@ -10,12 +10,15 @@ RUN apt-get update && apt-get install -y \
 # Set work directory
 WORKDIR /app/backend
 
+# Install pip first
+RUN python -m ensurepip && \
+    python -m pip install --upgrade pip setuptools wheel
+
 # Copy only requirements first
 COPY backend/requirements.txt /app/backend/
 
 # Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy backend files
 COPY backend/ /app/backend/
