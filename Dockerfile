@@ -23,4 +23,4 @@ ENV DJANGO_SETTINGS_MODULE=config.settings_prod
 ENV PORT=8000
 
 # Run migrations and start the application
-CMD python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT 
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT 
