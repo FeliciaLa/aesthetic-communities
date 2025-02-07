@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -85,8 +85,8 @@ const SavedItems = () => {
             }
             
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/preview/?url=${encodeURIComponent(url)}`,
+            const response = await api.get(
+                `preview/?url=${encodeURIComponent(url)}`,
                 {
                     headers: { 
                         'Authorization': `Token ${token}`
@@ -109,26 +109,26 @@ const SavedItems = () => {
     const fetchSavedItems = async () => {
         try {
             // Fetch saved images
-            const imagesRes = await axios.get('http://localhost:8000/api/saved/images/', {
+            const imagesRes = await api.get('saved/images/', {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
             });
             setSavedImages(imagesRes.data);
 
             // Fetch saved products
-            const productsRes = await axios.get('http://localhost:8000/api/saved/products/', {
+            const productsRes = await api.get('saved/products/', {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
             });
             setSavedProducts(productsRes.data);
 
             // Fetch saved collections
-            const collectionsRes = await axios.get('http://localhost:8000/api/saved/collections/', {
+            const collectionsRes = await api.get('saved/collections/', {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
             });
             console.log('Saved collections data:', collectionsRes.data);
             setSavedCollections(collectionsRes.data);
 
             // Fetch saved resources
-            const resourcesRes = await axios.get('http://localhost:8000/api/saved/resources/', {
+            const resourcesRes = await api.get('saved/resources/', {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
             });
             console.log('Saved resources:', resourcesRes.data);
@@ -554,8 +554,8 @@ const ProductCard = ({ product }) => {
 
                 // If client-side fails, try server-side proxy
                 const token = localStorage.getItem('token');
-                const proxyResponse = await axios.get(
-                    `http://localhost:8000/api/preview/?url=${encodeURIComponent(product.url)}`,
+                const proxyResponse = await api.get(
+                    `preview/?url=${encodeURIComponent(product.url)}`,
                     {
                         params: { url: product.url },
                         headers: { 'Authorization': `Token ${token}` }

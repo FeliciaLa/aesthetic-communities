@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import './RecommendedProducts.css';
 import AddProductModal from './AddProductModal';
-import api from '../../../api';
 
 const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [products, setProducts] = useState([]);
@@ -20,8 +19,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const fetchProducts = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(
-                `http://localhost:8000/api/communities/${communityId}/products/`,
+            const response = await api.get(
+                `/communities/${communityId}/products/`,
                 {
                     headers: { 'Authorization': `Token ${token}` }
                 }
@@ -118,8 +117,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     let attempts = [
                         // First attempt: Direct preview API
                         async () => {
-                            const response = await axios.get(
-                                `http://localhost:8000/api/preview/?url=${encodeURIComponent(product.url)}`,
+                            const response = await api.get(
+                                `/preview/?url=${encodeURIComponent(product.url)}`,
                                 {
                                     headers: { 'Authorization': `Token ${token}` }
                                 }
@@ -128,8 +127,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                         },
                         // Second attempt: Try metadata API
                         async () => {
-                            const response = await axios.post(
-                                `http://localhost:8000/api/products/fetch-metadata/`,
+                            const response = await api.post(
+                                `/products/fetch-metadata/`,
                                 { url: product.url },
                                 {
                                     headers: {

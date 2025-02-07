@@ -1,9 +1,5 @@
 import api from '../api';
 
-const API_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://aesthetic-communities-production.up.railway.app/api/'
-    : 'http://localhost:8000/api/';
-
 export const authService = {
     login: async (credentials) => {
         try {

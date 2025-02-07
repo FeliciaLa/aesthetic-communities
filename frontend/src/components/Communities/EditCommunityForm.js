@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import api from '../../services/api';
+import api from '../../api';
 
 const EditCommunityForm = ({ community, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({

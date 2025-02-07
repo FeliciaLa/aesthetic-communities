@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const CollectionForm = ({ communityId, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
@@ -27,8 +27,8 @@ const CollectionForm = ({ communityId, onSuccess, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(
-        `http://localhost:8000/api/resources/categories/`,
+      const response = await api.post(
+        `/resources/categories/`,
         formDataToSend,
         {
           headers: {

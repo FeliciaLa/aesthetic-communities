@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 
 const AddProductModal = ({ catalogues, onSubmit, onClose }) => {
     const [formData, setFormData] = useState({
@@ -23,8 +23,8 @@ const AddProductModal = ({ catalogues, onSubmit, onClose }) => {
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(
-                    `http://localhost:8000/api/preview/?url=${encodeURIComponent(formData.url)}`,
+                const response = await api.get(
+                    `/preview/?url=${encodeURIComponent(formData.url)}`,
                     {
                         headers: { 
                             'Authorization': `Token ${token}`

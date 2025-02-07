@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import './Resources.css';
 import CollectionForm from './CollectionForm';
 import EditCollectionForm from './EditCollectionForm';
@@ -27,7 +27,7 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
         try {
             console.log('Fetching collections for community:', communityId);
             
-            const response = await axios.get(
+            const response = await api.get(
                 '/resources/categories/',
                 {
                     params: { community_id: communityId }
@@ -87,7 +87,7 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
         if (window.confirm('Are you sure you want to delete this collection?')) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(
+                await api.delete(
                     `http://localhost:8000/api/resources/categories/${collectionId}/`,
                     {
                         headers: { 'Authorization': `Token ${token}` }
@@ -164,9 +164,11 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
                             >
                                 {collection.preview_image && (
                                     <img
-                                        src={collection.preview_image.startsWith('http') 
+                                        src={collection.preview_image?.startsWith('http') 
                                             ? collection.preview_image 
-                                            : `http://localhost:8000${collection.preview_image}`}
+                                            : collection.preview_image 
+                                                ? `${api.defaults.baseURL}${collection.preview_image}`
+                                                : null}
                                         alt={collection.name}
                                         className="collection-preview"
                                     />
