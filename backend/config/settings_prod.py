@@ -33,9 +33,23 @@ ALLOWED_HOSTS = [
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your local frontend
-    "https://aesthetic-communities-production.up.railway.app",  # Your Railway domain
+    "https://aesthetic-communities-production.up.railway.app",  # Your Railway backend
+    "https://aesthetic-communities.vercel.app",  # Your Vercel frontend
+    # Add any other domains you're using
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Database configuration
 DATABASES = {
