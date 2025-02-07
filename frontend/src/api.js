@@ -1,10 +1,14 @@
 import axios from "axios";
 
+// Add console log to check environment
+console.log('Current NODE_ENV:', process.env.NODE_ENV);
+
 const baseURL = process.env.NODE_ENV === 'production'
     ? 'https://aesthetic-communities-production.up.railway.app/api/'
     : 'http://localhost:8000/api/';
 
-console.log('API baseURL:', baseURL); // Debug log
+// Add console log to check baseURL
+console.log('Selected baseURL:', baseURL);
 
 const api = axios.create({
     baseURL,
@@ -20,6 +24,8 @@ const api = axios.create({
 // Add a request interceptor to add the auth token
 api.interceptors.request.use(
     (config) => {
+        // Add console log to check each request URL
+        console.log('Making request to:', config.baseURL + config.url);
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;

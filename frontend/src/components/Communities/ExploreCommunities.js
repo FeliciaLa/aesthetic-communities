@@ -439,22 +439,29 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      console.log('Fetching communities...'); // Add debug log
+      // Add debug logs
+      console.log('API instance:', api);
+      console.log('API baseURL:', api.defaults.baseURL);
+      
       const response = await api.get('/communities/');
-      console.log('Response:', response); // Add debug log
+      console.log('Communities response:', response);
       
       const communitiesWithFullUrls = response.data.map(community => ({
         ...community,
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `${api.defaults.baseURL}${community.banner_image}`
+            `https://aesthetic-communities-production.up.railway.app/api${community.banner_image}`
           ) : null
       }));
 
       setCommunities(communitiesWithFullUrls);
     } catch (err) {
-      console.error('Error fetching communities:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response,
+        config: err.config
+      });
       setError('Failed to fetch communities');
     } finally {
       setLoading(false);
