@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../api';  // Update to use configured api instance
 
 const API_URL = process.env.NODE_ENV === 'production' 
     ? 'https://aesthetic-communities-production.up.railway.app/api/'
@@ -7,7 +7,7 @@ const API_URL = process.env.NODE_ENV === 'production'
 export const authService = {
     login: async (credentials) => {
         try {
-            const response = await axios.post(`${API_URL}login/`, {
+            const response = await api.post('login/', {
                 username: credentials.identifier,
                 password: credentials.password
             });
@@ -26,7 +26,7 @@ export const authService = {
 
     register: async (credentials) => {
         try {
-            const response = await axios.post(`${API_URL}auth/register/`, {
+            const response = await api.post('auth/register/', {
                 email: credentials.email,
                 username: credentials.username,
                 password: credentials.password,
@@ -61,7 +61,7 @@ export const authService = {
 
     requestPasswordReset: async (email) => {
         try {
-            const response = await axios.post(`${API_URL}password-reset/`, {
+            const response = await api.post('password-reset/', {
                 email: email
             }, {
                 headers: {
@@ -76,8 +76,8 @@ export const authService = {
 
     resetPassword: async (userId, token, password) => {
         try {
-            const response = await axios.post(
-                `${API_URL}/password-reset-confirm/${userId}/${token}/`,
+            const response = await api.post(
+                `/password-reset-confirm/${userId}/${token}/`,
                 { password }
             );
             return response.data;

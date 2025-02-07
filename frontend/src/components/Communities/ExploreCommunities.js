@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './ExploreCommunities.css';
-import api from '../../api';  // Import our configured api instance
+import api from '../../../api';  // Update import path
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'react-feather';
