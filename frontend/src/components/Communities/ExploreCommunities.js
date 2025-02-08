@@ -406,7 +406,11 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+        banner_image: community.banner_image ? 
+          (community.banner_image.startsWith('http') ? 
+            community.banner_image : 
+            `${api.defaults.baseURL}${community.banner_image}`
+          ) : null
       }));
       
       console.log('Transformed communities:', transformedCommunities);
@@ -423,10 +427,13 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       
       if (response.data && response.data.length > 0) {
-        // Use the same URL transformation for trending communities
         const transformedCommunities = response.data.map(community => ({
           ...community,
-          banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+          banner_image: community.banner_image ? 
+            (community.banner_image.startsWith('http') ? 
+              community.banner_image : 
+              `${api.defaults.baseURL}${community.banner_image}`
+            ) : null
         }));
         
         setTrendingCommunities(transformedCommunities);
