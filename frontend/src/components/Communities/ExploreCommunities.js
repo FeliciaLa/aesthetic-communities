@@ -421,20 +421,20 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
           ...community,
           banner_image: community.banner_image || null
         }));
+        console.log('Setting trending communities:', transformedCommunities);
         setTrendingCommunities(transformedCommunities);
       } else {
-        // If no trending communities, use top 3 from regular communities
+        console.log('No trending communities found, using fallback');
         const fallbackTrending = communities
-          .sort((a, b) => b.member_count - a.member_count)
-          .slice(0, 3);
+          .sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
+          .slice(0, 5);
         setTrendingCommunities(fallbackTrending);
       }
     } catch (error) {
       console.error('Error fetching trending communities:', error.response || error);
-      // Use regular communities as fallback for trending
       const fallbackTrending = communities
-        .sort((a, b) => b.member_count - a.member_count)
-        .slice(0, 3);
+        .sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
+        .slice(0, 5);
       setTrendingCommunities(fallbackTrending);
     }
   };
@@ -595,14 +595,19 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
             {/* Trending Section */}
             <h2 style={{ maxWidth: '1200px', margin: '2rem auto 1rem auto', padding: '0 1.5rem' }}>Trending Hubs</h2>
             <CarouselContainer>
-              <CarouselTrack itemCount={10}>
-                {trendingCommunities
-                  .concat(trendingCommunities) // Duplicate for infinite scroll
-                  .map(community => (
-                    <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
+              <CarouselTrack itemCount={trendingCommunities.length * 2}>
+                {trendingCommunities.length > 0 ? (
+                  [...trendingCommunities, ...trendingCommunities].map((community, index) => (
+                    <StyledLink 
+                      to={`/communities/${community.id}`} 
+                      key={`${community.id}-${index}`}
+                    >
                       <CommunityCard community={community} />
                     </StyledLink>
-                  ))}
+                  ))
+                ) : (
+                  <div>Loading trending communities...</div>
+                )}
               </CarouselTrack>
             </CarouselContainer>
 
