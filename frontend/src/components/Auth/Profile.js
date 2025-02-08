@@ -197,21 +197,21 @@ const Profile = () => {
 
         // Transform the communities data to include full image URLs
         const allCommunities = allCommunitiesRes.data.map(community => {
-          const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
-          console.log('Original banner_image:', community.banner_image);
-          console.log('Base URL without API:', baseURLWithoutApi);
+          // Remove /api from the base URL and ensure it ends with a slash
+          const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
           
-          const finalImageUrl = community.banner_image ? 
-            (community.banner_image.startsWith('http') ? 
-              community.banner_image : 
-              `${baseURLWithoutApi}${community.banner_image}`
-            ) : null;
-          
-          console.log('Final image URL:', finalImageUrl);
-          
+          // Ensure the banner_image path starts with a slash
+          const imagePath = community.banner_image && !community.banner_image.startsWith('/')
+            ? `/${community.banner_image}`
+            : community.banner_image;
+
           return {
             ...community,
-            banner_image: finalImageUrl
+            banner_image: imagePath
+              ? (imagePath.startsWith('http')
+                ? imagePath
+                : `${baseURLWithoutApi}${imagePath}`)
+              : null
           };
         });
         
@@ -322,9 +322,14 @@ const Profile = () => {
                               src={community.banner_image} 
                               alt={community.name}
                               onError={(e) => {
-                                console.log('Image load error:', community.banner_image); // Debug log
-                                e.target.onerror = null;
-                                e.target.src = DEFAULT_AVATAR; // Fallback to default image
+                                e.target.onerror = null; // Prevent infinite loop
+                                e.target.style.display = 'none'; // Hide broken image
+                                // Show placeholder instead
+                                e.target.parentElement.innerHTML = `
+                                  <div class="placeholder-banner">
+                                    ${community.name.charAt(0).toUpperCase()}
+                                  </div>
+                                `;
                               }}
                             />
                           ) : (
@@ -364,9 +369,14 @@ const Profile = () => {
                               src={community.banner_image} 
                               alt={community.name}
                               onError={(e) => {
-                                console.log('Image load error:', community.banner_image); // Debug log
-                                e.target.onerror = null;
-                                e.target.src = DEFAULT_AVATAR; // Fallback to default image
+                                e.target.onerror = null; // Prevent infinite loop
+                                e.target.style.display = 'none'; // Hide broken image
+                                // Show placeholder instead
+                                e.target.parentElement.innerHTML = `
+                                  <div class="placeholder-banner">
+                                    ${community.name.charAt(0).toUpperCase()}
+                                  </div>
+                                `;
                               }}
                             />
                           ) : (
