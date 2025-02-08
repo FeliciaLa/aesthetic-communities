@@ -442,11 +442,9 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/');
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image ? 
-          (community.banner_image.startsWith('http') ? 
-            community.banner_image : 
-            `${api.defaults.baseURL}${community.banner_image}`
-          ) : null
+        banner_image: community.banner_image && !community.banner_image.startsWith('http') 
+          ? `${api.defaults.baseURL}${community.banner_image}`
+          : community.banner_image
       }));
       setCommunities(transformedCommunities);
     } catch (error) {
@@ -460,11 +458,9 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image ? 
-          (community.banner_image.startsWith('http') ? 
-            community.banner_image : 
-            `${api.defaults.baseURL}${community.banner_image}`
-          ) : null
+        banner_image: community.banner_image && !community.banner_image.startsWith('http') 
+          ? `${api.defaults.baseURL}${community.banner_image}`
+          : community.banner_image
       }));
       setTrendingCommunities(transformedCommunities);
     } catch (error) {
@@ -583,7 +579,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                               alt={community.name}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/default-banner.jpg';
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = `
+                                  <div class="placeholder-banner">
+                                    ${community.name.charAt(0).toUpperCase()}
+                                  </div>
+                                `;
                               }}
                             />
                           ) : (
@@ -647,7 +648,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                             alt={community.name}
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = '/default-banner.jpg';
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = `
+                                <div class="placeholder-banner">
+                                  ${community.name.charAt(0).toUpperCase()}
+                                </div>
+                              `;
                             }}
                           />
                         ) : (
@@ -696,7 +702,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                               alt={community.name}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/default-banner.jpg';
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = `
+                                  <div class="placeholder-banner">
+                                    ${community.name.charAt(0).toUpperCase()}
+                                  </div>
+                                `;
                               }}
                             />
                           ) : (
@@ -760,7 +771,12 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                             alt={community.name}
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = '/default-banner.jpg';
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = `
+                                <div class="placeholder-banner">
+                                  ${community.name.charAt(0).toUpperCase()}
+                                </div>
+                              `;
                             }}
                           />
                         ) : (

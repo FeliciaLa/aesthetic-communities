@@ -128,12 +128,12 @@ class CommunitySerializer(serializers.ModelSerializer):
         return obj.views.filter(viewed_at__gte=thirty_days_ago).count()
 
     def get_banner_image(self, obj):
-        if obj.banner_image:
+        if obj.banner_image and obj.banner_image.url:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.banner_image.url)
             return obj.banner_image.url
-        return None  # Return null if no banner image exists
+        return None
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
