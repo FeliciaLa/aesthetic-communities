@@ -38,7 +38,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://aesthetic-communities.vercel.app",
     "https://aesthetic-communities-git-master-felicialas-projects.vercel.app",
     "https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app",
-    "https://aesthetic-communities-251nx0jod-felicia-lammertings-projects.vercel.app"
+    "https://aesthetic-communities-251nx0jod-felicia-lammertings-projects.vercel.app",
+    "https://aesthetic-communities.vercel.app"  # Make sure this exact domain is included
 ]
 
 # Add these important settings

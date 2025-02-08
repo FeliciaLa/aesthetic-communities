@@ -1,7 +1,8 @@
 import axios from "axios";
 
-// Force production URL and add debug logging
+// Force production URL
 const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
+
 console.log('API Configuration:', {
     baseURL: baseURL,
     environment: process.env.NODE_ENV
@@ -43,16 +44,16 @@ testConnection();
 // Add request interceptor for debugging
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Token ${token}`;
+        // Ensure the URL starts with the correct base URL
+        if (!config.url.startsWith('http')) {
+            config.url = `${baseURL}${config.url.replace(/^\//, '')}`;
         }
-        console.log('Request:', {
-            url: config.url,
+        
+        console.log('Making request to:', config.url, {
             method: config.method,
-            headers: config.headers,
             data: config.data
         });
+        
         return config;
     },
     (error) => {
@@ -64,14 +65,18 @@ api.interceptors.request.use(
 // Add response interceptor for debugging
 api.interceptors.response.use(
     (response) => {
-        console.log('Response:', response.data);
+        console.log('Response received:', {
+            url: response.config.url,
+            status: response.status,
+            data: response.data
+        });
         return response;
     },
     (error) => {
-        console.error('Response error:', {
+        console.error('API Error:', {
+            url: error.config?.url,
             message: error.message,
-            status: error.response?.status,
-            data: error.response?.data
+            response: error.response?.data
         });
         return Promise.reject(error);
     }
