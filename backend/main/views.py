@@ -1677,3 +1677,26 @@ class PasswordResetConfirmView(APIView):
                 {'error': 'User not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class TrendingCommunitiesView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            # Get all communities and order by some metric (e.g., member count, activity)
+            communities = Community.objects.annotate(
+                member_count=Count('members'),
+                post_count=Count('posts')
+            ).order_by('-member_count', '-post_count')[:3]  # Get top 3
+            
+            serializer = CommunitySerializer(
+                communities, 
+                many=True,
+                context={'request': request}
+            )
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

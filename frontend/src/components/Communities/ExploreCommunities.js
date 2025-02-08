@@ -409,6 +409,7 @@ const SectionHeader = styled.div`
 
 const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const [communities, setCommunities] = useState([]);
+  const [trendingCommunities, setTrendingCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -438,7 +439,6 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   const fetchCommunities = async () => {
     try {
-      setLoading(true);
       const response = await api.get('/communities/');
       const transformedCommunities = response.data.map(community => ({
         ...community,
@@ -452,19 +452,38 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     } catch (error) {
       console.error('Error fetching communities:', error);
       setError('Failed to load communities');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const refreshCommunities = useCallback(() => {
-    console.log('Component mounted, fetching communities...'); // Debug log
-    fetchCommunities();
-  }, []);
+  const fetchTrendingCommunities = async () => {
+    try {
+      const response = await api.get('/communities/trending/');
+      const transformedCommunities = response.data.map(community => ({
+        ...community,
+        banner_image: community.banner_image ? 
+          (community.banner_image.startsWith('http') ? 
+            community.banner_image : 
+            `/media/community_banners/default-banner.jpg`
+          ) : `/media/community_banners/default-banner.jpg`
+      }));
+      setTrendingCommunities(transformedCommunities);
+    } catch (error) {
+      console.error('Error fetching trending communities:', error);
+      // Don't set error state here to allow regular communities to still load
+    }
+  };
 
   useEffect(() => {
-    refreshCommunities();
-  }, [refreshCommunities]);
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchCommunities(),
+        fetchTrendingCommunities()
+      ]);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

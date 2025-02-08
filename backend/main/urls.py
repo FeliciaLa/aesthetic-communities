@@ -39,7 +39,8 @@ from .views import (
     RegisterView,
     LoginView,
     PasswordResetView,
-    PasswordResetConfirmView
+    PasswordResetConfirmView,
+    TrendingCommunitiesView
 )
 from . import views
 
@@ -122,6 +123,8 @@ urlpatterns = [
     path('password-reset/', PasswordResetView.as_view(), name='password-reset'),
     path('password-reset-confirm/<int:user_id>/<str:token>/', 
          PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+
+    path('communities/trending/', TrendingCommunitiesView.as_view(), name='trending-communities'),
 ]
 
 # Add this for debugging
