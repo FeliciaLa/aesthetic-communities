@@ -12,17 +12,43 @@ const api = axios.create({
     timeout: 10000,
     headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    },
-    // Remove withCredentials since we're using token auth
-    withCredentials: false
+        'Content-Type': 'application/json'
+    }
 });
+
+// Test connection immediately
+const testConnection = async () => {
+    try {
+        const response = await axios({
+            method: 'get',
+            url: `${baseURL}communities/`,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        console.log('Test connection successful:', response.data);
+    } catch (error) {
+        console.error('Test connection failed:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+            config: error.config
+        });
+    }
+};
+
+// Run test
+testConnection();
 
 // Add request interceptor for debugging
 api.interceptors.request.use(
     (config) => {
-        // Log the full URL being requested
-        console.log('Making request to:', `${baseURL}${config.url}`, {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Token ${token}`;
+        }
+        console.log('Making request:', {
+            url: `${baseURL}${config.url}`,
             method: config.method,
             headers: config.headers
         });
@@ -37,14 +63,15 @@ api.interceptors.request.use(
 // Add response interceptor for debugging
 api.interceptors.response.use(
     (response) => {
-        console.log('Successful response:', response.data);
+        console.log('Response:', response.data);
         return response;
     },
     (error) => {
         console.error('Response error:', {
             message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
+            status: error.response?.status,
+            data: error.response?.data,
+            config: error.config
         });
         return Promise.reject(error);
     }
