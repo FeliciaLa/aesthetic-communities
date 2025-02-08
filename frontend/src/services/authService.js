@@ -39,29 +39,33 @@ export const authService = {
             });
 
             const formData = {
-                email: credentials.email,
                 username: credentials.username,
+                email: credentials.email,
                 password: credentials.password,
                 confirm_password: credentials.confirmPassword,
                 is_over_16: credentials.isOver16
             };
 
+            console.log('Sending registration data:', formData);
+
             const response = await api.post('auth/register/', formData);
+            console.log('Registration response:', response.data);
             
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('username', response.data.username);
-                localStorage.setItem('userId', response.data.user_id.toString());
-                console.log('Registration successful:', response.data);
+                localStorage.setItem('userId', response.data.user_id?.toString());
                 return response.data;
             } else {
+                console.error('No token in response:', response.data);
                 throw new Error('Registration failed: No token received');
             }
         } catch (error) {
             console.error('Registration error details:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status
+                status: error.response?.status,
+                url: error.config?.url
             });
             throw error;
         }

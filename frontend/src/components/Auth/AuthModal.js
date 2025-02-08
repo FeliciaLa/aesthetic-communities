@@ -104,13 +104,30 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
           return;
         }
 
-        response = await authService.register({
-          email,
-          username,
-          password,
-          confirmPassword,
-          isOver16
-        });
+        try {
+          response = await authService.register({
+            email,
+            username,
+            password,
+            confirmPassword,
+            isOver16
+          });
+        } catch (err) {
+          // Handle specific validation errors
+          if (err.response?.data) {
+            const errors = err.response.data;
+            if (errors.username) {
+              setError(errors.username[0]);
+              return;
+            }
+            if (errors.email) {
+              setError(errors.email[0]);
+              return;
+            }
+          }
+          setError('Registration failed. Please try again.');
+          return;
+        }
       }
 
       if (response.token) {
