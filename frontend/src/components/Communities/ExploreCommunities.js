@@ -414,13 +414,21 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       console.log('Fetching trending communities...');
       const response = await api.get('/communities/trending/');
-      console.log('Trending communities response:', response.data); // Debug log
-      const transformedCommunities = response.data.map(community => ({
-        ...community,
-        banner_image: community.banner_image || null
-      }));
-      console.log('Transformed trending communities:', transformedCommunities); // Debug log
-      setTrendingCommunities(transformedCommunities);
+      console.log('Trending communities response:', response.data);
+      
+      if (response.data && response.data.length > 0) {
+        const transformedCommunities = response.data.map(community => ({
+          ...community,
+          banner_image: community.banner_image || null
+        }));
+        setTrendingCommunities(transformedCommunities);
+      } else {
+        // If no trending communities, use top 3 from regular communities
+        const fallbackTrending = communities
+          .sort((a, b) => b.member_count - a.member_count)
+          .slice(0, 3);
+        setTrendingCommunities(fallbackTrending);
+      }
     } catch (error) {
       console.error('Error fetching trending communities:', error.response || error);
       // Use regular communities as fallback for trending
