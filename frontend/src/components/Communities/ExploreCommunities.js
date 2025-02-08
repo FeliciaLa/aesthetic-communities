@@ -362,6 +362,12 @@ const SectionHeader = styled.div`
   }
 `;
 
+const getImageUrl = (image) => {
+  return image.startsWith('http') 
+    ? image 
+    : `${api.defaults.baseURL}${image}`;
+};
+
 const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
   const [communities, setCommunities] = useState([]);
   const [trendingCommunities, setTrendingCommunities] = useState([]);
@@ -398,22 +404,10 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/');
       console.log('All communities response:', response.data);
       
-      // Use the same URL transformation for all communities
-      const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
-      const transformedCommunities = response.data.map(community => {
-        const imagePath = community.banner_image && !community.banner_image.startsWith('/')
-          ? `/${community.banner_image}`
-          : community.banner_image;
-
-        return {
-          ...community,
-          banner_image: imagePath
-            ? (imagePath.startsWith('http')
-              ? imagePath
-              : `${baseURLWithoutApi}${imagePath}`)
-            : null
-        };
-      });
+      const transformedCommunities = response.data.map(community => ({
+        ...community,
+        banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+      }));
       
       console.log('Transformed communities:', transformedCommunities);
       setCommunities(transformedCommunities);
@@ -430,21 +424,10 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       
       if (response.data && response.data.length > 0) {
         // Use the same URL transformation for trending communities
-        const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
-        const transformedCommunities = response.data.map(community => {
-          const imagePath = community.banner_image && !community.banner_image.startsWith('/')
-            ? `/${community.banner_image}`
-            : community.banner_image;
-
-          return {
-            ...community,
-            banner_image: imagePath
-              ? (imagePath.startsWith('http')
-                ? imagePath
-                : `${baseURLWithoutApi}${imagePath}`)
-              : null
-          };
-        });
+        const transformedCommunities = response.data.map(community => ({
+          ...community,
+          banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+        }));
         
         setTrendingCommunities(transformedCommunities);
       } else {
