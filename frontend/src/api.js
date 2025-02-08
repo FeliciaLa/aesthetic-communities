@@ -41,19 +41,14 @@ const testConnection = async () => {
 // Run test
 testConnection();
 
-// Add request interceptor for debugging
+// Add request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Ensure the URL starts with the correct base URL
-        if (!config.url.startsWith('http')) {
-            config.url = `${baseURL}${config.url.replace(/^\//, '')}`;
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Token ${token}`;
         }
-        
-        console.log('Making request to:', config.url, {
-            method: config.method,
-            data: config.data
-        });
-        
+        console.log('Request:', config.url, config.data);
         return config;
     },
     (error) => {
@@ -62,38 +57,20 @@ api.interceptors.request.use(
     }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor
 api.interceptors.response.use(
     (response) => {
-        console.log('Response received:', {
-            url: response.config.url,
-            status: response.status,
-            data: response.data
-        });
+        console.log('Response:', response.data);
         return response;
     },
     (error) => {
-        console.error('API Error:', {
+        console.error('Response error:', {
             url: error.config?.url,
-            message: error.message,
-            response: error.response?.data
+            status: error.response?.status,
+            data: error.response?.data
         });
         return Promise.reject(error);
     }
 );
-
-// Login helper function
-api.login = async (email, password) => {
-    try {
-        const response = await api.post('/auth/login/', {
-            identifier: email,  // Backend expects 'identifier'
-            password: password
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Login failed:', error);
-        throw error;
-    }
-};
 
 export default api;
