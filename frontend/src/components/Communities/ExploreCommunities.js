@@ -406,7 +406,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+        banner_image: community.banner_image ? 
+          `https://aesthetic-communities-production.up.railway.app/media/${community.banner_image}` : null
       }));
       
       console.log('Transformed communities:', transformedCommunities);
@@ -425,7 +426,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       if (response.data && response.data.length > 0) {
         const transformedCommunities = response.data.map(community => ({
           ...community,
-          banner_image: community.banner_image ? getImageUrl(community.banner_image) : null
+          banner_image: community.banner_image ? 
+            `https://aesthetic-communities-production.up.railway.app/media/${community.banner_image}` : null
         }));
         
         setTrendingCommunities(transformedCommunities);
@@ -436,7 +438,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
         setTrendingCommunities(fallbackTrending);
       }
     } catch (error) {
-      console.error('Error fetching trending communities:', error.response || error);
+      console.error('Error fetching trending communities:', error);
       const fallbackTrending = communities
         .sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
         .slice(0, 5);
