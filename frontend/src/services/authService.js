@@ -33,20 +33,36 @@ export const authService = {
 
     register: async (credentials) => {
         try {
-            const response = await api.post('auth/register/', {
+            console.log('Attempting registration with:', {
+                email: credentials.email,
+                username: credentials.username
+            });
+
+            const formData = {
                 email: credentials.email,
                 username: credentials.username,
                 password: credentials.password,
                 confirm_password: credentials.confirmPassword,
                 is_over_16: credentials.isOver16
-            });
-            const { token, user } = response.data;
+            };
+
+            const response = await api.post('auth/register/', formData);
             
-            localStorage.setItem('token', token);
-            localStorage.setItem('userId', user.id.toString());
-            
-            return response.data;
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('username', response.data.username);
+                localStorage.setItem('userId', response.data.user_id.toString());
+                console.log('Registration successful:', response.data);
+                return response.data;
+            } else {
+                throw new Error('Registration failed: No token received');
+            }
         } catch (error) {
+            console.error('Registration error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
             throw error;
         }
     },
