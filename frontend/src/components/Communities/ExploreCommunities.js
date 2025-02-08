@@ -395,11 +395,14 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   const fetchCommunities = async () => {
     try {
+      console.log('Fetching all communities...');
       const response = await api.get('/communities/');
+      console.log('All communities response:', response.data); // Debug log
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image || null  // Only use the banner if it exists
+        banner_image: community.banner_image || null
       }));
+      console.log('Transformed communities:', transformedCommunities); // Debug log
       setCommunities(transformedCommunities);
     } catch (error) {
       console.error('Error fetching communities:', error);
@@ -409,15 +412,22 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   const fetchTrendingCommunities = async () => {
     try {
+      console.log('Fetching trending communities...');
       const response = await api.get('/communities/trending/');
+      console.log('Trending communities response:', response.data); // Debug log
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image || null  // Only use the banner if it exists
+        banner_image: community.banner_image || null
       }));
+      console.log('Transformed trending communities:', transformedCommunities); // Debug log
       setTrendingCommunities(transformedCommunities);
     } catch (error) {
-      console.error('Error fetching trending communities:', error);
-      // Don't set error state here to allow regular communities to still load
+      console.error('Error fetching trending communities:', error.response || error);
+      // Use regular communities as fallback for trending
+      const fallbackTrending = communities
+        .sort((a, b) => b.member_count - a.member_count)
+        .slice(0, 3);
+      setTrendingCommunities(fallbackTrending);
     }
   };
 
@@ -517,10 +527,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
             <h2 style={{ maxWidth: '1200px', margin: '0 auto 1rem auto', padding: '0 1.5rem' }}>Trending Hubs</h2>
             <CarouselContainer>
               <CarouselTrack itemCount={10}>
-                {[...communities]
-                  .sort((a, b) => b.member_count - a.member_count)
-                  .slice(0, 10)
-                  .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
+                {trendingCommunities
+                  .concat(trendingCommunities) // Duplicate for infinite scroll
                   .map(community => (
                     <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
                       <CommunityCard community={community} />
@@ -580,10 +588,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
             <h2 style={{ maxWidth: '1200px', margin: '2rem auto 1rem auto', padding: '0 1.5rem' }}>Trending Hubs</h2>
             <CarouselContainer>
               <CarouselTrack itemCount={10}>
-                {[...communities]
-                  .sort((a, b) => b.member_count - a.member_count)
-                  .slice(0, 10)
-                  .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
+                {trendingCommunities
+                  .concat(trendingCommunities) // Duplicate for infinite scroll
                   .map(community => (
                     <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
                       <CommunityCard community={community} />
