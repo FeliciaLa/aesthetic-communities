@@ -4,17 +4,19 @@ export const authService = {
     login: async (credentials) => {
         try {
             const response = await api.post('auth/login/', {
-                username: credentials.identifier,
+                identifier: credentials.identifier,
                 password: credentials.password
             });
             const { token, user } = response.data;
             
             localStorage.setItem('token', token);
             localStorage.setItem('userId', user.id.toString());
-            console.log('Stored user ID:', user.id);
+            localStorage.setItem('username', user.username);
+            console.log('Login successful:', user);
             
             return response.data;
         } catch (error) {
+            console.error('Login error:', error);
             throw error;
         }
     },

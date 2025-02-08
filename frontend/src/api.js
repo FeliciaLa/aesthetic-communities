@@ -47,10 +47,11 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-        console.log('Making request:', {
-            url: `${baseURL}${config.url}`,
+        console.log('Request:', {
+            url: config.url,
             method: config.method,
-            headers: config.headers
+            headers: config.headers,
+            data: config.data
         });
         return config;
     },
@@ -70,11 +71,24 @@ api.interceptors.response.use(
         console.error('Response error:', {
             message: error.message,
             status: error.response?.status,
-            data: error.response?.data,
-            config: error.config
+            data: error.response?.data
         });
         return Promise.reject(error);
     }
 );
+
+// Login helper function
+api.login = async (email, password) => {
+    try {
+        const response = await api.post('/auth/login/', {
+            identifier: email,  // Backend expects 'identifier'
+            password: password
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+    }
+};
 
 export default api;
