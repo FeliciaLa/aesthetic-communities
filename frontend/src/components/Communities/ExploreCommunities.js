@@ -175,82 +175,38 @@ const StyledLink = styled(Link)`
   color: inherit;
 `;
 
-const CommunityCard = styled.div`
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-  }
-
-  .community-banner {
-    height: 120px;
-    background: #f0f0f0;
-    position: relative;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .placeholder-banner {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: #666;
-      background: #e0e0e0;
-    }
-  }
-
-  .community-content {
-    padding: 1rem;
-
-    h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1.2rem;
-    }
-
-    p {
-      color: #666;
-      font-size: 0.9rem;
-      margin: 0 0 1rem;
-    }
-
-    .community-stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-      color: #888;
-    }
-
-    .view-button {
-      padding: 0.3rem 1rem;
-      background: transparent;
-      color: #fa8072;
-      border: 1px solid #fa8072;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #fa8072;
-        color: white;
-      }
-    }
-  }
-`;
+const CommunityCard = ({ community }) => (
+  <div className="community-card">
+    <div className="community-banner">
+      {community.banner_image ? (
+        <img 
+          src={community.banner_image} 
+          alt={community.name}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.parentElement.innerHTML = `
+              <div class="placeholder-banner">
+                ${community.name.charAt(0).toUpperCase()}
+              </div>
+            `;
+          }}
+        />
+      ) : (
+        <div className="placeholder-banner">
+          {community.name.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </div>
+    <div className="community-content">
+      <h2>{community.name}</h2>
+      <p>{community.description}</p>
+      <div className="community-stats">
+        <span>{community.member_count || 0} members</span>
+        <button className="view-button">View Hub</button>
+      </div>
+    </div>
+  </div>
+);
 
 const LoadMoreContainer = styled.div`
   text-align: center;
@@ -442,9 +398,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/');
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image && !community.banner_image.startsWith('http') 
-          ? `${api.defaults.baseURL}${community.banner_image}`
-          : community.banner_image
+        banner_image: community.banner_image || null  // Only use the banner if it exists
       }));
       setCommunities(transformedCommunities);
     } catch (error) {
@@ -458,9 +412,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image && !community.banner_image.startsWith('http') 
-          ? `${api.defaults.baseURL}${community.banner_image}`
-          : community.banner_image
+        banner_image: community.banner_image || null  // Only use the banner if it exists
       }));
       setTrendingCommunities(transformedCommunities);
     } catch (error) {
@@ -571,37 +523,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                   .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
                   .map(community => (
                     <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
-                      <CommunityCard>
-                        <div className="community-banner">
-                          {community.banner_image ? (
-                            <img 
-                              src={community.banner_image} 
-                              alt={community.name}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML = `
-                                  <div class="placeholder-banner">
-                                    ${community.name.charAt(0).toUpperCase()}
-                                  </div>
-                                `;
-                              }}
-                            />
-                          ) : (
-                            <div className="placeholder-banner">
-                              {community.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <div className="community-content">
-                          <h2>{community.name}</h2>
-                          <p>{community.description}</p>
-                          <div className="community-stats">
-                            <span>{community.member_count} members</span>
-                            <button className="view-button">View Hub</button>
-                          </div>
-                        </div>
-                      </CommunityCard>
+                      <CommunityCard community={community} />
                     </StyledLink>
                   ))}
               </CarouselTrack>
@@ -640,37 +562,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map(community => (
                   <StyledLink to={`/communities/${community.id}`} key={community.id}>
-                    <CommunityCard>
-                      <div className="community-banner">
-                        {community.banner_image ? (
-                          <img 
-                            src={community.banner_image} 
-                            alt={community.name}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = `
-                                <div class="placeholder-banner">
-                                  ${community.name.charAt(0).toUpperCase()}
-                                </div>
-                              `;
-                            }}
-                          />
-                        ) : (
-                          <div className="placeholder-banner">
-                            {community.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <div className="community-content">
-                        <h2>{community.name}</h2>
-                        <p>{community.description}</p>
-                        <div className="community-stats">
-                          <span>{community.member_count} members</span>
-                          <button className="view-button">View Hub</button>
-                        </div>
-                      </div>
-                    </CommunityCard>
+                    <CommunityCard community={community} />
                   </StyledLink>
                 ))}
             </CommunitiesGrid>
@@ -694,37 +586,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                   .concat([...communities].sort((a, b) => b.member_count - a.member_count).slice(0, 10))
                   .map(community => (
                     <StyledLink to={`/communities/${community.id}`} key={`${community.id}-${Math.random()}`}>
-                      <CommunityCard>
-                        <div className="community-banner">
-                          {community.banner_image ? (
-                            <img 
-                              src={community.banner_image} 
-                              alt={community.name}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML = `
-                                  <div class="placeholder-banner">
-                                    ${community.name.charAt(0).toUpperCase()}
-                                  </div>
-                                `;
-                              }}
-                            />
-                          ) : (
-                            <div className="placeholder-banner">
-                              {community.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <div className="community-content">
-                          <h2>{community.name}</h2>
-                          <p>{community.description}</p>
-                          <div className="community-stats">
-                            <span>{community.member_count} members</span>
-                            <button className="view-button">View Hub</button>
-                          </div>
-                        </div>
-                      </CommunityCard>
+                      <CommunityCard community={community} />
                     </StyledLink>
                   ))}
               </CarouselTrack>
@@ -763,37 +625,7 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                 .slice(0, displayLimit)
                 .map(community => (
                   <StyledLink to={`/communities/${community.id}`} key={community.id}>
-                    <CommunityCard>
-                      <div className="community-banner">
-                        {community.banner_image ? (
-                          <img 
-                            src={community.banner_image} 
-                            alt={community.name}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = `
-                                <div class="placeholder-banner">
-                                  ${community.name.charAt(0).toUpperCase()}
-                                </div>
-                              `;
-                            }}
-                          />
-                        ) : (
-                          <div className="placeholder-banner">
-                            {community.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <div className="community-content">
-                        <h2>{community.name}</h2>
-                        <p>{community.description}</p>
-                        <div className="community-stats">
-                          <span>{community.member_count} members</span>
-                          <button className="view-button">View Hub</button>
-                        </div>
-                      </div>
-                    </CommunityCard>
+                    <CommunityCard community={community} />
                   </StyledLink>
                 ))}
             </CommunitiesGrid>
