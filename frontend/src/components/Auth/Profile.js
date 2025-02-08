@@ -196,14 +196,19 @@ const Profile = () => {
         ]);
 
         // Transform the communities data to include full image URLs
-        const allCommunities = allCommunitiesRes.data.map(community => ({
-          ...community,
-          banner_image: community.banner_image ? 
-            (community.banner_image.startsWith('http') ? 
-              community.banner_image : 
-              `${api.defaults.baseURL}${community.banner_image}`
-            ) : null
-        }));
+        const allCommunities = allCommunitiesRes.data.map(community => {
+          const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
+          return {
+            ...community,
+            banner_image: community.banner_image ? 
+              (community.banner_image.startsWith('http') ? 
+                community.banner_image : 
+                `${baseURLWithoutApi}${community.banner_image}`
+              ) : null
+          };
+        });
+        
+        console.log('Transformed communities:', allCommunities); // Debug log
         
         // Get created communities
         const created = allCommunities.filter(
@@ -250,8 +255,9 @@ const Profile = () => {
                   src={previewImage || profile.avatar} 
                   alt={profile.username}
                   onError={(e) => {
+                    console.log('Image load error:', previewImage || profile.avatar); // Debug log
                     e.target.onerror = null;
-                    e.target.src = DEFAULT_AVATAR;
+                    e.target.src = DEFAULT_AVATAR; // Fallback to default image
                   }}
                 />
               ) : (
@@ -305,7 +311,15 @@ const Profile = () => {
                       >
                         <div className="community-banner">
                           {community.banner_image ? (
-                            <img src={community.banner_image} alt={community.name} />
+                            <img 
+                              src={community.banner_image} 
+                              alt={community.name}
+                              onError={(e) => {
+                                console.log('Image load error:', community.banner_image); // Debug log
+                                e.target.onerror = null;
+                                e.target.src = DEFAULT_AVATAR; // Fallback to default image
+                              }}
+                            />
                           ) : (
                             <div className="placeholder-banner">
                               {community.name.charAt(0).toUpperCase()}
@@ -339,7 +353,15 @@ const Profile = () => {
                       >
                         <div className="community-banner">
                           {community.banner_image ? (
-                            <img src={community.banner_image} alt={community.name} />
+                            <img 
+                              src={community.banner_image} 
+                              alt={community.name}
+                              onError={(e) => {
+                                console.log('Image load error:', community.banner_image); // Debug log
+                                e.target.onerror = null;
+                                e.target.src = DEFAULT_AVATAR; // Fallback to default image
+                              }}
+                            />
                           ) : (
                             <div className="placeholder-banner">
                               {community.name.charAt(0).toUpperCase()}
