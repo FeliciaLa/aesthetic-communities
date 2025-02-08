@@ -202,7 +202,6 @@ const CommunityCard = ({ community }) => (
       <p>{community.description}</p>
       <div className="community-stats">
         <span>{community.member_count || 0} members</span>
-        <button className="view-button">View Hub</button>
       </div>
     </div>
   </div>
