@@ -1683,11 +1683,10 @@ class TrendingCommunitiesView(APIView):
 
     def get(self, request):
         try:
-            # Get all communities and order by some metric (e.g., member count, activity)
+            # Get all communities and order by member count only for now
             communities = Community.objects.annotate(
-                member_count=Count('members'),
-                post_count=Count('posts')
-            ).order_by('-member_count', '-post_count')[:3]  # Get top 3
+                member_count=Count('members')
+            ).order_by('-member_count')[:5]  # Get top 5
             
             serializer = CommunitySerializer(
                 communities, 
@@ -1696,6 +1695,7 @@ class TrendingCommunitiesView(APIView):
             )
             return Response(serializer.data)
         except Exception as e:
+            print(f"Error in TrendingCommunitiesView: {str(e)}")  # Debug log
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
