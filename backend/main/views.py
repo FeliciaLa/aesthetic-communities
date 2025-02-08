@@ -196,9 +196,19 @@ class CommunityListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        communities = Community.objects.all()
-        serializer = CommunitySerializer(communities, many=True)
-        return Response(serializer.data)
+        try:
+            communities = Community.objects.all()
+            serializer = CommunitySerializer(
+                communities, 
+                many=True,
+                context={'request': request}
+            )
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request):
         if not request.user.is_authenticated:

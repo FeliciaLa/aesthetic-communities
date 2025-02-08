@@ -440,14 +440,13 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       setLoading(true);
       const response = await api.get('/communities/');
-      // Transform the communities data to include full image URLs
       const transformedCommunities = response.data.map(community => ({
         ...community,
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `${api.defaults.baseURL.replace('/api', '')}${community.banner_image}`
-          ) : null
+            `/media/community_banners/default-banner.jpg`
+          ) : `/media/community_banners/default-banner.jpg`
       }));
       setCommunities(transformedCommunities);
     } catch (error) {

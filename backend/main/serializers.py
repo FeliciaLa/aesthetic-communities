@@ -107,6 +107,7 @@ class CommunitySerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
     member_count = serializers.SerializerMethodField()
     recent_views = serializers.SerializerMethodField()
+    banner_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
@@ -124,6 +125,14 @@ class CommunitySerializer(serializers.ModelSerializer):
     def get_recent_views(self, obj):
         thirty_days_ago = timezone.now() - timedelta(days=30)
         return obj.views.filter(viewed_at__gte=thirty_days_ago).count()
+
+    def get_banner_image(self, obj):
+        if obj.banner_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.banner_image.url)
+            return obj.banner_image.url
+        return '/media/community_banners/default-banner.jpg'
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
