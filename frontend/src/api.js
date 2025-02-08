@@ -11,45 +11,40 @@ const api = axios.create({
     baseURL: baseURL,
     timeout: 10000,
     headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
-    }
+    },
+    // Remove withCredentials since we're using token auth
+    withCredentials: false
 });
 
-// Modify the request interceptor to add token to ALL requests
+// Add request interceptor for debugging
 api.interceptors.request.use(
     (config) => {
-        console.log('Request Config:', {
-            url: config.url,
-            fullUrl: `${baseURL}${config.url}`,
+        // Log the full URL being requested
+        console.log('Making request to:', `${baseURL}${config.url}`, {
+            method: config.method,
             headers: config.headers
         });
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Add token to all requests, including image requests
-            config.headers.Authorization = `Token ${token}`;
-            
-            // Log the request for debugging
-            console.log('Request Config:', {
-                url: config.url,
-                fullUrl: config.baseURL + config.url,
-                headers: config.headers
-            });
-        }
         return config;
     },
     (error) => {
+        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
 
-// Add response interceptor for better error handling
+// Add response interceptor for debugging
 api.interceptors.response.use(
-    response => response,
-    error => {
-        console.error('API Error:', {
-            url: error.config?.url,
-            data: error.config?.data,
-            response: error.response?.data
+    (response) => {
+        console.log('Successful response:', response.data);
+        return response;
+    },
+    (error) => {
+        console.error('Response error:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
         });
         return Promise.reject(error);
     }
