@@ -445,8 +445,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `/media/community_banners/default-banner.jpg`
-          ) : `/media/community_banners/default-banner.jpg`
+            `${api.defaults.baseURL}${community.banner_image}`
+          ) : null
       }));
       setCommunities(transformedCommunities);
     } catch (error) {
@@ -463,8 +463,8 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
         banner_image: community.banner_image ? 
           (community.banner_image.startsWith('http') ? 
             community.banner_image : 
-            `/media/community_banners/default-banner.jpg`
-          ) : `/media/community_banners/default-banner.jpg`
+            `${api.defaults.baseURL}${community.banner_image}`
+          ) : null
       }));
       setTrendingCommunities(transformedCommunities);
     } catch (error) {

@@ -25,6 +25,7 @@ from .models import (
 from .utils import get_preview_data  # Add this import at the top
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
 
 User = get_user_model()
 
@@ -132,7 +133,7 @@ class CommunitySerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.banner_image.url)
             return obj.banner_image.url
-        return '/media/community_banners/default-banner.jpg'
+        return None  # Return null if no banner image exists
 
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
