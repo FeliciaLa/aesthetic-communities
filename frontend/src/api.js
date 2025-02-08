@@ -15,14 +15,20 @@ const api = axios.create({
     }
 });
 
-// Add request interceptor for debugging
+// Modify the request interceptor to add token to ALL requests
 api.interceptors.request.use(
     (config) => {
-        console.log('Request URL:', config.url);
-        console.log('Full URL:', config.baseURL + config.url);
         const token = localStorage.getItem('token');
         if (token) {
+            // Add token to all requests, including image requests
             config.headers.Authorization = `Token ${token}`;
+            
+            // Log the request for debugging
+            console.log('Request Config:', {
+                url: config.url,
+                fullUrl: config.baseURL + config.url,
+                headers: config.headers
+            });
         }
         return config;
     },
@@ -31,10 +37,10 @@ api.interceptors.request.use(
     }
 );
 
-// Add response interceptor for debugging
+// Keep your existing response interceptor
 api.interceptors.response.use(
     (response) => {
-        console.log('Received response:', response.status);
+        console.log('Response Status:', response.status);
         return response;
     },
     (error) => {

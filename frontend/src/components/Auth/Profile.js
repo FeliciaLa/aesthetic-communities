@@ -198,13 +198,20 @@ const Profile = () => {
         // Transform the communities data to include full image URLs
         const allCommunities = allCommunitiesRes.data.map(community => {
           const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
+          console.log('Original banner_image:', community.banner_image);
+          console.log('Base URL without API:', baseURLWithoutApi);
+          
+          const finalImageUrl = community.banner_image ? 
+            (community.banner_image.startsWith('http') ? 
+              community.banner_image : 
+              `${baseURLWithoutApi}${community.banner_image}`
+            ) : null;
+          
+          console.log('Final image URL:', finalImageUrl);
+          
           return {
             ...community,
-            banner_image: community.banner_image ? 
-              (community.banner_image.startsWith('http') ? 
-                community.banner_image : 
-                `${baseURLWithoutApi}${community.banner_image}`
-              ) : null
+            banner_image: finalImageUrl
           };
         });
         
