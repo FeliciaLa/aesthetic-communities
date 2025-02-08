@@ -112,4 +112,11 @@ CSRF_TRUSTED_ORIGINS = [
 # Security settings
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True 
+SECURE_BROWSER_XSS_FILTER = True
+
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# For production, you might want to use cloud storage
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage' 

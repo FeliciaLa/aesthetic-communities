@@ -440,8 +440,16 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       setLoading(true);
       const response = await api.get('/communities/');
-      console.log('Communities response:', response.data);
-      setCommunities(response.data);
+      // Transform the communities data to include full image URLs
+      const transformedCommunities = response.data.map(community => ({
+        ...community,
+        banner_image: community.banner_image ? 
+          (community.banner_image.startsWith('http') ? 
+            community.banner_image : 
+            `${api.defaults.baseURL.replace('/api', '')}${community.banner_image}`
+          ) : null
+      }));
+      setCommunities(transformedCommunities);
     } catch (error) {
       console.error('Error fetching communities:', error);
       setError('Failed to load communities');
@@ -552,7 +560,14 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                       <CommunityCard>
                         <div className="community-banner">
                           {community.banner_image ? (
-                            <img src={community.banner_image} alt={community.name} />
+                            <img 
+                              src={community.banner_image} 
+                              alt={community.name}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/default-banner.jpg';
+                              }}
+                            />
                           ) : (
                             <div className="placeholder-banner">
                               {community.name.charAt(0).toUpperCase()}
@@ -609,7 +624,14 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                     <CommunityCard>
                       <div className="community-banner">
                         {community.banner_image ? (
-                          <img src={community.banner_image} alt={community.name} />
+                          <img 
+                            src={community.banner_image} 
+                            alt={community.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/default-banner.jpg';
+                            }}
+                          />
                         ) : (
                           <div className="placeholder-banner">
                             {community.name.charAt(0).toUpperCase()}
@@ -651,7 +673,14 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                       <CommunityCard>
                         <div className="community-banner">
                           {community.banner_image ? (
-                            <img src={community.banner_image} alt={community.name} />
+                            <img 
+                              src={community.banner_image} 
+                              alt={community.name}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/default-banner.jpg';
+                              }}
+                            />
                           ) : (
                             <div className="placeholder-banner">
                               {community.name.charAt(0).toUpperCase()}
@@ -708,7 +737,14 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
                     <CommunityCard>
                       <div className="community-banner">
                         {community.banner_image ? (
-                          <img src={community.banner_image} alt={community.name} />
+                          <img 
+                            src={community.banner_image} 
+                            alt={community.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/default-banner.jpg';
+                            }}
+                          />
                         ) : (
                           <div className="placeholder-banner">
                             {community.name.charAt(0).toUpperCase()}
