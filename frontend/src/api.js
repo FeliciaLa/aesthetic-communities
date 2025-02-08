@@ -11,7 +11,6 @@ const api = axios.create({
     baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
     }
 });
 
@@ -37,14 +36,15 @@ api.interceptors.request.use(
     }
 );
 
-// Keep your existing response interceptor
+// Add response interceptor for better error handling
 api.interceptors.response.use(
-    (response) => {
-        console.log('Response Status:', response.status);
-        return response;
-    },
-    (error) => {
-        console.error('API Error:', error);
+    response => response,
+    error => {
+        console.error('API Error:', {
+            url: error.config?.url,
+            data: error.config?.data,
+            response: error.response?.data
+        });
         return Promise.reject(error);
     }
 );

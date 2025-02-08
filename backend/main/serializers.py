@@ -30,11 +30,16 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     communities = serializers.SerializerMethodField()
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'date_joined', 'communities']
-        # Note: We exclude password field for security
+        fields = ['id', 'username', 'email', 'date_joined', 'communities', 'password', 'confirm_password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'confirm_password': {'write_only': True}
+        }
 
     def get_communities(self, obj):
         communities = obj.communities.all()
@@ -45,8 +50,18 @@ class UserSerializer(serializers.ModelSerializer):
             'banner_image': community.banner_image.url if community.banner_image else None
         } for community in communities]
 
+    def validate(self, data):
+        if data.get('password') != data.get('confirm_password'):
+            raise serializers.ValidationError("Passwords don't match")
+        return data
+
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        validated_data.pop('confirm_password')  # Remove confirm_password from the data
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
         return user
 
 class UserRegisterSerializer(serializers.ModelSerializer):

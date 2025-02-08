@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api";  // Updated path to match your structure
 
-const Register = () => {
+const Register = ({ setIsLoggedIn }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirm_password: ""
   });
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,38 +17,27 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user starts typing
-    setErrors({
-      ...errors,
-      [e.target.name]: null
-    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      setErrors({
-        ...errors,
-        confirmPassword: "Passwords do not match"
-      });
-      return;
-    }
-
     try {
-      const response = await api.post("/register/", {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
-
-      navigate("/login");
+      const response = await api.post("/auth/register/", formData);
+      
+      // Store the token and username
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("username", response.data.username);
+      
+      // Update auth state
+      setIsLoggedIn(true);
+      
+      // Redirect to home page
+      navigate("/");
     } catch (err) {
-      const serverErrors = err.response?.data?.errors || {};
-      setErrors({
-        ...serverErrors,
-        general: serverErrors.general || "Registration failed"
-      });
+      console.error("Registration error:", err.response?.data);
+      setError(err.response?.data?.detail || 
+              err.response?.data?.password?.[0] ||
+              "Registration failed. Please try again.");
     }
   };
 
@@ -62,22 +51,18 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          {errors.general && (
-            <div className="error-message">{errors.general}</div>
-          )}
+          {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
             <label>Email</label>
             <input
               type="email"
               name="email"
+              placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               required
             />
-            {errors.email && (
-              <div className="field-error">{errors.email}</div>
-            )}
           </div>
 
           <div className="form-group">
@@ -85,13 +70,11 @@ const Register = () => {
             <input
               type="text"
               name="username"
+              placeholder="Username"
               value={formData.username}
               onChange={handleChange}
               required
             />
-            {errors.username && (
-              <div className="field-error">{errors.username}</div>
-            )}
           </div>
 
           <div className="form-group">
@@ -99,27 +82,23 @@ const Register = () => {
             <input
               type="password"
               name="password"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               required
             />
-            {errors.password && (
-              <div className="field-error">{errors.password}</div>
-            )}
           </div>
 
           <div className="form-group">
             <label>Confirm Password</label>
             <input
               type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              name="confirm_password"
+              placeholder="Confirm Password"
+              value={formData.confirm_password}
               onChange={handleChange}
               required
             />
-            {errors.confirmPassword && (
-              <div className="field-error">{errors.confirmPassword}</div>
-            )}
           </div>
 
           <button type="submit" className="submit-button">
@@ -232,12 +211,6 @@ const Register = () => {
             color: #0061ff;
             margin: 1.5rem 0;
             font-weight: 700;
-          }
-
-          .field-error {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
           }
         `}</style>
       </div>
