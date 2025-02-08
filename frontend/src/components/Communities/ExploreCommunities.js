@@ -404,10 +404,11 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/');
       console.log('All communities response:', response.data);
       
+      const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
       const transformedCommunities = response.data.map(community => ({
         ...community,
         banner_image: community.banner_image ? 
-          `https://aesthetic-communities-production.up.railway.app/media/${community.banner_image}` : null
+          `${baseURLWithoutApi}/media/${community.banner_image}` : null
       }));
       
       console.log('Transformed communities:', transformedCommunities);
@@ -424,10 +425,11 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       
       if (response.data && response.data.length > 0) {
+        const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
         const transformedCommunities = response.data.map(community => ({
           ...community,
           banner_image: community.banner_image ? 
-            `https://aesthetic-communities-production.up.railway.app/media/${community.banner_image}` : null
+            `${baseURLWithoutApi}/media/${community.banner_image}` : null
         }));
         
         setTrendingCommunities(transformedCommunities);
