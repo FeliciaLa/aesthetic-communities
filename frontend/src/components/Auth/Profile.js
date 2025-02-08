@@ -64,6 +64,32 @@ const ProfileCard = styled.div`
   .empty-community {
     border: none;
   }
+
+  .community-banner {
+    height: 120px;
+    background: #f0f0f0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    margin: -1.5rem -1.5rem 1rem -1.5rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .placeholder-banner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #666;
+      background: #e0e0e0;
+    }
+  }
 `;
 
 const Profile = () => {
@@ -169,7 +195,15 @@ const Profile = () => {
           api.get('/communities/')
         ]);
 
-        const allCommunities = allCommunitiesRes.data;
+        // Transform the communities data to include full image URLs
+        const allCommunities = allCommunitiesRes.data.map(community => ({
+          ...community,
+          banner_image: community.banner_image ? 
+            (community.banner_image.startsWith('http') ? 
+              community.banner_image : 
+              `${api.defaults.baseURL}${community.banner_image}`
+            ) : null
+        }));
         
         // Get created communities
         const created = allCommunities.filter(
@@ -269,6 +303,15 @@ const Profile = () => {
                         key={community.id}
                         className="community-card"
                       >
+                        <div className="community-banner">
+                          {community.banner_image ? (
+                            <img src={community.banner_image} alt={community.name} />
+                          ) : (
+                            <div className="placeholder-banner">
+                              {community.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
                         <h3>{community.name}</h3>
                         <p>{community.description}</p>
                       </Link>
@@ -294,6 +337,15 @@ const Profile = () => {
                         key={community.id}
                         className="community-card"
                       >
+                        <div className="community-banner">
+                          {community.banner_image ? (
+                            <img src={community.banner_image} alt={community.name} />
+                          ) : (
+                            <div className="placeholder-banner">
+                              {community.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
                         <h3>{community.name}</h3>
                         <p>{community.description}</p>
                       </Link>
@@ -513,6 +565,32 @@ const Profile = () => {
 
         .tab:hover {
           color: #FF7F6F;
+        }
+
+        .community-banner {
+          height: 120px;
+          background: #f0f0f0;
+          position: relative;
+          overflow: hidden;
+          border-radius: 8px 8px 0 0;
+          margin: -1.5rem -1.5rem 1rem -1.5rem;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .placeholder-banner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #666;
+            background: #e0e0e0;
+          }
         }
       `}</style>
     </div>
