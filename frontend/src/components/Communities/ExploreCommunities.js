@@ -396,12 +396,26 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       console.log('Fetching all communities...');
       const response = await api.get('/communities/');
-      console.log('All communities response:', response.data); // Debug log
-      const transformedCommunities = response.data.map(community => ({
-        ...community,
-        banner_image: community.banner_image || null
-      }));
-      console.log('Transformed communities:', transformedCommunities); // Debug log
+      console.log('All communities response:', response.data);
+      
+      // Use the same URL transformation for all communities
+      const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
+      const transformedCommunities = response.data.map(community => {
+        const imagePath = community.banner_image && !community.banner_image.startsWith('/')
+          ? `/${community.banner_image}`
+          : community.banner_image;
+
+        return {
+          ...community,
+          banner_image: imagePath
+            ? (imagePath.startsWith('http')
+              ? imagePath
+              : `${baseURLWithoutApi}${imagePath}`)
+            : null
+        };
+      });
+      
+      console.log('Transformed communities:', transformedCommunities);
       setCommunities(transformedCommunities);
     } catch (error) {
       console.error('Error fetching communities:', error);
@@ -413,17 +427,27 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
     try {
       console.log('Fetching trending communities...');
       const response = await api.get('/communities/trending/');
-      console.log('Trending communities response:', response.data);
       
       if (response.data && response.data.length > 0) {
-        const transformedCommunities = response.data.map(community => ({
-          ...community,
-          banner_image: community.banner_image || null
-        }));
-        console.log('Setting trending communities:', transformedCommunities);
+        // Use the same URL transformation for trending communities
+        const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
+        const transformedCommunities = response.data.map(community => {
+          const imagePath = community.banner_image && !community.banner_image.startsWith('/')
+            ? `/${community.banner_image}`
+            : community.banner_image;
+
+          return {
+            ...community,
+            banner_image: imagePath
+              ? (imagePath.startsWith('http')
+                ? imagePath
+                : `${baseURLWithoutApi}${imagePath}`)
+              : null
+          };
+        });
+        
         setTrendingCommunities(transformedCommunities);
       } else {
-        console.log('No trending communities found, using fallback');
         const fallbackTrending = communities
           .sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
           .slice(0, 5);
