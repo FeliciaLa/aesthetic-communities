@@ -404,14 +404,21 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/');
       console.log('All communities response:', response.data);
       
-      const transformedCommunities = response.data.map(community => ({
-        ...community,
-        banner_image: community.banner_image ? 
-          (community.banner_image.startsWith('http') ? 
-            community.banner_image : 
-            `${api.defaults.baseURL}${community.banner_image}`
-          ) : null
-      }));
+      const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
+      const transformedCommunities = response.data.map(community => {
+        const imagePath = community.banner_image && !community.banner_image.startsWith('/')
+          ? `/${community.banner_image}`
+          : community.banner_image;
+
+        return {
+          ...community,
+          banner_image: imagePath
+            ? (imagePath.startsWith('http')
+              ? imagePath
+              : `${baseURLWithoutApi}${imagePath}`)
+            : null
+        };
+      });
       
       console.log('Transformed communities:', transformedCommunities);
       setCommunities(transformedCommunities);
@@ -427,14 +434,21 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       
       if (response.data && response.data.length > 0) {
-        const transformedCommunities = response.data.map(community => ({
-          ...community,
-          banner_image: community.banner_image ? 
-            (community.banner_image.startsWith('http') ? 
-              community.banner_image : 
-              `${api.defaults.baseURL}${community.banner_image}`
-            ) : null
-        }));
+        const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
+        const transformedCommunities = response.data.map(community => {
+          const imagePath = community.banner_image && !community.banner_image.startsWith('/')
+            ? `/${community.banner_image}`
+            : community.banner_image;
+
+          return {
+            ...community,
+            banner_image: imagePath
+              ? (imagePath.startsWith('http')
+                ? imagePath
+                : `${baseURLWithoutApi}${imagePath}`)
+              : null
+          };
+        });
         
         setTrendingCommunities(transformedCommunities);
       } else {
