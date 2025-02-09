@@ -3,10 +3,8 @@ import api from '../api';
 export const authService = {
     login: async (credentials) => {
         try {
-            console.log('Attempting login with:', {
-                email: credentials.identifier,
-                password: '***'
-            });
+            console.log('Login request to:', `${api.defaults.baseURL}auth/login/`);
+            console.log('With credentials:', { identifier: credentials.identifier });
 
             const response = await api.post('auth/login/', {
                 identifier: credentials.identifier,
@@ -24,13 +22,11 @@ export const authService = {
                 throw new Error('No token received');
             }
         } catch (error) {
-            console.error('Login error details:', {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status,
+            console.error('Login error:', {
                 url: error.config?.url,
-                method: error.config?.method,
-                baseURL: error.config?.baseURL
+                baseURL: error.config?.baseURL,
+                status: error.response?.status,
+                data: error.response?.data
             });
             throw error;
         }

@@ -60,6 +60,8 @@ api.interceptors.request.use(
             headers: config.headers
         });
         
+        config.headers['Access-Control-Allow-Origin'] = '*';
+        
         return config;
     },
     (error) => {
