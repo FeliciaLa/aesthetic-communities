@@ -10,11 +10,12 @@ console.log('API Configuration:', {
 
 const api = axios.create({
     baseURL: baseURL,
-    timeout: 30000,
+    timeout: 10000,
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: false
 });
 
 // Test connection immediately
@@ -44,28 +45,16 @@ testConnection();
 // Add request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Remove any double slashes in the URL except after http(s):
-        config.url = config.url.replace(/([^:]\/)\/+/g, "$1");
-        
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        
-        // Log the complete request URL and data
-        console.log('Making request:', {
-            url: `${config.baseURL}${config.url}`,
-            method: config.method,
-            data: config.data,
-            headers: config.headers
-        });
-        
         config.headers['Access-Control-Allow-Origin'] = '*';
-        
+        console.log('Request:', config.url, config.data);
         return config;
     },
     (error) => {
-        console.error('Request interceptor error:', error);
+        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
@@ -73,21 +62,15 @@ api.interceptors.request.use(
 // Add response interceptor
 api.interceptors.response.use(
     (response) => {
-        console.log('Response received:', {
-            url: response.config.url,
-            status: response.status,
-            data: response.data
-        });
+        console.log('Response:', response.data);
         return response;
     },
     (error) => {
-        if (error.code === 'ERR_NETWORK') {
-            console.error('Network Error Details:', {
-                url: error.config?.url,
-                message: error.message,
-                code: error.code
-            });
-        }
+        console.error('Response error:', {
+            url: error.config?.url,
+            status: error.response?.status,
+            data: error.response?.data
+        });
         return Promise.reject(error);
     }
 );

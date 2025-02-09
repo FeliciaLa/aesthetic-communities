@@ -33,19 +33,17 @@ ALLOWED_HOSTS = [
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://aesthetic-communities-production.up.railway.app",
     "https://aesthetic-communities.vercel.app",
-    "https://aesthetic-communities-git-master-felicialas-projects.vercel.app",
-    "https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app",
-    "https://aesthetic-communities-251nx0jod-felicia-lammertings-projects.vercel.app",
-    "https://aesthetic-communities.vercel.app"  # Make sure this exact domain is included
+    "https://aesthetic-communities-git-main-feliciacarlattos-projects.vercel.app",
+    "https://aesthetic-communities-feliciacarlattos-projects.vercel.app",
+    "https://aesthetic-communities-production.up.railway.app",
+    "http://localhost:3000",
 ]
 
-# Add these important settings
+# Add these settings
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for testing
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = False  # Keep this False for security
-CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -59,7 +57,6 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Add these additional settings
-CORS_EXPOSE_HEADERS = ['content-type', 'x-csrftoken']
 CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Database configuration
