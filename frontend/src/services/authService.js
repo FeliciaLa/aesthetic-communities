@@ -4,14 +4,16 @@ export const authService = {
     login: async (credentials) => {
         try {
             console.log('Attempting login with:', {
-                url: 'auth/login/',
-                identifier: credentials.identifier
+                email: credentials.identifier,
+                password: '***'
             });
 
             const response = await api.post('auth/login/', {
                 identifier: credentials.identifier,
                 password: credentials.password
             });
+
+            console.log('Login response:', response);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
@@ -25,7 +27,10 @@ export const authService = {
             console.error('Login error details:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status
+                status: error.response?.status,
+                url: error.config?.url,
+                method: error.config?.method,
+                baseURL: error.config?.baseURL
             });
             throw error;
         }
@@ -35,7 +40,10 @@ export const authService = {
         try {
             console.log('Attempting registration with:', {
                 email: credentials.email,
-                username: credentials.username
+                username: credentials.username,
+                hasPassword: !!credentials.password,
+                hasConfirmPassword: !!credentials.confirmPassword,
+                isOver16: credentials.isOver16
             });
 
             const formData = {
@@ -46,10 +54,14 @@ export const authService = {
                 is_over_16: credentials.isOver16
             };
 
-            console.log('Sending registration data:', formData);
+            console.log('Registration URL:', `${api.defaults.baseURL}auth/register/`);
 
             const response = await api.post('auth/register/', formData);
-            console.log('Registration response:', response.data);
+            console.log('Registration response:', {
+                status: response.status,
+                data: response.data,
+                headers: response.headers
+            });
             
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
@@ -65,7 +77,8 @@ export const authService = {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status,
-                url: error.config?.url
+                url: error.config?.url,
+                method: error.config?.method
             });
             throw error;
         }

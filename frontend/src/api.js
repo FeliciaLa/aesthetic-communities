@@ -49,7 +49,7 @@ api.interceptors.request.use(
         
         const token = localStorage.getItem('token');
         if (token) {
-            config.headers.Authorization = `Token ${token}`;
+            config.headers.Authorization = `Bearer ${token}`;
         }
         
         // Log the complete request URL and data
