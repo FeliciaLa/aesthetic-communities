@@ -175,25 +175,28 @@ class CommunityListView(APIView):
             )
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return Response(
-                {'error': 'Authentication required to create communities'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        
-        print("Files in request:", request.FILES)  # Add this for debugging
-        serializer = CommunitySerializer(data=request.data)
-        if serializer.is_valid():
-            community = serializer.save(created_by=request.user)
+        try:
+            print("Received data:", request.data)  # Debug print
+            print("Received files:", request.FILES)  # Debug print
             
-            # Handle banner image
-            if 'banner_image' in request.FILES:
-                community.banner_image = request.FILES['banner_image']
-                community.save()
-                print("Banner URL:", community.banner_image.url)  # Add this for debugging
-                
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = CommunitySerializer(
+                data=request.data,
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                community = serializer.save(created_by=request.user)
+                return Response(
+                    CommunitySerializer(community, context={'request': request}).data,
+                    status=status.HTTP_201_CREATED
+                )
+            print("Serializer errors:", serializer.errors)  # Debug print
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print("Error creating community:", str(e))  # Debug print
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class CommunityDetailView(APIView):
     permission_classes = [IsAuthenticated]

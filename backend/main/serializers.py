@@ -108,11 +108,12 @@ class CommunitySerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
     member_count = serializers.SerializerMethodField()
     recent_views = serializers.SerializerMethodField()
-    banner_image = serializers.SerializerMethodField()
+    banner_image = serializers.ImageField(required=False)
     
     class Meta:
         model = Community
-        fields = ['id', 'name', 'description', 'created_by', 'created_at', 'is_creator', 'banner_image', 'member_count', 'recent_views']
+        fields = ['id', 'name', 'description', 'created_by', 'created_at', 
+                 'is_creator', 'banner_image', 'member_count', 'recent_views']
 
     def get_is_creator(self, obj):
         request = self.context.get('request')
