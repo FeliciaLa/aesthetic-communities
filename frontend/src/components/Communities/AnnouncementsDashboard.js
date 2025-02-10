@@ -35,6 +35,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
     if (!newAnnouncement.trim()) return;
 
     try {
+      console.log('Sending announcement:', { content: newAnnouncement });
       const response = await api.post(
         `/communities/${communityId}/announcements/`,
         { content: newAnnouncement },
@@ -44,11 +45,12 @@ const AnnouncementsDashboard = ({ communityId }) => {
           }
         }
       );
-      
+      console.log('Announcement response:', response.data);
       setNewAnnouncement('');
       fetchAnnouncements();
     } catch (err) {
       console.error('Error creating announcement:', err.response?.data);
+      console.error('Full error:', err);
     }
   };
 

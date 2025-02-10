@@ -294,11 +294,12 @@ class PollSerializer(serializers.ModelSerializer):
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
+    community = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Announcement
-        fields = ['id', 'content', 'created_by', 'created_at']
-        read_only_fields = ['created_by', 'created_at']
+        fields = ['id', 'content', 'created_by', 'created_at', 'community']
+        read_only_fields = ['created_by', 'created_at', 'community']
 
 class RecommendedProductSerializer(serializers.ModelSerializer):
     class Meta:
