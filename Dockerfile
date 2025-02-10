@@ -24,6 +24,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend directory
 COPY backend/ .
 
+# Create static directory
+RUN mkdir -p staticfiles
+
 # Collect static files without database check
 RUN python manage.py collectstatic --noinput --no-input
 
