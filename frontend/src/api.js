@@ -2,13 +2,13 @@ import axios from "axios";
 import { getApiUrl } from './config';
 
 const baseURL = getApiUrl();
-const apiBaseURL = `${baseURL}api/`;
+// Remove the api/ from here since it's part of the URL pattern
+const apiBaseURL = baseURL;
 
 console.log('API URL Construction:', {
     rawBaseURL: baseURL,
     apiBaseURL: apiBaseURL,
-    sampleFullUrl: `${apiBaseURL}auth/login/`,
-    API_BASE_URL: process.env.REACT_APP_API_URL
+    fullRequestUrl: `${apiBaseURL}api/auth/login/`
 });
 
 // Add this right before the axios.create

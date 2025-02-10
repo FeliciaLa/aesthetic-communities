@@ -5,7 +5,7 @@ export const authService = {
     login: async (credentials) => {
         try {
             // Hardcode the complete URL path to test
-            const fullUrl = '/auth/login/';  // Start with leading slash
+            const fullUrl = 'api/auth/login/';  // Include the full path
             console.log('Attempting login with hardcoded URL:', {
                 fullUrl,
                 baseURL: api.defaults.baseURL,
