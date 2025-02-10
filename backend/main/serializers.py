@@ -100,7 +100,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
 
 class UserLoginSerializer(serializers.Serializer):
-    identifier = serializers.CharField()  # This can be email or username
+    username = serializers.CharField()  # Change from identifier to username
     password = serializers.CharField(write_only=True)
 
 class CommunitySerializer(serializers.ModelSerializer):
