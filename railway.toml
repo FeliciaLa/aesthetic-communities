@@ -1,11 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = """
-  python3 -m venv venv && \
-  /bin/bash -c "source venv/bin/activate" && \
-  pip install --upgrade pip && \
-  pip install -r requirements.txt
-"""
+buildCommand = "pip install -r requirements.txt"
 
 [deploy]
 startCommand = "gunicorn config.wsgi"
@@ -16,4 +11,4 @@ healthcheckTimeout = 100
 rootDirectory = "backend"
 
 [phases.setup]
-nixPkgs = ["python39"] 
+nixPkgs = ["python39", "pip"] 
