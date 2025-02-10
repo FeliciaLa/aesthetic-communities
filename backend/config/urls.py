@@ -43,8 +43,8 @@ def health_check(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('health/', health_check, name='health_check'),
     path('api/', include('main.urls')),
     path('api/', include('music.urls')),
+    path('api/', include(router.urls)),
+    path('health/', health_check, name='health_check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
