@@ -4,22 +4,31 @@ import dj_database_url
 from decouple import config, UndefinedValueError
 import logging
 
-# Print environment variables for debugging (excluding sensitive data)
+print("=== Environment Variables Check ===")
 print("Available environment variables:", [k for k in os.environ.keys()])
+print("DATABASE_URL exists:", 'DATABASE_URL' in os.environ)
+print("PGDATABASE exists:", 'PGDATABASE' in os.environ)
+print("PGHOST exists:", 'PGHOST' in os.environ)
+print("=== End Environment Check ===")
 
 # Database Configuration
 if 'DATABASE_URL' in os.environ:
-    print("Using DATABASE_URL from environment")
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
-    print("WARNING: DATABASE_URL not found in environment")
-    # Fallback for build process
+    # Try direct PostgreSQL configuration
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('PGDATABASE'),
+            'USER': os.getenv('PGUSER'),
+            'PASSWORD': os.getenv('PGPASSWORD'),
+            'HOST': os.getenv('PGHOST'),
+            'PORT': os.getenv('PGPORT'),
         }
     }
 
