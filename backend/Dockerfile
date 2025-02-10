@@ -5,18 +5,23 @@ FROM python:3.9-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set work directory
-WORKDIR /app
+WORKDIR /app/backend
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
+# Copy only the requirements first
+COPY backend/requirements.txt .
 
-# Install dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
-COPY . .
+# Copy the backend directory
+COPY backend/ .
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
