@@ -69,8 +69,10 @@ print(f"STATIC_ROOT: {STATIC_ROOT}")
 print(f"Database Engine: {DATABASES['default']['ENGINE']}")
 
 # Security settings
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = False  # Disable SSL redirect for healthcheck
 SECURE_PROXY_SSL_HEADER = None
+SESSION_COOKIE_SECURE = False  # Temporarily disable for testing
+CSRF_COOKIE_SECURE = False  # Temporarily disable for testing
 
 # Basic settings
 ALLOWED_HOSTS = [
@@ -129,8 +131,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
 
 # Security settings
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
 # Media files configuration
