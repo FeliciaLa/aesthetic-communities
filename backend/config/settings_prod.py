@@ -7,6 +7,12 @@ import sys
 # Check if we're running collectstatic
 IS_COLLECTSTATIC = 'collectstatic' in sys.argv
 
+# Print environment debug info
+print("=== Database Configuration Debug ===")
+print(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
+print(f"PGHOST exists: {bool(os.getenv('PGHOST'))}")
+print(f"Available env vars: {[k for k in os.environ.keys()]}")
+
 # Database Configuration
 if IS_COLLECTSTATIC:
     # Use dummy DB for collectstatic
@@ -16,14 +22,28 @@ if IS_COLLECTSTATIC:
             'NAME': ':memory:'
         }
     }
-else:
-    # Normal database configuration for runtime
+elif os.getenv('DATABASE_URL'):
+    # Use DATABASE_URL if available
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
         )
     }
+else:
+    # Fallback to individual Postgres settings
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('PGDATABASE'),
+            'USER': os.getenv('PGUSER'),
+            'PASSWORD': os.getenv('PGPASSWORD'),
+            'HOST': os.getenv('PGHOST'),  # This should come from Railway
+            'PORT': os.getenv('PGPORT', '5432'),
+        }
+    }
+
+print(f"Database HOST setting: {DATABASES['default'].get('HOST', 'not set')}")
 
 # Import base settings
 from .settings import *

@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def health_check(request):
     logger.debug(f"Health check endpoint hit at {request.path}")
-    logger.debug(f"Request method: {request.method}")
-    logger.debug(f"Request headers: {dict(request.headers)}")
+    logger.debug(f"Available environment variables: {[k for k in os.environ.keys()]}")
+    logger.debug(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
+    logger.debug(f"PGHOST value: {os.getenv('PGHOST', 'not set')}")
     
     try:
         # Test database connection
@@ -28,9 +29,11 @@ def health_check(request):
             cursor.execute("SELECT 1")
             logger.debug("Database connection successful")
         
-        # Log system info
-        logger.debug(f"Python version: {sys.version}")
-        logger.debug(f"Current working directory: {os.getcwd()}")
+        # Log database settings (without sensitive info)
+        from django.conf import settings
+        logger.debug(f"Database ENGINE: {settings.DATABASES['default']['ENGINE']}")
+        logger.debug(f"Database HOST: {settings.DATABASES['default'].get('HOST', 'not set')}")
+        logger.debug(f"Database PORT: {settings.DATABASES['default'].get('PORT', 'not set')}")
         
         return HttpResponse("OK", status=200)
     except Exception as e:
