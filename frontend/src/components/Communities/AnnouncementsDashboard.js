@@ -25,6 +25,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
     try {
       const response = await api.get(`/communities/${communityId}/`);
       setIsCreator(response.data.is_creator);
+      console.log('Creator status:', response.data.is_creator);
     } catch (err) {
       console.error('Error checking creator status:', err);
     }
