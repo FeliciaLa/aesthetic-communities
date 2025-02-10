@@ -1,7 +1,5 @@
 // Base API URL for production
-const API_BASE_URL = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:8000/api/'
-    : 'https://aesthetic-communities-production.up.railway.app/api/';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
 
 // Ensure trailing slash
 export const getApiUrl = () => {
