@@ -149,7 +149,7 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 # Media files
-MEDIA_URL = '/media/'
+MEDIA_URL = 'https://aesthetic-communities-production.up.railway.app/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Create media directory if it doesn't exist
@@ -238,3 +238,5 @@ LOGGING = {
 
 # Add Custom User Model
 AUTH_USER_MODEL = 'main.CustomUser'
+
+# Add AWS S3 or similar cloud storage settings here if needed

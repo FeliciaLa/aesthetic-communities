@@ -14,17 +14,25 @@ from django.views.static import serve
 def serve_media_file(request, path):
     """Custom view to serve media files with proper headers"""
     try:
+        # Remove any leading slashes from the path
+        path = path.lstrip('/')
         file_path = os.path.join(settings.MEDIA_ROOT, path)
         print(f"Attempting to serve file: {file_path}")
         print(f"File exists: {os.path.exists(file_path)}")
-        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
         
         if os.path.exists(file_path):
             response = FileResponse(open(file_path, 'rb'))
-            response['Content-Type'] = 'image/jpeg'  # Adjust based on file type
-            response['X-Frame-Options'] = 'SAMEORIGIN'
+            # Set content type based on file extension
+            if path.endswith('.jpg') or path.endswith('.jpeg'):
+                response['Content-Type'] = 'image/jpeg'
+            elif path.endswith('.png'):
+                response['Content-Type'] = 'image/png'
+            elif path.endswith('.gif'):
+                response['Content-Type'] = 'image/gif'
+                
             response['Access-Control-Allow-Origin'] = '*'
             return response
+            
         print(f"File not found: {file_path}")
         return HttpResponse(status=404)
     except Exception as e:
@@ -68,15 +76,6 @@ urlpatterns = [
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
     path('health/', health_check, name='health_check'),
-    # Add explicit media serving
+    # Single media serving path
     path('media/<path:path>', serve_media_file, name='serve_media'),
 ]
-
-# Add this condition for serving media files
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # For production, serve media files through a separate URL pattern
-    urlpatterns += [
-        path('media/<path:path>', serve_media_file, name='serve_media'),
-    ]
