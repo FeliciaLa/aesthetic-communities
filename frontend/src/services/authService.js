@@ -4,10 +4,13 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
+            console.log('Attempting login with URL:', 'auth/login/');
             const response = await api.post('auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
+
+            console.log('Login response:', response);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
@@ -21,7 +24,9 @@ export const authService = {
                 message: error.message,
                 code: error.code,
                 response: error.response?.data,
-                baseURL: api.defaults.baseURL
+                baseURL: api.defaults.baseURL,
+                fullURL: api.defaults.baseURL + 'auth/login/',
+                status: error.response?.status
             });
             
             if (error.code === 'ERR_NETWORK') {

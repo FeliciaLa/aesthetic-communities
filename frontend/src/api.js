@@ -1,13 +1,11 @@
 import axios from "axios";
 import { getApiUrl } from './config';
 
-console.log('API Configuration:', {
-    baseURL: getApiUrl(),
-    environment: process.env.NODE_ENV
-});
+const baseURL = getApiUrl();
+console.log('Creating axios instance with baseURL:', baseURL);
 
 const api = axios.create({
-    baseURL: getApiUrl(),
+    baseURL,
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
@@ -21,9 +19,10 @@ const api = axios.create({
     }
 });
 
-// Add request interceptor for auth token
+// Add request interceptor for debugging
 api.interceptors.request.use(
     (config) => {
+        console.log('Making request to:', config.baseURL + config.url);
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
@@ -35,7 +34,10 @@ api.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        console.error('Request error:', error);
+        return Promise.reject(error);
+    }
 );
 
 // Add response interceptor with better error handling
