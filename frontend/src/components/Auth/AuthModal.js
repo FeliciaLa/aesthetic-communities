@@ -82,7 +82,7 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
       let response;
       if (mode === 'login') {
         response = await authService.login({
-          identifier: email,
+          username: email,
           password: password
         });
       } else {
