@@ -267,3 +267,36 @@ else:
 
 # Static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Static files configuration - add this at the top with other imports
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Create static directory if it doesn't exist
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+
+# AWS S3 Settings - only configure if we're not collecting static files
+if 'collectstatic' not in sys.argv:
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=None)
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='aesthetic-communities-media')
+    AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='eu-north-1')
+    AWS_DEFAULT_ACL = 'public-read'
+
+    if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+        # Construct the domain from environment variables
+        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+        
+        # Media files configuration
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    else:
+        # Fallback to local storage
+        DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+        MEDIA_URL = '/media/'
+else:
+    # During collectstatic, use local storage
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
