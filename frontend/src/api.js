@@ -27,13 +27,14 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const fullUrl = config.baseURL + config.url;
-        console.log('Full request details:', {
+        console.log('Making API request:', {
             fullUrl,
             baseURL: config.baseURL,
             endpoint: config.url,
             method: config.method,
             headers: config.headers,
-            data: config.data
+            data: config.data,
+            withCredentials: config.withCredentials
         });
         const token = localStorage.getItem('token');
         if (token) {
@@ -47,7 +48,7 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.error('API Request Error:', error);
+        console.error('Request interceptor error:', error);
         return Promise.reject(error);
     }
 );
@@ -63,11 +64,16 @@ api.interceptors.response.use(
         return response;
     },
     (error) => {
-        console.error('API Response Error:', {
+        console.error('API Error Details:', {
             message: error.message,
-            response: error.response?.data,
             status: error.response?.status,
-            config: error.config
+            data: error.response?.data,
+            config: {
+                url: error.config?.url,
+                baseURL: error.config?.baseURL,
+                method: error.config?.method,
+                headers: error.config?.headers
+            }
         });
         if (error.code === 'ERR_NETWORK') {
             console.error('Network Error Details:', {
