@@ -48,5 +48,5 @@ urlpatterns = [
     path('api/health/', health_check, name='health_check'),
     path('api/', include('main.urls')),
     path('api/', include('music.urls')),
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
