@@ -246,17 +246,24 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 FILE_UPLOAD_PERMISSIONS = 0o644
 
 # AWS S3 Settings
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='aesthetic-communities-media')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='eu-north-1')
 AWS_DEFAULT_ACL = 'public-read'
 
-# Construct the domain from environment variables
-AWS_S3_CUSTOM_DOMAIN = f"{config('AWS_STORAGE_BUCKET_NAME')}.s3.{config('AWS_S3_REGION_NAME')}.amazonaws.com"
-
-# Media files configuration
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+# Only configure S3 if credentials are available
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    # Construct the domain from environment variables
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    
+    # Media files configuration
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+else:
+    # Fallback to local storage during build
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
 
 # Static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
