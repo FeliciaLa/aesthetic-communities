@@ -1,30 +1,83 @@
 from .settings import *
 import os
-from decouple import config
+from decouple import config, UndefinedValueError
 import dj_database_url
 import logging
 
-# Set up logging
+# Set up logging with more detail
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': 'DEBUG',  # Changed to DEBUG for more detailed logs
     },
 }
+
+# Print environment variables (without sensitive data)
+print("Available environment variables:", [k for k in os.environ.keys()])
+
+try:
+    # Try to get DATABASE_URL first
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=database_url,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+        print("Using DATABASE_URL configuration")
+    else:
+        # Fallback to individual credentials
+        print("DATABASE_URL not found, trying individual credentials")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('PGDATABASE'),
+                'USER': os.environ.get('PGUSER'),
+                'PASSWORD': os.environ.get('PGPASSWORD'),
+                'HOST': os.environ.get('PGHOST'),
+                'PORT': os.environ.get('PGPORT', '5432'),
+            }
+        }
+except Exception as e:
+    print(f"Database configuration error: {str(e)}")
+    print("Falling back to SQLite")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
+# Ensure static files directory exists
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+
+# Other settings remain the same...
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['*']  # You can restrict this later
+
+# Print configuration status
+print("Configuration loaded with:")
+print(f"DEBUG: {DEBUG}")
+print(f"STATIC_ROOT: {STATIC_ROOT}")
+print(f"Database Engine: {DATABASES['default']['ENGINE']}")
 
 # Security settings
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Basic settings
-DEBUG = True
 ALLOWED_HOSTS = [
     'aesthetic-communities-production.up.railway.app',
     'aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
@@ -59,31 +112,11 @@ CORS_ALLOW_HEADERS = [
 # Add these additional settings
 CORS_PREFLIGHT_MAX_AGE = 86400
 
-# Database configuration
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
-
-# Add fallback for DATABASE_URL
-if not os.environ.get('DATABASE_URL'):
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-
 # Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
-# Ensure the static directory exists
-os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
 
 # URLs
 APPEND_SLASH = True  # This ensures URLs end with a slash
