@@ -83,15 +83,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
 
-# Media files configuration with HTTPS
-MEDIA_URL = 'https://aesthetic-communities-production.up.railway.app/media/'
+# Media files configuration
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Force HTTPS for media
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
 # For production, you might want to use cloud storage
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
