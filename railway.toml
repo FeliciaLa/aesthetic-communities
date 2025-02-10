@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "gunicorn config.wsgi"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+
+[service]
+rootDirectory = "backend" 
