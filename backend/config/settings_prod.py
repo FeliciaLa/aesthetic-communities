@@ -4,6 +4,22 @@ import dj_database_url
 from decouple import config
 import sys
 
+# Import base settings first
+from .settings import *
+
+# Now override database settings
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+        )
+    }
+    print(f"Using DATABASE_URL configuration: {DATABASES['default']['HOST']}")
+else:
+    print("No DATABASE_URL found in environment")
+    raise ValueError("DATABASE_URL must be set in production")
+
 # Check if we're running collectstatic
 IS_COLLECTSTATIC = 'collectstatic' in sys.argv
 
