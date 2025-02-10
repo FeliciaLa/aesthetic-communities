@@ -1,19 +1,21 @@
 import os
-from decouple import config, UndefinedValueError
+from pathlib import Path
 import dj_database_url
+from decouple import config, UndefinedValueError
 import logging
 
-# Configure database first, before importing from settings
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# Print environment variables for debugging (excluding sensitive data)
+print("Available environment variables:", [k for k in os.environ.keys()])
 
-# If DATABASE_URL is not set, use SQLite for build process
-if not os.environ.get('DATABASE_URL'):
+# Database Configuration
+if 'DATABASE_URL' in os.environ:
+    print("Using DATABASE_URL from environment")
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+else:
+    print("WARNING: DATABASE_URL not found in environment")
+    # Fallback for build process
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -21,7 +23,11 @@ if not os.environ.get('DATABASE_URL'):
         }
     }
 
-# Now import from settings after database configuration
+# Print database configuration (without sensitive details)
+print("Database Engine:", DATABASES['default']['ENGINE'])
+print("Database Host:", DATABASES['default'].get('HOST', 'not set'))
+
+# Now import the rest of the settings
 from .settings import *
 
 # Set up logging with more detail
@@ -40,13 +46,18 @@ LOGGING = {
     },
 }
 
-# Print environment variables (without sensitive data)
-print("Available environment variables:", [k for k in os.environ.keys()])
-
-# Ensure static files directory exists
+# Static Files
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Create staticfiles directory if it doesn't exist
 if not os.path.exists(STATIC_ROOT):
     os.makedirs(STATIC_ROOT, exist_ok=True)
+
+# Remove STATICFILES_DIRS if the directory doesn't exist
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 # Other settings remain the same...
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
@@ -95,12 +106,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Add these additional settings
 CORS_PREFLIGHT_MAX_AGE = 86400
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
 
 # URLs
 APPEND_SLASH = True  # This ensures URLs end with a slash
