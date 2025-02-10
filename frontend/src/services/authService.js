@@ -4,7 +4,10 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            console.log('Attempting login with URL:', 'auth/login/');
+            console.log('Login attempt:', {
+                baseURL: api.defaults.baseURL,
+                endpoint: 'auth/login/'
+            });
             const response = await api.post('auth/login/', {
                 username: credentials.username,
                 password: credentials.password
