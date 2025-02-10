@@ -6,9 +6,9 @@ export const authService = {
         try {
             console.log('Login attempt:', {
                 baseURL: api.defaults.baseURL,
-                endpoint: 'auth/login/'
+                endpoint: 'api/auth/login/'
             });
-            const response = await api.post('auth/login/', {
+            const response = await api.post('api/auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
