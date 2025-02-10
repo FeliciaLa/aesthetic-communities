@@ -4,23 +4,17 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            const requestUrl = 'auth/login/';
-            console.log('URL Construction:', {
-                requestUrl,
+            // Hardcode the complete URL path to test
+            const fullUrl = '/api/auth/login/';  // Start with leading slash
+            console.log('Attempting login with hardcoded URL:', {
+                fullUrl,
                 baseURL: api.defaults.baseURL,
-                expectedFullUrl: `${api.defaults.baseURL}${requestUrl}`,
                 credentials
             });
 
-            const response = await api.post(requestUrl, {
+            const response = await api.post(fullUrl, {
                 username: credentials.username,
                 password: credentials.password
-            }, {
-                baseURL: api.defaults.baseURL,
-                url: requestUrl,
-                validateStatus: function (status) {
-                    return status < 500;
-                }
             });
 
             console.log('Login response:', response);
