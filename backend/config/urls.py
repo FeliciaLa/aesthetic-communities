@@ -5,12 +5,22 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from main.views import SavedItemsViewSet
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import logging
 
 router = DefaultRouter()
 router.register(r'saved', SavedItemsViewSet, basename='saved')
 
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
 def health_check(request):
-    return HttpResponse("OK")
+    logger.debug("Health check endpoint hit")
+    try:
+        return HttpResponse("OK", status=200)
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return HttpResponse(str(e), status=500)
 
 urlpatterns = [
     path('api/', include('main.urls')),  # Move this to the top

@@ -60,7 +60,7 @@ if not os.path.exists(STATIC_ROOT):
 # ]
 
 # Other settings remain the same...
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False
 
 # Print configuration status
 print("Configuration loaded with:")
@@ -69,8 +69,8 @@ print(f"STATIC_ROOT: {STATIC_ROOT}")
 print(f"Database Engine: {DATABASES['default']['ENGINE']}")
 
 # Security settings
-SECURE_SSL_REDIRECT = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = None
 
 # Basic settings
 ALLOWED_HOSTS = [
