@@ -48,7 +48,7 @@ router.register('saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
     # Auth endpoints
-    path('auth/login/', LoginView.as_view(), name='login'),
+    path('login/', LoginView.as_view(), name='login'),
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('profile/', UserProfileView.as_view(), name='profile'),
