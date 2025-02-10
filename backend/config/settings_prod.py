@@ -4,7 +4,7 @@ import dj_database_url
 from decouple import config
 import sys
 
-# Import base settings first
+# Import base settings once
 from .settings import *
 
 # Check if we're in build/collect static phase
@@ -32,16 +32,10 @@ else:
 # Print environment debug info
 print("=== Database Configuration Debug ===")
 print(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
-print(f"PGHOST exists: {bool(os.getenv('PGHOST'))}")
-print(f"PGHOST value: {os.getenv('PGHOST', 'not set')}")
-print(f"Available env vars: {[k for k in os.environ.keys()]}")
+print(f"Database HOST: {DATABASES['default'].get('HOST', 'not set')}")
 
-# Import base settings
-from .settings import *
-
-# Override settings for production
+# Production-specific settings
 DEBUG = False
-
 ALLOWED_HOSTS = [
     'aesthetic-communities-production.up.railway.app',
     'aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
