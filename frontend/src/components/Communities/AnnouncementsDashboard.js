@@ -24,8 +24,14 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const checkIsCreator = async () => {
     try {
       const response = await api.get(`/communities/${communityId}/`);
-      setIsCreator(response.data.is_creator);
-      console.log('Creator status:', response.data.is_creator);
+      const currentUser = response.data.current_username;
+      const communityCreator = response.data.creator_name;
+      setIsCreator(currentUser === communityCreator);
+      console.log('Creator check:', {
+        currentUser,
+        communityCreator,
+        isCreator: currentUser === communityCreator
+      });
     } catch (err) {
       console.error('Error checking creator status:', err);
     }
