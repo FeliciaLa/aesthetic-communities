@@ -5,12 +5,17 @@ const API_BASE_URL = process.env.NODE_ENV === 'development'
 
 // Ensure trailing slash
 export const getApiUrl = () => {
-    return API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+    const url = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+    console.log('API URL:', url); // Add this for debugging
+    return url;
 };
 
 export { API_BASE_URL };
 
 // Axios default config
+import axios from 'axios';
+axios.defaults.withCredentials = true;
+
 export const axiosConfig = {
     baseURL: API_BASE_URL,
     withCredentials: true,

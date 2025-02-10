@@ -78,20 +78,19 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-# Add these settings
-CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for testing
 CORS_ALLOW_CREDENTIALS = True
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://aesthetic-communities.vercel.app",
+    "https://aesthetic-communities-production.up.railway.app",
 ]
 
 # Add these additional settings
@@ -124,13 +123,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
 # Security settings
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
-
-# Security settings
-CSRF_TRUSTED_ORIGINS = [
-    "https://aesthetic-communities-production.up.railway.app",  # Your Railway domain
-]
-
-# Add any other production-specific settings
 
 # Security settings
 SESSION_COOKIE_SECURE = True
