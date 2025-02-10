@@ -9,6 +9,11 @@ export const getApiUrl = () => {
     return apiUrl;
 };
 
+// Export the base URL for other uses
+export const getBaseUrl = () => {
+    return API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+};
+
 export { API_BASE_URL };
 
 // Axios default config
