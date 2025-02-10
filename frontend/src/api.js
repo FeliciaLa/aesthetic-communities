@@ -2,7 +2,11 @@ import axios from "axios";
 import { getApiUrl } from './config';
 
 const baseURL = getApiUrl();
-console.log('Creating axios instance with baseURL:', baseURL);
+console.log('API Configuration:', {
+    baseURL,
+    environment: process.env.NODE_ENV,
+    fullLoginUrl: `${baseURL}auth/login/`
+});
 
 const api = axios.create({
     baseURL,
@@ -19,10 +23,16 @@ const api = axios.create({
     }
 });
 
-// Add request interceptor for debugging
+// Add request interceptor with more detailed logging
 api.interceptors.request.use(
     (config) => {
-        console.log('Making request to:', config.baseURL + config.url);
+        const fullUrl = config.baseURL + config.url;
+        console.log('Making API request:', {
+            method: config.method,
+            url: fullUrl,
+            headers: config.headers,
+            data: config.data
+        });
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
@@ -35,15 +45,28 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
-        console.error('Request error:', error);
+        console.error('API Request Error:', error);
         return Promise.reject(error);
     }
 );
 
-// Add response interceptor with better error handling
+// Add response interceptor
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    (response) => {
+        console.log('API Response:', {
+            status: response.status,
+            data: response.data,
+            headers: response.headers
+        });
+        return response;
+    },
+    (error) => {
+        console.error('API Response Error:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+            config: error.config
+        });
         if (error.code === 'ERR_NETWORK') {
             console.error('Network Error Details:', {
                 baseURL: api.defaults.baseURL,
