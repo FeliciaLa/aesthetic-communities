@@ -39,9 +39,9 @@ def health_check(request):
         return HttpResponse(f"Health check failed: {str(e)}", status=500)
 
 urlpatterns = [
-    path('api/', include('main.urls')),  # Move this to the top
-    path('admin/', admin.site.urls),  # Admin interface
-    path('api/', include('music.urls')),  # Remove the 'music/' prefix
+    path('health/', health_check, name='health_check'),
+    path('api/', include('main.urls')),
+    path('admin/', admin.site.urls),
+    path('api/', include('music.urls')),
     path('api/', include(router.urls)),
-    path('', health_check, name='health_check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

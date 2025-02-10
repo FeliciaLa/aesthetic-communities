@@ -3,13 +3,21 @@ from pathlib import Path
 import dj_database_url
 from decouple import config
 
-# Basic database configuration that was working
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-    )
-}
+# Database Configuration with error handling
+try:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+        )
+    }
+    # Test the connection
+    from django.db import connections
+    connections['default'].ensure_connection()
+    print("Database connection successful")
+except Exception as e:
+    print(f"Database connection error: {str(e)}")
+    raise
 
 # Import base settings
 from .settings import *
