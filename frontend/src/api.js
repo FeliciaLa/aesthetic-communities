@@ -1,13 +1,13 @@
 import axios from "axios";
-import { API_BASE_URL } from './config';
+import { getApiUrl } from './config';
 
 console.log('API Configuration:', {
-    baseURL: API_BASE_URL,
+    baseURL: getApiUrl(),
     environment: process.env.NODE_ENV
 });
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: getApiUrl(),
     withCredentials: true,
     headers: {
         'Accept': 'application/json',

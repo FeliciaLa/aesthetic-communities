@@ -3,7 +3,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://aesthetic-communi
 
 // Ensure trailing slash and api path
 export const getApiUrl = () => {
-    return API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+    return `${baseUrl}api/`;  // Always include /api/ in the base URL
 };
 
 // Export the base URL for other uses
