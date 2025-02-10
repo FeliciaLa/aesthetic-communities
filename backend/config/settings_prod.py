@@ -11,6 +11,7 @@ IS_COLLECTSTATIC = 'collectstatic' in sys.argv
 print("=== Database Configuration Debug ===")
 print(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
 print(f"PGHOST exists: {bool(os.getenv('PGHOST'))}")
+print(f"PGHOST value: {os.getenv('PGHOST', 'not set')}")
 print(f"Available env vars: {[k for k in os.environ.keys()]}")
 
 # Database Configuration
@@ -23,27 +24,34 @@ if IS_COLLECTSTATIC:
         }
     }
 elif os.getenv('DATABASE_URL'):
-    # Use DATABASE_URL if available
+    # Parse the DATABASE_URL
+    db_config = dj_database_url.parse(os.getenv('DATABASE_URL'))
+    # Ensure we're not using localhost
+    if db_config.get('HOST') in ['localhost', '127.0.0.1', '::1']:
+        print("WARNING: Database host is localhost, checking for PGHOST")
+        db_config['HOST'] = os.getenv('PGHOST')
+    
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-        )
+        'default': db_config
     }
 else:
     # Fallback to individual Postgres settings
+    db_host = os.getenv('PGHOST')
+    if not db_host or db_host in ['localhost', '127.0.0.1', '::1']:
+        raise ValueError("Invalid database host. PGHOST must be set to a non-localhost value")
+        
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('PGDATABASE'),
             'USER': os.getenv('PGUSER'),
             'PASSWORD': os.getenv('PGPASSWORD'),
-            'HOST': os.getenv('PGHOST'),  # This should come from Railway
+            'HOST': db_host,
             'PORT': os.getenv('PGPORT', '5432'),
         }
     }
 
-print(f"Database HOST setting: {DATABASES['default'].get('HOST', 'not set')}")
+print(f"Final Database HOST setting: {DATABASES['default'].get('HOST', 'not set')}")
 
 # Import base settings
 from .settings import *
