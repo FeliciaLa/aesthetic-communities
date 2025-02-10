@@ -26,16 +26,21 @@ const api = axios.create({
 // Add request interceptor with more detailed logging
 api.interceptors.request.use(
     (config) => {
-        const fullUrl = config.baseURL + config.url;
-        console.log('Making API request:', {
-            fullUrl,
+        console.log('Request Config BEFORE:', {
+            originalUrl: config.url,
             baseURL: config.baseURL,
-            endpoint: config.url,
-            method: config.method,
-            headers: config.headers,
-            data: config.data,
-            withCredentials: config.withCredentials
+            fullUrl: `${config.baseURL}${config.url}`,
+            method: config.method
         });
+        
+        const fullUrl = config.baseURL + config.url;
+        console.log('Request Config AFTER:', {
+            modifiedUrl: config.url,
+            baseURL: config.baseURL,
+            fullUrl: fullUrl,
+            method: config.method
+        });
+        
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
