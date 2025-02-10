@@ -4,11 +4,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from main.views import SavedItemsViewSet, LoginView, UserRegistrationView
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
 import sys
 import os
+from django.views.static import serve
+
+def serve_media_file(request, path):
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'))
+    return HttpResponse(status=404)
 
 router = DefaultRouter()
 router.register(r'saved', SavedItemsViewSet, basename='saved')
@@ -47,4 +54,13 @@ urlpatterns = [
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
     path('health/', health_check, name='health_check'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# Add this condition for serving media files
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # For production, serve media files through a separate URL pattern
+    urlpatterns += [
+        path('media/<path:path>', serve_media_file, name='serve_media'),
+    ]
