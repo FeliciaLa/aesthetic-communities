@@ -14,7 +14,14 @@ const CreateCommunity = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/communities/', formData, {
+            const formDataToSend = new FormData();
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('description', formData.description);
+            if (formData.banner_image) {
+                formDataToSend.append('banner_image', formData.banner_image);
+            }
+
+            const response = await api.post('/communities/', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -23,6 +30,14 @@ const CreateCommunity = () => {
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to create community');
         }
+    };
+
+    const handleBannerChange = (e) => {
+        const file = e.target.files[0];
+        setFormData(prev => ({
+            ...prev,
+            banner_image: file
+        }));
     };
 
     return (
@@ -56,8 +71,8 @@ const CreateCommunity = () => {
                     <label>Banner Image</label>
                     <input
                         type="file"
-                        onChange={(e) => setFormData({...formData, banner_image: e.target.files[0]})}
                         accept="image/*"
+                        onChange={handleBannerChange}
                     />
                 </div>
 
