@@ -4,10 +4,17 @@ import { getApiUrl } from './config';
 const baseURL = getApiUrl();
 const apiBaseURL = `${baseURL}api/`;
 
-console.log('API Configuration:', {
+console.log('API URL Construction:', {
+    rawBaseURL: baseURL,
+    apiBaseURL: apiBaseURL,
+    sampleFullUrl: `${apiBaseURL}auth/login/`,
+    API_BASE_URL: process.env.REACT_APP_API_URL
+});
+
+// Add this right before the axios.create
+console.log('Final Axios Config:', {
     baseURL: apiBaseURL,
-    environment: process.env.NODE_ENV,
-    fullLoginUrl: `${apiBaseURL}auth/login/`
+    fullTestUrl: `${apiBaseURL}auth/login/`
 });
 
 const api = axios.create({
