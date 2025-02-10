@@ -148,28 +148,6 @@ class UserRegistrationView(APIView):
                 }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserLoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({
-                'token': token.key,
-                'user': {
-                    'id': user.id,
-                    'username': user.username
-                }
-            })
-        return Response(
-            {'error': 'Invalid credentials'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
