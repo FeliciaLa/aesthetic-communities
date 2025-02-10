@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'main',
     'music',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -149,7 +150,6 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 # Media files
-MEDIA_URL = 'https://aesthetic-communities-production.up.railway.app/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Create media directory if it doesn't exist
@@ -240,3 +240,23 @@ LOGGING = {
 AUTH_USER_MODEL = 'main.CustomUser'
 
 # Add AWS S3 or similar cloud storage settings here if needed
+
+# Storage settings
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+FILE_UPLOAD_PERMISSIONS = 0o644
+
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+AWS_DEFAULT_ACL = 'public-read'
+
+# Construct the domain from environment variables
+AWS_S3_CUSTOM_DOMAIN = f"{config('AWS_STORAGE_BUCKET_NAME')}.s3.{config('AWS_S3_REGION_NAME')}.amazonaws.com"
+
+# Media files configuration
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+# Static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

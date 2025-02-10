@@ -14,23 +14,19 @@ from django.views.static import serve
 def serve_media_file(request, path):
     """Custom view to serve media files with proper headers"""
     try:
-        # Remove any leading slashes from the path
-        path = path.lstrip('/')
-        file_path = os.path.join(settings.MEDIA_ROOT, path)
+        # Clean the path
+        path = path.replace('media/', '').lstrip('/')
+        file_path = os.path.join(settings.MEDIA_ROOT, 'community_banners', path)
+        
         print(f"Attempting to serve file: {file_path}")
-        print(f"File exists: {os.path.exists(file_path)}")
+        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+        print(f"Path requested: {path}")
         
         if os.path.exists(file_path):
             response = FileResponse(open(file_path, 'rb'))
-            # Set content type based on file extension
-            if path.endswith('.jpg') or path.endswith('.jpeg'):
-                response['Content-Type'] = 'image/jpeg'
-            elif path.endswith('.png'):
-                response['Content-Type'] = 'image/png'
-            elif path.endswith('.gif'):
-                response['Content-Type'] = 'image/gif'
-                
+            response['Content-Type'] = 'image/jpeg'
             response['Access-Control-Allow-Origin'] = '*'
+            response['Cache-Control'] = 'public, max-age=31536000'
             return response
             
         print(f"File not found: {file_path}")
@@ -76,6 +72,6 @@ urlpatterns = [
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
     path('health/', health_check, name='health_check'),
-    # Single media serving path
-    path('media/<path:path>', serve_media_file, name='serve_media'),
+    # Update media serving path to handle the full URL structure
+    path('media/community_banners/<path:path>', serve_media_file, name='serve_media'),
 ]
