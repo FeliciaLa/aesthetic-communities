@@ -112,7 +112,10 @@ if not os.path.exists(STATIC_ROOT):
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app',
+    'https://aesthetic-communities.vercel.app',
+    'https://aesthetic-communities-production.up.railway.app',
+    'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
+    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -161,7 +164,8 @@ print(f"DEBUG: {DEBUG}")
 print(f"DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app',
+    'https://aesthetic-communities.vercel.app',
+    'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
 ]
 
 # Add Email settings

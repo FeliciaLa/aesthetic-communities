@@ -7,7 +7,7 @@ console.log('API Configuration:', {
 });
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: `${API_BASE_URL}/api/`,
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
