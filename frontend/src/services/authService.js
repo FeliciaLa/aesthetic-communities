@@ -4,14 +4,23 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            console.log('Login attempt BEFORE request:', {
-                url: 'auth/login/',
-                fullUrl: `${api.defaults.baseURL}auth/login/`,
+            const requestUrl = 'auth/login/';
+            console.log('URL Construction:', {
+                requestUrl,
+                baseURL: api.defaults.baseURL,
+                expectedFullUrl: `${api.defaults.baseURL}${requestUrl}`,
                 credentials
             });
-            const response = await api.post('auth/login/', {
+
+            const response = await api.post(requestUrl, {
                 username: credentials.username,
                 password: credentials.password
+            }, {
+                baseURL: api.defaults.baseURL,
+                url: requestUrl,
+                validateStatus: function (status) {
+                    return status < 500;
+                }
             });
 
             console.log('Login response:', response);
