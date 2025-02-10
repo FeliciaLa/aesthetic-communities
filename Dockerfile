@@ -3,7 +3,8 @@ FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    DJANGO_SETTINGS_MODULE=config.settings_prod
 
 # Install system dependencies
 RUN apt-get update && \
@@ -23,12 +24,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend directory
 COPY backend/ .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Collect static files without database check
+RUN python manage.py collectstatic --noinput --no-input
 
 # Expose the port the app runs on
 EXPOSE 8000
 
 # Command to run the application
 CMD echo "Starting Gunicorn..." && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:8000 --log-level debug --timeout 30 --workers 1 --threads 2 
+    gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --log-level debug --timeout 30 --workers 1 --threads 2 

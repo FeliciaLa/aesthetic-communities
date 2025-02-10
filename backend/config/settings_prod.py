@@ -2,22 +2,28 @@ import os
 from pathlib import Path
 import dj_database_url
 from decouple import config
+import sys
 
-# Database Configuration with error handling
-try:
+# Check if we're running collectstatic
+IS_COLLECTSTATIC = 'collectstatic' in sys.argv
+
+# Database Configuration
+if IS_COLLECTSTATIC:
+    # Use dummy DB for collectstatic
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:'
+        }
+    }
+else:
+    # Normal database configuration for runtime
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
         )
     }
-    # Test the connection
-    from django.db import connections
-    connections['default'].ensure_connection()
-    print("Database connection successful")
-except Exception as e:
-    print(f"Database connection error: {str(e)}")
-    raise
 
 # Import base settings
 from .settings import *
