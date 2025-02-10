@@ -3,9 +3,12 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:8000"
-healthcheckPath = "/admin/"
-healthcheckTimeout = 100
+startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+
+[env]
+PORT = "8000"
 
 [phases.setup]
 nixPkgs = [

@@ -61,7 +61,6 @@ if not os.path.exists(STATIC_ROOT):
 
 # Other settings remain the same...
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*']  # You can restrict this later
 
 # Print configuration status
 print("Configuration loaded with:")
@@ -139,4 +138,16 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # For production, you might want to use cloud storage
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage' 
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+] 
