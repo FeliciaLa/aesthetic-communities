@@ -1142,10 +1142,14 @@ class AnnouncementView(APIView):
 
     def get(self, request, community_id):
         try:
+            print(f"Fetching announcements for community {community_id}")
+            print(f"Request user: {request.user}")
             announcements = Announcement.objects.filter(community_id=community_id)
+            print(f"Found {announcements.count()} announcements")
             serializer = AnnouncementSerializer(announcements, many=True)
             return Response(serializer.data)
         except Exception as e:
+            print(f"Error fetching announcements: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, community_id):

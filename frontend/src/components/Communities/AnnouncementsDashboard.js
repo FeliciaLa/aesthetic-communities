@@ -14,26 +14,37 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const fetchAnnouncements = async () => {
     try {
-      const response = await api.get(`/communities/${communityId}/announcements/`);
+      console.log('Fetching announcements for community:', communityId);
+      const token = localStorage.getItem('token');
+      const response = await api.get(`/api/communities/${communityId}/announcements/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Announcements response:', response.data);
       setAnnouncements(response.data);
     } catch (err) {
-      console.error('Error fetching announcements:', err);
+      console.error('Error fetching announcements:', err.response?.data || err);
     }
   };
 
   const checkIsCreator = async () => {
     try {
-      const response = await api.get(`/communities/${communityId}/`);
+      console.log('Checking creator status for community:', communityId);
+      const token = localStorage.getItem('token');
+      const response = await api.get(`/api/communities/${communityId}/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const currentUser = response.data.current_username;
       const communityCreator = response.data.creator_name;
+      console.log('Creator check:', { currentUser, communityCreator });
       setIsCreator(currentUser === communityCreator);
-      console.log('Creator check:', {
-        currentUser,
-        communityCreator,
-        isCreator: currentUser === communityCreator
-      });
     } catch (err) {
-      console.error('Error checking creator status:', err);
+      console.error('Error checking creator status:', err.response?.data || err);
     }
   };
 
