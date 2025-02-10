@@ -3,8 +3,7 @@ FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8000  # Add explicit PORT env var
+    PYTHONDONTWRITEBYTECODE=1
 
 # Install system dependencies
 RUN apt-get update && \
@@ -27,8 +26,8 @@ COPY backend/ .
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Expose the port
-EXPOSE ${PORT}
+# Expose the port the app runs on
+EXPOSE 8000
 
 # Command to run the application
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --log-level debug --timeout 120 
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--log-level", "debug"] 
