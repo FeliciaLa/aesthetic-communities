@@ -13,14 +13,23 @@ from django.views.static import serve
 
 def serve_media_file(request, path):
     """Custom view to serve media files with proper headers"""
-    file_path = os.path.join(settings.MEDIA_ROOT, path)
-    if os.path.exists(file_path):
-        response = FileResponse(open(file_path, 'rb'))
-        response['Content-Type'] = 'image/jpeg'  # Adjust based on file type
-        response['X-Frame-Options'] = 'SAMEORIGIN'
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-    return HttpResponse(status=404)
+    try:
+        file_path = os.path.join(settings.MEDIA_ROOT, path)
+        print(f"Attempting to serve file: {file_path}")
+        print(f"File exists: {os.path.exists(file_path)}")
+        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+        
+        if os.path.exists(file_path):
+            response = FileResponse(open(file_path, 'rb'))
+            response['Content-Type'] = 'image/jpeg'  # Adjust based on file type
+            response['X-Frame-Options'] = 'SAMEORIGIN'
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+        print(f"File not found: {file_path}")
+        return HttpResponse(status=404)
+    except Exception as e:
+        print(f"Error serving media file: {str(e)}")
+        return HttpResponse(status=500)
 
 router = DefaultRouter()
 router.register(r'saved', SavedItemsViewSet, basename='saved')

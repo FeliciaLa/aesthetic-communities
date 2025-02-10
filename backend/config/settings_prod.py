@@ -149,12 +149,13 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 # Media files
-MEDIA_URL = 'https://aesthetic-communities-production.up.railway.app/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Create media directory if it doesn't exist
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT, exist_ok=True)
+    print(f"Created MEDIA_ROOT directory at: {MEDIA_ROOT}")
 
 # Static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
