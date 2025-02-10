@@ -1,15 +1,25 @@
 import axios from "axios";
-import { axiosConfig } from './config';
-
-// Force production URL
-const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
+import { API_BASE_URL } from './config';
 
 console.log('API Configuration:', {
-    baseURL: baseURL,
+    baseURL: API_BASE_URL,
     environment: process.env.NODE_ENV
 });
 
-const api = axios.create(axiosConfig);
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    timeout: 15000, // Increase timeout to 15 seconds
+    // Add retry logic
+    retry: 3,
+    retryDelay: (retryCount) => {
+        return retryCount * 1000;
+    }
+});
 
 // Add request interceptor for auth token
 api.interceptors.request.use(
@@ -18,18 +28,26 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
+        // Add CSRF token if needed
+        const csrfToken = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+        if (csrfToken) {
+            config.headers['X-CSRFToken'] = csrfToken[2];
+        }
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-// Add response interceptor for error handling
+// Add response interceptor with better error handling
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+    async (error) => {
+        if (error.code === 'ERR_NETWORK') {
+            console.error('Network Error Details:', {
+                baseURL: api.defaults.baseURL,
+                endpoint: error.config?.url,
+                method: error.config?.method
+            });
         }
         return Promise.reject(error);
     }

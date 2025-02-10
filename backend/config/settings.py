@@ -16,6 +16,11 @@ import os
 import logging.config
 from decouple import config
 
+# Debug print
+print("Environment variables loaded:")
+print(f"DB_NAME: {config('DB_NAME', default='not_found')}")
+print(f"SECRET_KEY exists: {bool(config('DJANGO_SECRET_KEY', default=None))}")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,10 +29,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*b7p%bwo+do-e)al3mo*tm!g#68mb+3+8jyj1+yyfx8&)d289h"
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='your-secret-key-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -104,11 +109,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'aesthetics_finder',  # The database name you created
-        'USER': 'felicialammerting',  # The username you created
-        'PASSWORD': 'FeliciaL123$',  # The password you set
-        'HOST': 'localhost',  # Or 127.0.0.1
-        'PORT': '5432',  # Default PostgreSQL port
+        'NAME': config('DB_NAME', default='aesthetics_finder'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 

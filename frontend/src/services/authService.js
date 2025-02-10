@@ -1,10 +1,11 @@
 import api from '../api';
+import { API_BASE_URL } from '../config';
 
 export const authService = {
     login: async (credentials) => {
         try {
-            const response = await api.post('auth/login/', {
-                username: credentials.identifier,
+            const response = await api.post('/auth/login/', {
+                username: credentials.username,
                 password: credentials.password
             });
 
@@ -13,11 +14,19 @@ export const authService = {
                 localStorage.setItem('userId', response.data.user.id.toString());
                 localStorage.setItem('username', response.data.user.username);
                 return response.data;
-            } else {
-                throw new Error('No token received');
             }
+            throw new Error('No token received');
         } catch (error) {
-            console.error('Login error:', error.response?.data || error.message);
+            console.error('Login error details:', {
+                message: error.message,
+                code: error.code,
+                response: error.response?.data,
+                baseURL: api.defaults.baseURL
+            });
+            
+            if (error.code === 'ERR_NETWORK') {
+                throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+            }
             throw error;
         }
     },

@@ -101,47 +101,32 @@ class LoginView(APIView):
 
     def post(self, request):
         try:
-            identifier = request.data.get('identifier')  # This can be email or username
+            username = request.data.get('username')
             password = request.data.get('password')
-
-            # Try to find the user by email or username
-            user = authenticate(
-                username=identifier,  # Django's authenticate will try username first
-                password=password
-            )
-
-            if not user:
-                # If authentication with username failed, try with email
-                try:
-                    user_obj = User.objects.get(email=identifier)
-                    user = authenticate(
-                        username=user_obj.username,
-                        password=password
-                    )
-                except User.DoesNotExist:
-                    pass
-
+            
+            logger.info(f"Login attempt for user: {username}")
+            
+            user = authenticate(username=username, password=password)
             if user:
                 token, _ = Token.objects.get_or_create(user=user)
                 return Response({
                     'token': token.key,
                     'user': {
                         'id': user.id,
-                        'username': user.username,
-                        'email': user.email
+                        'username': user.username
                     }
                 })
-            
-            return Response(
-                {'error': 'Invalid credentials'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-            
+            else:
+                logger.warning(f"Failed login attempt for user: {username}")
+                return Response(
+                    {'error': 'Invalid credentials'}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
         except Exception as e:
-            print(f"Login error: {str(e)}")
+            logger.error(f"Login error: {str(e)}")
             return Response(
                 {'error': str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class UserRegistrationView(APIView):

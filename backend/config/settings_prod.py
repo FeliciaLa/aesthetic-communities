@@ -93,13 +93,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 # Security settings
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
 
-# Print environment variables for debugging (will be removed later)
-print("DATABASE SETTINGS:")
-print(f"NAME: {os.environ.get('PGDATABASE')}")
-print(f"USER: {os.environ.get('PGUSER')}")
-print(f"HOST: {os.environ.get('PGHOST')}")
-print(f"PORT: {os.environ.get('PGPORT')}")
-
 # Security settings
 CSRF_TRUSTED_ORIGINS = [
     "https://aesthetic-communities-production.up.railway.app",  # Your Railway domain

@@ -1,5 +1,14 @@
 // Base API URL for production
-export const API_BASE_URL = 'https://aesthetic-communities-production.up.railway.app/api';
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:8000/api/'
+    : 'https://aesthetic-communities-production.up.railway.app/api/';
+
+// Ensure trailing slash
+export const getApiUrl = () => {
+    return API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+};
+
+export { API_BASE_URL };
 
 // Axios default config
 export const axiosConfig = {
