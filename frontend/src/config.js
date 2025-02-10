@@ -9,12 +9,9 @@ if (!API_BASE_URL) {
     console.error('API_BASE_URL is not set! Check .env.production file');
 }
 
-// Ensure trailing slash and api path
+// Don't add /api/ here since it's part of the URL patterns
 export const getApiUrl = () => {
-    const baseUrl = API_BASE_URL?.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
-    const apiUrl = `${baseUrl}api/`;
-    console.log('Constructed API URL:', apiUrl);
-    return apiUrl;
+    return API_BASE_URL?.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
 };
 
 // Export the base URL for other uses
