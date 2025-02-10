@@ -28,8 +28,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'main',
+    'music',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +77,7 @@ if IS_BUILD:
         }
     }
 else:
+    # Runtime database configuration
     if not os.getenv('DATABASE_URL'):
         raise ValueError("DATABASE_URL must be set in production runtime")
         
@@ -103,6 +106,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Create staticfiles directory if it doesn't exist
 if not os.path.exists(STATIC_ROOT):
     os.makedirs(STATIC_ROOT, exist_ok=True)
 
@@ -137,8 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Rest Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -160,3 +163,52 @@ print(f"DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
 CSRF_TRUSTED_ORIGINS = [
     'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app',
 ]
+
+# Add Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True)
+
+# Add Frontend URL
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
+
+# Add Audio settings
+ALLOWED_AUDIO_TYPES = [
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg'
+]
+MAX_AUDIO_SIZE = 5 * 1024 * 1024
+
+# Add Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'main': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# Add Custom User Model
+AUTH_USER_MODEL = 'main.CustomUser'
