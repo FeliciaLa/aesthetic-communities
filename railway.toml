@@ -2,18 +2,21 @@
 builder = "nixpacks"
 buildCommand = """
   cd backend && \
-  python -m pip install --upgrade pip && \
-  python -m pip install -r requirements.txt && \
-  python manage.py collectstatic --noinput
+  /usr/local/bin/python -m pip install --upgrade pip && \
+  /usr/local/bin/python -m pip install -r requirements.txt && \
+  /usr/local/bin/python manage.py collectstatic --noinput
 """
 
 [deploy]
-startCommand = "cd backend && gunicorn --chdir backend config.wsgi:application"
+startCommand = "cd backend && gunicorn config.wsgi"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 
 [phases.setup]
-nixPkgs = ["python", "python3", "python39", "python39Packages.pip", "postgresql"]
+nixPkgs = [
+  "python39-full",
+  "postgresql"
+]
 
 [service]
 rootDirectory = "." 
