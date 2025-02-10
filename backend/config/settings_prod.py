@@ -115,7 +115,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://aesthetic-communities.vercel.app',
     'https://aesthetic-communities-production.up.railway.app',
     'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
-    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app'
+    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app',
+    'http://localhost:3000'  # Add this for local development
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -126,6 +127,19 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'POST',
     'PUT',
+]
+
+# Add these settings
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 # Security settings that were working
