@@ -157,6 +157,7 @@ class UserLogoutView(APIView):
 
 class CommunityListView(APIView):
     permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
         try:
@@ -179,9 +180,18 @@ class CommunityListView(APIView):
                 {'error': 'Authentication required to create communities'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
+        
+        print("Files in request:", request.FILES)  # Add this for debugging
         serializer = CommunitySerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user)
+            community = serializer.save(created_by=request.user)
+            
+            # Handle banner image
+            if 'banner_image' in request.FILES:
+                community.banner_image = request.FILES['banner_image']
+                community.save()
+                print("Banner URL:", community.banner_image.url)  # Add this for debugging
+                
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
