@@ -3,7 +3,7 @@ from django.urls import path, include  # Import `include` to reference app-speci
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from main.views import SavedItemsViewSet
+from main.views import SavedItemsViewSet, LoginView, UserRegistrationView
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -42,9 +42,11 @@ def health_check(request):
         return HttpResponse(f"Health check failed: {str(e)}", status=500)
 
 urlpatterns = [
-    path('health/', health_check, name='health_check'),
-    path('api/', include('main.urls')),
     path('admin/', admin.site.urls),
+    path('api/auth/login/', LoginView.as_view(), name='login'),
+    path('api/auth/register/', UserRegistrationView.as_view(), name='register'),
+    path('api/health/', health_check, name='health_check'),
+    path('api/', include('main.urls')),
     path('api/', include('music.urls')),
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

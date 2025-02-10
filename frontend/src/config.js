@@ -1,10 +1,10 @@
 // Base API URL for production
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://aesthetic-communities-production.up.railway.app/api';
 
 // Ensure trailing slash
 export const getApiUrl = () => {
     const url = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
-    console.log('API URL:', url); // Add this for debugging
+    console.log('Current API URL:', url); // Debug log
     return url;
 };
 
