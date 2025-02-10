@@ -13,19 +13,74 @@ import AuthModal from './components/Auth/AuthModal';
 import PasswordResetConfirm from './components/Auth/PasswordResetConfirm';
 import PasswordReset from './components/Auth/PasswordReset';
 import ErrorBoundary from './components/ErrorBoundary';
+import { authService } from './services/authService';
+import { createContext, useContext } from 'react';
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        // Update authentication state when localStorage changes
+        const handleStorageChange = () => {
+            setIsAuthenticated(authService.isAuthenticated());
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    const login = async (credentials) => {
+        try {
+            const response = await authService.login(credentials);
+            setIsAuthenticated(true);
+            setUser(response.user);
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    const logout = () => {
+        authService.logout();
+        setIsAuthenticated(false);
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => useContext(AuthContext);
 
 const AppContent = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check authentication status on mount and token changes
+    const checkAuth = () => {
+      setIsLoggedIn(authService.isAuthenticated());
+    };
+
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
+
   const handleAuthClick = () => {
     setInitialAuthMode('register');
     setShowAuthModal(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    authService.logout();
     setIsLoggedIn(false);
     navigate('/');
   };
@@ -81,10 +136,12 @@ const AppContent = () => {
 
       {showAuthModal && (
         <AuthModal
-          show={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
           initialMode={initialAuthMode}
-          setIsLoggedIn={setIsLoggedIn}
+          onClose={() => setShowAuthModal(false)}
+          onLoginSuccess={() => {
+            setIsLoggedIn(true);
+            setShowAuthModal(false);
+          }}
         />
       )}
     </MusicProvider>
@@ -96,7 +153,9 @@ const App = () => {
     <ErrorBoundary>
       <Router>
         <MusicProvider>
-          <AppContent />
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
         </MusicProvider>
       </Router>
     </ErrorBoundary>

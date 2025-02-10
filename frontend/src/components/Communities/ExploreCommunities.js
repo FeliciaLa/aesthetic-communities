@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import { ChevronDown, Search, ChevronLeft, ChevronRight } from 'react-feather';
 import ErrorBoundary from '../ErrorBoundary';
 import RecommendedCommunities from './RecommendedCommunities';
+import { API_BASE_URL } from '../../config';
+import { getFullImageUrl } from '../../utils/imageUtils';
 
 // Styled Components
 const Container = styled.div`
@@ -365,7 +367,7 @@ const SectionHeader = styled.div`
 const getImageUrl = (image) => {
   return image.startsWith('http') 
     ? image 
-    : `${api.defaults.baseURL}${image}`;
+    : `${API_BASE_URL}${image}`;
 };
 
 const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
@@ -400,22 +402,19 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   const fetchCommunities = async () => {
     try {
-      console.log('Fetching all communities...');
       const response = await api.get('/communities/');
-      console.log('All communities response:', response.data);
       
-      const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
       const transformedCommunities = response.data.map(community => ({
         ...community,
-        banner_image: community.banner_image ? 
-          `${baseURLWithoutApi}/media/${community.banner_image}` : null
+        banner_image: getFullImageUrl(community.banner_image)
       }));
       
-      console.log('Transformed communities:', transformedCommunities);
       setCommunities(transformedCommunities);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching communities:', error);
       setError('Failed to load communities');
+      setLoading(false);
     }
   };
 
@@ -425,11 +424,9 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
       const response = await api.get('/communities/trending/');
       
       if (response.data && response.data.length > 0) {
-        const baseURLWithoutApi = api.defaults.baseURL.replace('/api', '');
         const transformedCommunities = response.data.map(community => ({
           ...community,
-          banner_image: community.banner_image ? 
-            `${baseURLWithoutApi}/media/${community.banner_image}` : null
+          banner_image: getFullImageUrl(community.banner_image)
         }));
         
         setTrendingCommunities(transformedCommunities);

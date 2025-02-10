@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { DEFAULT_AVATAR } from './CommunityFeed';
 
 const AnnouncementsDashboard = ({ communityId }) => {
@@ -14,13 +14,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const fetchAnnouncements = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/announcements/`,
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/announcements/`);
       setAnnouncements(response.data);
     } catch (err) {
       console.error('Error fetching announcements:', err);
@@ -29,13 +23,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const checkIsCreator = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:8000/api/communities/${communityId}/`,
-        {
-          headers: { 'Authorization': `Token ${token}` }
-        }
-      );
+      const response = await api.get(`/communities/${communityId}/`);
       setIsCreator(response.data.is_creator);
     } catch (err) {
       console.error('Error checking creator status:', err);
@@ -47,13 +35,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
     if (!newAnnouncement.trim()) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `http://localhost:8000/api/communities/${communityId}/announcements/`,
+      const response = await api.post(
+        `/communities/${communityId}/announcements/`,
         { content: newAnnouncement },
         {
           headers: { 
-            'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
           }
         }

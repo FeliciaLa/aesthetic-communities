@@ -11,6 +11,7 @@ import JoinCommunityButton from './JoinCommunityButton';
 import AnnouncementsDashboard from './AnnouncementsDashboard';
 import RecommendedProducts from './RecommendedProducts';
 import GalleryView from './GalleryView';
+import { getFullImageUrl } from '../../utils/imageUtils';
 
 
 const CommunityDetail = () => {
@@ -58,11 +59,7 @@ const CommunityDetail = () => {
                 // Transform the banner_image URL
                 const communityData = {
                     ...communityResponse.data,
-                    banner_image: communityResponse.data.banner_image ? 
-                        (communityResponse.data.banner_image.startsWith('http') ? 
-                            communityResponse.data.banner_image : 
-                            `${api.defaults.baseURL}${communityResponse.data.banner_image}`
-                        ) : '/default-banner.jpg'
+                    banner_image: getFullImageUrl(communityResponse.data.banner_image) || '/default-banner.jpg'
                 };
                 
                 setCommunity(communityData);

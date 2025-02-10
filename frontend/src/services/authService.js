@@ -3,18 +3,10 @@ import api from '../api';
 export const authService = {
     login: async (credentials) => {
         try {
-            console.log('Attempting login with URL:', `${api.defaults.baseURL}auth/login/`);
-            console.log('Request config:', {
-                withCredentials: api.defaults.withCredentials,
-                headers: api.defaults.headers
-            });
-
             const response = await api.post('auth/login/', {
-                identifier: credentials.identifier,
+                username: credentials.identifier,
                 password: credentials.password
             });
-
-            console.log('Login response:', response);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
@@ -25,13 +17,7 @@ export const authService = {
                 throw new Error('No token received');
             }
         } catch (error) {
-            console.error('Login error full details:', error);
-            console.error('Login error config:', {
-                url: error.config?.url,
-                baseURL: error.config?.baseURL,
-                headers: error.config?.headers,
-                data: error.config?.data
-            });
+            console.error('Login error:', error.response?.data || error.message);
             throw error;
         }
     },
@@ -87,6 +73,7 @@ export const authService = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
+        localStorage.removeItem('username');
     },
 
     getCurrentUser: () => {

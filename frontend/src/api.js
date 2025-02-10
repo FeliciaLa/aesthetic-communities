@@ -1,4 +1,5 @@
 import axios from "axios";
+import { axiosConfig } from './config';
 
 // Force production URL
 const baseURL = 'https://aesthetic-communities-production.up.railway.app/api/';
@@ -8,69 +9,28 @@ console.log('API Configuration:', {
     environment: process.env.NODE_ENV
 });
 
-const api = axios.create({
-    baseURL: baseURL,
-    timeout: 10000,
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    withCredentials: false
-});
+const api = axios.create(axiosConfig);
 
-// Test connection immediately
-const testConnection = async () => {
-    try {
-        const response = await axios({
-            method: 'get',
-            url: `${baseURL}communities/`,
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        console.log('Test connection successful:', response.data);
-    } catch (error) {
-        console.error('Test connection failed:', {
-            message: error.message,
-            status: error.response?.status,
-            data: error.response?.data,
-            config: error.config
-        });
-    }
-};
-
-// Run test
-testConnection();
-
-// Add request interceptor
+// Add request interceptor for auth token
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `Token ${token}`;
         }
-        config.headers['Access-Control-Allow-Origin'] = '*';
-        console.log('Request:', config.url, config.data);
         return config;
     },
-    (error) => {
-        console.error('Request error:', error);
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// Add response interceptor
+// Add response interceptor for error handling
 api.interceptors.response.use(
-    (response) => {
-        console.log('Response:', response.data);
-        return response;
-    },
+    (response) => response,
     (error) => {
-        console.error('Response error:', {
-            url: error.config?.url,
-            status: error.response?.status,
-            data: error.response?.data
-        });
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
         return Promise.reject(error);
     }
 );

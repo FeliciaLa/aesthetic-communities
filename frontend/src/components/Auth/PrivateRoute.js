@@ -1,17 +1,17 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { authService } from '../../services/authService';
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("token"); // Retrieve token from localStorage
+    const location = useLocation();
+    const isAuthenticated = authService.isAuthenticated();
 
-  if (!token) {
-    // If no token, redirect to login
-    console.warn("Access denied. No token found."); // Debugging
-    return <Navigate to="/login" replace />;
-  }
+    if (!isAuthenticated) {
+        // Redirect to login while saving the attempted URL
+        return <Navigate to="/" state={{ from: location }} replace />;
+    }
 
-  // If token exists, allow access to the protected route
-  return children;
+    return children;
 };
 
 export default PrivateRoute;

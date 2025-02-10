@@ -5,6 +5,8 @@ import { DEFAULT_AVATAR } from '../Communities/CommunityFeed';
 import EditProfileModal from './EditProfileModal';
 import api from '../../api';
 import SavedItems from './SavedItems';
+import { API_BASE_URL } from '../../config';
+import { getFullImageUrl } from '../../utils/imageUtils';
 
 const ProfileCard = styled.div`
   background: white;
@@ -153,93 +155,47 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await api.get(
-          '/profile/update/',
-          {
-            headers: {
-              'Authorization': `Token ${token}`
-            }
-          }
-        );
-        
-        // Make sure the avatar URL is complete when loading profile
-        if (response.data.avatar && !response.data.avatar.startsWith('http')) {
-          response.data.avatar = `http://localhost:8000${response.data.avatar}`;
-        }
-        
-        setProfile(response.data);
-        setBio(response.data.bio || '');
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError('Failed to load profile');
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const username = localStorage.getItem('username');
-
-        // Get profile and all communities
         const [profileRes, allCommunitiesRes] = await Promise.all([
           api.get('/profile/'),
           api.get('/communities/')
         ]);
 
-        // Transform the communities data to include full image URLs
-        const allCommunities = allCommunitiesRes.data.map(community => {
-          // Remove /api from the base URL and ensure it ends with a slash
-          const baseURLWithoutApi = api.defaults.baseURL.split('/api')[0];
-          
-          // Ensure the banner_image path starts with a slash
-          const imagePath = community.banner_image && !community.banner_image.startsWith('/')
-            ? `/${community.banner_image}`
-            : community.banner_image;
+        // Transform the communities data
+        const baseURLWithoutApi = API_BASE_URL.split('/api')[0];
+        const allCommunities = allCommunitiesRes.data.map(community => ({
+          ...community,
+          banner_image: community.banner_image
+            ? (community.banner_image.startsWith('http')
+              ? community.banner_image
+              : `${baseURLWithoutApi}${community.banner_image}`)
+            : null
+        }));
 
-          return {
-            ...community,
-            banner_image: imagePath
-              ? (imagePath.startsWith('http')
-                ? imagePath
-                : `${baseURLWithoutApi}${imagePath}`)
-              : null
-          };
-        });
-        
-        console.log('Transformed communities:', allCommunities); // Debug log
-        
-        // Get created communities
+        // Filter communities
+        const username = localStorage.getItem('username');
         const created = allCommunities.filter(
           community => community.created_by === username
         );
 
-        // Check membership status for each community
+        // Check membership status
         const membershipChecks = await Promise.all(
           allCommunities.map(community =>
             api.get(`/communities/${community.id}/membership/`)
           )
         );
 
-        // Filter joined communities based on membership status
         const joined = allCommunities.filter((community, index) => 
           membershipChecks[index].data.is_member && community.created_by !== username
         );
 
         setCreatedCommunities(created);
         setJoinedCommunities(joined);
+        setProfile(profileRes.data);
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching profile data:', err);
-        setError('Failed to load profile data');
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
         setLoading(false);
       }
     };

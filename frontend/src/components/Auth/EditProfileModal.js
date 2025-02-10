@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../api';
+import { API_BASE_URL } from '../../config';
 
 const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -19,28 +20,24 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
     const data = new FormData();
     
     data.append('bio', formData.bio);
     if (formData.avatar) {
-      data.append('avatar', formData.avatar, formData.avatar.name);
+      data.append('avatar', formData.avatar);
     }
 
     try {
-      const response = await api.patch(
-        '/profile/update/',
-        data,
-        {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'multipart/form-data',
-          }
+      const response = await api.patch('/profile/update/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
         }
-      );
+      });
       
+      // Transform avatar URL if needed
       if (response.data.avatar && !response.data.avatar.startsWith('http')) {
-        response.data.avatar = `http://localhost:8000${response.data.avatar}`;
+        const baseURLWithoutApi = API_BASE_URL.split('/api')[0];
+        response.data.avatar = `${baseURLWithoutApi}${response.data.avatar}`;
       }
       
       onSuccess(response.data);
