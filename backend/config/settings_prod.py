@@ -36,9 +36,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -122,8 +122,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://aesthetic-communities.vercel.app',
     'https://aesthetic-communities-production.up.railway.app',
     'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
-    'https://aesthetic-communities-m0yg51gdj-felicia-lammertings-projects.vercel.app',
-    'http://localhost:3000'  # Add this for local development
+    'https://aesthetic-communities-jopldlo67-felicia-lammertings-projects.vercel.app',
+    'http://localhost:3000'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -194,6 +194,7 @@ print(f"DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
 CSRF_TRUSTED_ORIGINS = [
     'https://aesthetic-communities.vercel.app',
     'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
+    'https://aesthetic-communities-jopldlo67-felicia-lammertings-projects.vercel.app',
 ]
 
 # Add Email settings
@@ -272,3 +273,5 @@ else:
     # During collectstatic, use local storage
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
+
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily for debugging
