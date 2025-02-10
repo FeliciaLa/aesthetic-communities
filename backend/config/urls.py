@@ -12,9 +12,14 @@ import os
 from django.views.static import serve
 
 def serve_media_file(request, path):
+    """Custom view to serve media files with proper headers"""
     file_path = os.path.join(settings.MEDIA_ROOT, path)
     if os.path.exists(file_path):
-        return FileResponse(open(file_path, 'rb'))
+        response = FileResponse(open(file_path, 'rb'))
+        response['Content-Type'] = 'image/jpeg'  # Adjust based on file type
+        response['X-Frame-Options'] = 'SAMEORIGIN'
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
     return HttpResponse(status=404)
 
 router = DefaultRouter()
@@ -54,6 +59,8 @@ urlpatterns = [
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
     path('health/', health_check, name='health_check'),
+    # Add explicit media serving
+    path('media/<path:path>', serve_media_file, name='serve_media'),
 ]
 
 # Add this condition for serving media files
