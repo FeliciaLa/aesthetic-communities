@@ -30,4 +30,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Command to run the application
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--log-level", "debug"] 
+CMD echo "Starting Gunicorn..." && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:8000 --log-level debug --timeout 30 --workers 1 --threads 2 

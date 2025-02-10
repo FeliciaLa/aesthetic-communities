@@ -30,19 +30,40 @@ print("Database Host:", DATABASES['default'].get('HOST', 'not set'))
 # Now import the rest of the settings
 from .settings import *
 
-# Set up logging with more detail
+# Add detailed logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
             'level': 'DEBUG',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',  # Changed to DEBUG for more detailed logs
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'gunicorn': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
     },
 }
 
@@ -151,3 +172,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Print startup diagnostic information
+print("Django Starting Up:")
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+print(f"DEBUG: {DEBUG}")
+print(f"DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
