@@ -1,8 +1,28 @@
-from .settings import *
 import os
 from decouple import config, UndefinedValueError
 import dj_database_url
 import logging
+
+# Configure database first, before importing from settings
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# If DATABASE_URL is not set, use SQLite for build process
+if not os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
+
+# Now import from settings after database configuration
+from .settings import *
 
 # Set up logging with more detail
 LOGGING = {
@@ -22,41 +42,6 @@ LOGGING = {
 
 # Print environment variables (without sensitive data)
 print("Available environment variables:", [k for k in os.environ.keys()])
-
-try:
-    # Try to get DATABASE_URL first
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        DATABASES = {
-            'default': dj_database_url.config(
-                default=database_url,
-                conn_max_age=600,
-                conn_health_checks=True,
-            )
-        }
-        print("Using DATABASE_URL configuration")
-    else:
-        # Fallback to individual credentials
-        print("DATABASE_URL not found, trying individual credentials")
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.environ.get('PGDATABASE'),
-                'USER': os.environ.get('PGUSER'),
-                'PASSWORD': os.environ.get('PGPASSWORD'),
-                'HOST': os.environ.get('PGHOST'),
-                'PORT': os.environ.get('PGPORT', '5432'),
-            }
-        }
-except Exception as e:
-    print(f"Database configuration error: {str(e)}")
-    print("Falling back to SQLite")
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
 
 # Ensure static files directory exists
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
