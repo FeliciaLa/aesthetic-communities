@@ -4,8 +4,7 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            // Hardcode the complete URL path to test
-            const fullUrl = 'api/auth/login/';  // Include the full path
+            const fullUrl = 'auth/login/';  // Remove 'api/' prefix
             console.log('Attempting login with hardcoded URL:', {
                 fullUrl,
                 baseURL: api.defaults.baseURL,
