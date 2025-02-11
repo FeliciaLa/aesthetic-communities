@@ -8,6 +8,8 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isCreator, setIsCreator] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [community, setCommunity] = useState(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -20,11 +22,23 @@ const AnnouncementsDashboard = ({ communityId }) => {
         withCredentials: true
       });
       
+      const communityData = {
+        ...response.data,
+        banner_image: response.data.banner_image ? 
+            (response.data.banner_image.startsWith('http') ? 
+                response.data.banner_image : 
+                getFullImageUrl(response.data.banner_image)) 
+            : null
+      };
+
+      setCommunity(communityData);
       setAnnouncements(response.data);
       setError(null);
+      setLoading(false);
     } catch (err) {
       console.error('Error fetching announcements:', err);
       setError('Failed to load announcements. Please try again later.');
+      setLoading(false);
     }
   };
 
@@ -46,6 +60,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
     } catch (err) {
       console.error('Error checking creator status:', err);
       setError('Failed to check creator status.');
+      setLoading(false);
     }
   };
 
@@ -83,6 +98,10 @@ const AnnouncementsDashboard = ({ communityId }) => {
       minute: '2-digit'
     });
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!community) return <div>No community found</div>;
 
   return (
     <div className="announcements-dashboard">
