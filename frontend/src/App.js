@@ -34,7 +34,7 @@ const AppContent = () => {
         return;
       }
       
-      const response = await api.get('/profile/');
+      const response = await api.get('/auth/profile/');
       if (response.status === 200) {
         setIsLoggedIn(true);
       } else {
