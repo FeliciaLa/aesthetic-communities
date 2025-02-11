@@ -85,11 +85,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         password: password
       });
 
-      console.log('Login response:', response);
       if (response && response.token) {
         await onLoginSuccess();
-      } else {
-        setError('Invalid login response');
       }
     } catch (err) {
       console.error('Auth error:', err);
