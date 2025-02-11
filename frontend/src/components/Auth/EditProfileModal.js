@@ -20,6 +20,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     const data = new FormData();
     
     data.append('bio', formData.bio);
@@ -31,6 +32,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
       const response = await api.patch('/profile/update/', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Authorization': `Token ${token}`
         }
       });
       

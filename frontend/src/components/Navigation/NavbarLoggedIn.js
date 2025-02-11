@@ -89,7 +89,7 @@ const NavbarLoggedIn = ({ handleLogout }) => {
           Create Hub
         </Link>
         <Link 
-          to="/auth/profile" 
+          to="/profile" 
           className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
         >
           Profile
