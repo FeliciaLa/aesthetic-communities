@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
+import { API_BASE_URL } from '../../config';
 import { DEFAULT_AVATAR } from './CommunityFeed';
 
 const AnnouncementsDashboard = ({ communityId }) => {
@@ -18,8 +19,16 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
-      const url = `/communities/${communityId}/announcements/`;
+      // Add /api to the URL if it's not already in the base URL
+      const apiPrefix = API_BASE_URL.includes('/api') ? '' : '/api';
+      const url = `${apiPrefix}/communities/${communityId}/announcements/`;
       
+      console.log('Making request to:', {
+        baseURL: API_BASE_URL,
+        apiPrefix,
+        finalUrl: url
+      });
+
       const response = await api.get(url, {
         headers,
         withCredentials: true
@@ -28,7 +37,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
       setAnnouncements(response.data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', err);
+      console.error('Error fetching announcements:', {
+        error: err,
+        baseURL: API_BASE_URL,
+        communityId
+      });
       setError('Failed to load announcements. Please try again later.');
     }
   };
@@ -38,7 +51,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
-      const response = await api.get(`/communities/${communityId}/`, {
+      // Add /api to the URL if it's not already in the base URL
+      const apiPrefix = API_BASE_URL.includes('/api') ? '' : '/api';
+      const url = `${apiPrefix}/communities/${communityId}/`;
+      
+      const response = await api.get(url, {
         headers,
         withCredentials: true
       });
