@@ -114,7 +114,7 @@ const AppContent = () => {
         />
         <Route path="/communities/:id" element={<CommunityDetail />} />
         <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
-        <Route path="/profile" element={
+        <Route path="/auth/profile" element={
           <PrivateRoute isLoggedIn={isLoggedIn}>
             <Profile />
           </PrivateRoute>
