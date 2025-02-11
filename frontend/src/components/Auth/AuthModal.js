@@ -83,12 +83,10 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
     try {
       let response;
       if (mode === 'login') {
-        console.log('Attempting login...');
         response = await authService.login({
           username: email,
           password: password
         });
-        console.log('Login successful:', response);
       } else {
         // Validation for registration
         if (password !== confirmPassword) {
@@ -135,10 +133,14 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
       }
 
       if (response.token) {
-        console.log('Setting logged in state...');
-        setIsLoggedIn(true);
-        console.log('Closing modal...');
-        onClose();
+        // First set the logged in state
+        await setIsLoggedIn(true);
+        // Small delay before closing modal
+        setTimeout(() => {
+          onClose();
+          // Refresh the page to ensure all states are updated
+          window.location.reload();
+        }, 100);
       }
     } catch (err) {
       console.error('Login error:', err);
