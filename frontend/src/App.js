@@ -30,10 +30,16 @@ const AppContent = () => {
       const token = localStorage.getItem('token');
       if (!token) {
         setIsLoggedIn(false);
+        setIsLoading(false);
         return;
       }
+      
       const response = await api.get('/profile/');
-      setIsLoggedIn(true);
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+      } else {
+        throw new Error('Invalid token');
+      }
     } catch (error) {
       console.error('Auth validation failed:', error);
       setIsLoggedIn(false);
@@ -62,11 +68,6 @@ const AppContent = () => {
     return <div>Loading...</div>;
   }
 
-  const handleAuthClick = () => {
-    setInitialAuthMode('register');
-    setShowAuthModal(true);
-  };
-
   return (
     <MusicProvider>
       {isLoggedIn ? (
@@ -83,8 +84,11 @@ const AppContent = () => {
           path="/" 
           element={
             <ExploreCommunities 
-              setIsLoggedIn={setIsLoggedIn}
-              onAuthClick={handleAuthClick}
+              isLoggedIn={isLoggedIn}
+              onAuthClick={() => {
+                setInitialAuthMode('register');
+                setShowAuthModal(true);
+              }}
             />
           } 
         />
@@ -92,8 +96,11 @@ const AppContent = () => {
           path="/communities" 
           element={
             <ExploreCommunities 
-              setIsLoggedIn={setIsLoggedIn}
-              onAuthClick={handleAuthClick}
+              isLoggedIn={isLoggedIn}
+              onAuthClick={() => {
+                setInitialAuthMode('register');
+                setShowAuthModal(true);
+              }}
             />
           } 
         />

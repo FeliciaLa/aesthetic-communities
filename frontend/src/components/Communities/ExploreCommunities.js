@@ -370,7 +370,7 @@ const getImageUrl = (image) => {
     : `${API_BASE_URL}${image}`;
 };
 
-const ExploreCommunities = ({ setIsLoggedIn, onAuthClick, isLoggedIn }) => {
+const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
   const [communities, setCommunities] = useState([]);
   const [trendingCommunities, setTrendingCommunities] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -79,26 +79,17 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     setError('');
 
     try {
-      let response;
-      if (mode === 'login') {
-        response = await authService.login({
-          username: username,
-          password: password
-        });
-      } else {
-        if (password !== confirmPassword) {
-          setError('Passwords do not match');
-          return;
-        }
-        response = await authService.register({
-          email,
-          username,
-          password
-        });
-      }
+      console.log('Attempting login with:', { username });
+      const response = await authService.login({
+        username: username,
+        password: password
+      });
 
-      if (response.token) {
+      console.log('Login response:', response);
+      if (response && response.token) {
         await onLoginSuccess();
+      } else {
+        setError('Invalid login response');
       }
     } catch (err) {
       console.error('Auth error:', err);
