@@ -15,21 +15,25 @@ const AnnouncementsDashboard = ({ communityId }) => {
   }, [communityId]);
 
   const fetchAnnouncements = async () => {
+    console.log('Debug API Configuration:', {
+      apiBaseURL: api.defaults.baseURL,
+      apiInstance: api,
+      environmentURL: process.env.REACT_APP_API_URL,
+      nodeEnv: process.env.NODE_ENV
+    });
+
     try {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
-      // Add /api to the URL if it's not already in the base URL
-      const apiPrefix = API_BASE_URL.includes('/api') ? '' : '/api';
-      const url = `${apiPrefix}/communities/${communityId}/announcements/`;
-      
-      console.log('Making request to:', {
-        baseURL: API_BASE_URL,
-        apiPrefix,
-        finalUrl: url
+      console.log('Making announcement request:', {
+        method: 'GET',
+        url: `/communities/${communityId}/announcements/`,
+        baseURL: api.defaults.baseURL,
+        headers
       });
 
-      const response = await api.get(url, {
+      const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers,
         withCredentials: true
       });
@@ -37,10 +41,15 @@ const AnnouncementsDashboard = ({ communityId }) => {
       setAnnouncements(response.data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', {
+      console.error('Detailed Error Information:', {
         error: err,
-        baseURL: API_BASE_URL,
-        communityId
+        baseURL: api.defaults.baseURL,
+        environmentVariables: {
+          REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+          NODE_ENV: process.env.NODE_ENV
+        },
+        requestConfig: err.config,
+        fullUrl: err.config?.baseURL + err.config?.url
       });
       setError('Failed to load announcements. Please try again later.');
     }
@@ -51,11 +60,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
-      // Add /api to the URL if it's not already in the base URL
-      const apiPrefix = API_BASE_URL.includes('/api') ? '' : '/api';
-      const url = `${apiPrefix}/communities/${communityId}/`;
-      
-      const response = await api.get(url, {
+      const response = await api.get(`/communities/${communityId}/`, {
         headers,
         withCredentials: true
       });
