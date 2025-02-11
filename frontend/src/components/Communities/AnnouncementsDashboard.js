@@ -17,7 +17,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('Fetching announcements for community:', communityId);
-      const response = await api.get(`/api/communities/${communityId}/announcements/`, {
+      const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -36,7 +36,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('Checking creator status for community:', communityId);
-      const response = await api.get(`/api/communities/${communityId}/`, {
+      const response = await api.get(`/communities/${communityId}/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
