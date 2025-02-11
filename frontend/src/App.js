@@ -66,23 +66,26 @@ const AppContent = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const validateAuth = async () => {
+      setIsLoading(true);
       try {
         const isAuth = await authService.isAuthenticated();
         setIsLoggedIn(isAuth);
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Auth validation failed:', error);
         setIsLoggedIn(false);
+        // Clear any invalid tokens
+        authService.logout();
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkAuth();
+    validateAuth();
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or your loading component
+    return <div>Loading...</div>;
   }
 
   const handleAuthClick = () => {

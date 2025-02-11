@@ -4,27 +4,24 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            console.log('Attempting login with URL:', {
-                baseURL: api.defaults.baseURL,
-                credentials
-            });
-
             const response = await api.post('auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
 
-            console.log('Login response:', response);
-
-            if (response.data.token) {
+            if (response.data?.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userId', response.data.user.id.toString());
                 localStorage.setItem('username', response.data.user.username);
                 return response.data;
             }
-            throw new Error('No token received');
+            throw new Error('Invalid login response');
         } catch (error) {
-            console.error('Login error details:', error);
+            console.error('Login error:', error);
+            // Clear any existing invalid tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
             throw error;
         }
     },
@@ -94,13 +91,11 @@ export const authService = {
         if (!token) return false;
 
         try {
-            // Verify token is valid by making a request to profile
-            const response = await api.get('/profile/');
-            console.log('Auth check response:', response);
+            await api.get('/profile/');
             return true;
         } catch (error) {
             console.error('Token validation failed:', error);
-            // If token is invalid, clear storage
+            // Clear invalid tokens
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('username');

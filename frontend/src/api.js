@@ -2,34 +2,20 @@ import axios from "axios";
 import { getApiUrl } from './config';
 
 const baseURL = getApiUrl();
-// Remove the api/ from here since it's part of the URL pattern
-const apiBaseURL = baseURL;
 
 console.log('API URL Construction:', {
-    rawBaseURL: baseURL,
-    apiBaseURL: apiBaseURL,
-    fullRequestUrl: `${apiBaseURL}api/auth/login/`
-});
-
-// Add this right before the axios.create
-console.log('Final Axios Config:', {
-    baseURL: apiBaseURL,
-    fullTestUrl: `${apiBaseURL}auth/login/`
+    baseURL,
+    fullTestUrl: `${baseURL}auth/login/`
 });
 
 const api = axios.create({
-    baseURL: apiBaseURL,
+    baseURL: baseURL,
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
     },
-    timeout: 15000, // Increase timeout to 15 seconds
-    // Add retry logic
-    retry: 3,
-    retryDelay: (retryCount) => {
-        return retryCount * 1000;
-    }
+    timeout: 15000
 });
 
 // Add request interceptor with more detailed logging
