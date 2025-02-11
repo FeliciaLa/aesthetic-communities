@@ -22,6 +22,7 @@ const CommunityDetail = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [images, setImages] = useState([]);
 
     const trackView = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -42,6 +43,15 @@ const CommunityDetail = () => {
             console.error('Error tracking view:', error.response?.data || error.message);
         }
     }, [id]);
+
+    const fetchImages = async () => {
+        try {
+            const response = await api.get(`/communities/${id}/gallery/`);
+            setImages(response.data);
+        } catch (err) {
+            console.error('Error fetching images:', err);
+        }
+    };
 
     useEffect(() => {
         async function fetchData() {
@@ -67,6 +77,11 @@ const CommunityDetail = () => {
                     setIsCreator(currentUser === communityCreator);
                     await trackView();
                 }
+
+                // Fetch images if on gallery tab
+                if (activeTab === 'gallery') {
+                    await fetchImages();
+                }
             } catch (error) {
                 console.error('Error fetching community:', {
                     status: error.response?.status,
@@ -81,7 +96,7 @@ const CommunityDetail = () => {
         }
 
         fetchData();
-    }, [id, trackView]);
+    }, [id, trackView, activeTab]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
@@ -119,20 +134,6 @@ const CommunityDetail = () => {
             console.error('Failed to upload image:', err);
         }
     };
-
-    const fetchImages = async () => {
-        try {
-            const response = await api.get(`/communities/${id}/gallery/`);
-        } catch (err) {
-            console.error('Error fetching images:', err);
-        }
-    };
-
-    useEffect(() => {
-        if (activeTab === 'gallery') {
-            fetchImages();
-        }
-    }, [activeTab, id]);
 
     const handleImageDelete = async (imageId) => {
         try {
