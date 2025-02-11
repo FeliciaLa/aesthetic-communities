@@ -28,7 +28,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
     }
 
     try {
-      const response = await api.patch('auth/profile/update/', data, {
+      const response = await api.patch('/profile/update/', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }

@@ -132,7 +132,7 @@ const Profile = () => {
 
     try {
       const response = await api.patch(
-        '/auth/profile/update/',
+        '/profile/update/',
         formData,
         {
           headers: {

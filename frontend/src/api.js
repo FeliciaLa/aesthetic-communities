@@ -21,6 +21,7 @@ const api = axios.create({
 // Add request interceptor with more detailed logging
 api.interceptors.request.use(
     (config) => {
+        console.log('API Request to:', config.url, 'from:', new Error().stack);
         const token = localStorage.getItem('token');
         console.log('Request interceptor:', {
             url: config.url,
