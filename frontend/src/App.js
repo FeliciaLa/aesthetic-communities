@@ -59,25 +59,31 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => useContext(AuthContext);
 
 const AppContent = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check authentication status on mount and token changes
-    const checkAuth = () => {
-      setIsLoggedIn(authService.isAuthenticated());
+    const checkAuth = async () => {
+      try {
+        const isAuth = await authService.isAuthenticated();
+        setIsLoggedIn(isAuth);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setIsLoggedIn(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
+    checkAuth();
   }, []);
 
-  // Add console log for state changes
-  useEffect(() => {
-    console.log('Auth state changed:', isLoggedIn);
-  }, [isLoggedIn]);
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your loading component
+  }
 
   const handleAuthClick = () => {
     setInitialAuthMode('register');

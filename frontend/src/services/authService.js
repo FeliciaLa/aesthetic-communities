@@ -9,7 +9,7 @@ export const authService = {
                 credentials
             });
 
-            const response = await api.post('/auth/login/', {
+            const response = await api.post('auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
@@ -24,15 +24,7 @@ export const authService = {
             }
             throw new Error('No token received');
         } catch (error) {
-            console.error('Login error details:', {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
-            
-            if (error.code === 'ERR_NETWORK') {
-                throw new Error('Unable to connect to server. Please check your internet connection and try again.');
-            }
+            console.error('Login error details:', error);
             throw error;
         }
     },
@@ -97,8 +89,23 @@ export const authService = {
         return { token, userId };
     },
 
-    isAuthenticated: () => {
-        return !!localStorage.getItem('token');
+    isAuthenticated: async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+
+        try {
+            // Verify token is valid by making a request to profile
+            const response = await api.get('/profile/');
+            console.log('Auth check response:', response);
+            return true;
+        } catch (error) {
+            console.error('Token validation failed:', error);
+            // If token is invalid, clear storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            return false;
+        }
     },
 
     requestPasswordReset: async (email) => {
