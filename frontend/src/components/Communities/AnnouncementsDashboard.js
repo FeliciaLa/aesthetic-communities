@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import { API_BASE_URL } from '../../config';
 import { DEFAULT_AVATAR } from './CommunityFeed';
+import { getFullImageUrl } from '../../utils/imageUtils';
 
 const AnnouncementsDashboard = ({ communityId }) => {
   const [announcements, setAnnouncements] = useState([]);
