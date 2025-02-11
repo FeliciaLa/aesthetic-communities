@@ -24,37 +24,10 @@ const CommunityDetail = () => {
     const [error, setError] = useState(null);
     const [images, setImages] = useState([]);
 
-    const trackView = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !id) return;
-        
-        try {
-            await api.post(
-                `/communities/${id}/view/`,
-                {},
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-        } catch (error) {
-            console.error('Error tracking view:', error.response?.data || error.message);
-        }
-    }, [id]);
-
-    const fetchImages = async () => {
-        try {
-            const response = await api.get(`/communities/${id}/gallery/`);
-            setImages(response.data);
-        } catch (err) {
-            console.error('Error fetching images:', err);
-        }
-    };
-
     useEffect(() => {
-        async function fetchData() {
+        const fetchData = async () => {
+            if (!id) return;
+            
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
@@ -64,23 +37,36 @@ const CommunityDetail = () => {
                     headers: headers
                 });
 
+                if (!communityResponse.data) {
+                    throw new Error('No data received from server');
+                }
+
                 const communityData = {
                     ...communityResponse.data,
-                    banner_image: getFullImageUrl(communityResponse.data.banner_image)
+                    banner_image: communityResponse.data.banner_image ? 
+                        getFullImageUrl(communityResponse.data.banner_image) : null
                 };
 
                 setCommunity(communityData);
 
-                if (token) {
-                    const currentUser = communityData.current_username;
-                    const communityCreator = communityData.creator_name;
-                    setIsCreator(currentUser === communityCreator);
-                    await trackView();
-                }
-
-                // Fetch images if on gallery tab
-                if (activeTab === 'gallery') {
-                    await fetchImages();
+                if (token && communityData.current_username && communityData.creator_name) {
+                    setIsCreator(communityData.current_username === communityData.creator_name);
+                    
+                    // Track view after confirming we have valid data
+                    try {
+                        await api.post(
+                            `/communities/${id}/view/`,
+                            {},
+                            {
+                                headers: { 
+                                    'Authorization': `Token ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
+                    } catch (viewError) {
+                        console.error('Error tracking view:', viewError);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching community:', {
@@ -93,10 +79,10 @@ const CommunityDetail = () => {
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
         fetchData();
-    }, [id, trackView, activeTab]);
+    }, [id]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
