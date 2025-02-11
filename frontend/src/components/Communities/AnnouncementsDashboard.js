@@ -6,6 +6,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isCreator, setIsCreator] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -14,8 +15,8 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const fetchAnnouncements = async () => {
     try {
-      console.log('Fetching announcements for community:', communityId);
       const token = localStorage.getItem('token');
+      console.log('Fetching announcements for community:', communityId);
       const response = await api.get(`/api/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
@@ -24,15 +25,17 @@ const AnnouncementsDashboard = ({ communityId }) => {
       });
       console.log('Announcements response:', response.data);
       setAnnouncements(response.data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching announcements:', err.response?.data || err);
+      setError('Failed to load announcements. Please try again later.');
     }
   };
 
   const checkIsCreator = async () => {
     try {
-      console.log('Checking creator status for community:', communityId);
       const token = localStorage.getItem('token');
+      console.log('Checking creator status for community:', communityId);
       const response = await api.get(`/api/communities/${communityId}/`, {
         headers: {
           'Authorization': `Token ${token}`,
@@ -43,8 +46,10 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const communityCreator = response.data.creator_name;
       console.log('Creator check:', { currentUser, communityCreator });
       setIsCreator(currentUser === communityCreator);
+      setError(null);
     } catch (err) {
       console.error('Error checking creator status:', err.response?.data || err);
+      setError('Failed to verify creator status. Please try again later.');
     }
   };
 
@@ -53,70 +58,82 @@ const AnnouncementsDashboard = ({ communityId }) => {
     if (!newAnnouncement.trim()) return;
 
     try {
+      const token = localStorage.getItem('token');
       console.log('Sending announcement:', { content: newAnnouncement });
       const response = await api.post(
-        `/communities/${communityId}/announcements/`,
+        `/api/communities/${communityId}/announcements/`,
         { content: newAnnouncement },
         {
           headers: { 
+            'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
           }
         }
       );
       console.log('Announcement response:', response.data);
       setNewAnnouncement('');
+      setError(null);
       fetchAnnouncements();
     } catch (err) {
       console.error('Error creating announcement:', err.response?.data);
-      console.error('Full error:', err);
+      setError('Failed to create announcement. Please try again later.');
     }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
     <div className="announcements-dashboard">
       <h2>Announcements</h2>
+      
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
       {isCreator && (
-        <div className="announcement-form">
+        <form onSubmit={handleSubmit} className="announcement-form">
           <textarea
             value={newAnnouncement}
             onChange={(e) => setNewAnnouncement(e.target.value)}
-            placeholder="Create a new announcement..."
-            className="announcement-input"
+            placeholder="Write a new announcement..."
+            required
           />
-          <button 
-            onClick={handleSubmit}
-            className="post-button"
-          >
+          <button type="submit" disabled={!newAnnouncement.trim()}>
             Post Announcement
           </button>
-        </div>
+        </form>
       )}
-      
+
       <div className="announcements-list">
-        {announcements.map(announcement => (
-          <div key={announcement.id} className="announcement-item">
-            <div className="announcement-header">
-              <img 
-                src={announcement.created_by?.avatar || DEFAULT_AVATAR} 
-                alt="avatar" 
-                className="avatar"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = DEFAULT_AVATAR;
-                }}
-              />
+        {announcements.length === 0 ? (
+          <p className="no-announcements">No announcements yet.</p>
+        ) : (
+          announcements.map((announcement) => (
+            <div key={announcement.id} className="announcement">
+              <div className="announcement-content">
+                {announcement.content}
+              </div>
               <div className="announcement-meta">
-                <span className="username">{announcement.created_by?.username}</span>
-                <span className="timestamp">
-                  {new Date(announcement.created_at).toLocaleDateString()}
+                <span className="announcement-author">
+                  Posted by {announcement.created_by}
+                </span>
+                <span className="announcement-date">
+                  {formatDate(announcement.created_at)}
                 </span>
               </div>
             </div>
-            <div className="announcement-content">
-              {announcement.content}
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <style jsx>{`
