@@ -34,7 +34,12 @@ const AppContent = () => {
         return;
       }
       
-      const response = await api.get('/auth/profile/');
+      const response = await api.get('/auth/profile/', {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      
       if (response.status === 200) {
         setIsLoggedIn(true);
       } else {

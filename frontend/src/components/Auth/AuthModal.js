@@ -79,14 +79,15 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     setError('');
 
     try {
-      console.log('Attempting login with:', { username });
       const response = await authService.login({
         username: username,
         password: password
       });
 
       if (response && response.token) {
-        await onLoginSuccess();
+        setTimeout(async () => {
+          await onLoginSuccess();
+        }, 100);
       }
     } catch (err) {
       console.error('Auth error:', err);

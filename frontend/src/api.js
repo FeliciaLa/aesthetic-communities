@@ -18,59 +18,28 @@ const api = axios.create({
     timeout: 15000
 });
 
-// Add request interceptor with more detailed logging
+// Add request interceptor
 api.interceptors.request.use(
     (config) => {
-        console.log('API Request to:', config.url, 'from:', new Error().stack);
         const token = localStorage.getItem('token');
-        console.log('Request interceptor:', {
-            url: config.url,
-            hasToken: !!token,
-            authHeader: token ? `Token ${token}` : 'No token'
-        });
-        
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-        
-        // Add CSRF token if needed
-        const csrfToken = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
-        if (csrfToken) {
-            config.headers['X-CSRFToken'] = csrfToken[2];
-        }
-
-        console.log('Final request headers:', config.headers);
         return config;
     },
     (error) => {
-        console.error('Request interceptor error:', error);
         return Promise.reject(error);
     }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor
 api.interceptors.response.use(
-    (response) => {
-        console.log('Response:', {
-            url: response.config.url,
-            status: response.status,
-            hasAuthHeader: !!response.config.headers.Authorization
-        });
-        return response;
-    },
+    (response) => response,
     (error) => {
-        console.error('Response error:', {
-            url: error.config?.url,
-            status: error.response?.status,
-            message: error.message,
-            hasAuthHeader: !!error.config?.headers?.Authorization
-        });
-
-        // Handle 401 Unauthorized responses
-        if (error.response?.status === 401 && !error.config.url.includes('/profile/update/')) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('username');
+        if (error.response?.status === 401 && 
+            !error.config.url.includes('login') && 
+            !error.config.url.includes('register')) {
+            authService.logout();
             window.location.href = '/';
         }
         return Promise.reject(error);
