@@ -39,20 +39,35 @@ const CommunityDetail = () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const headers = token ? { 'Authorization': `Token ${token}` } : {};
-                
-                // Debug URL and request
-                console.log('Making request to:', `/communities/${id}/`);
-                console.log('Headers:', headers);
-                
-                const response = await api.get(`/communities/${id}/`, {
+                if (!token) {
+                    setError('Authentication required to view this community');
+                    setLoading(false);
+                    return;
+                }
+
+                const headers = {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                };
+
+                // Debug authorization
+                console.log('Auth check:', {
+                    hasToken: !!token,
                     headers: headers
                 });
 
-                console.log('Response:', response); // Debug response
+                const response = await api.get(`/communities/${id}/`, {
+                    headers: headers,
+                    withCredentials: true  // Add this to match other components
+                });
 
                 if (!response?.data) {
                     throw new Error('No data received');
+                }
+
+                // Verify we got community data
+                if (!response.data.name) {
+                    throw new Error('Invalid community data received');
                 }
 
                 const communityData = {
