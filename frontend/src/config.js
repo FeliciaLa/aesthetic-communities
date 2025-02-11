@@ -11,7 +11,9 @@ if (!API_BASE_URL) {
 
 // Don't add /api/ here since it's part of the URL patterns
 export const getApiUrl = () => {
-    return API_BASE_URL?.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
+    // Remove any trailing slashes and ensure single /api/ suffix
+    const cleanBaseUrl = API_BASE_URL?.replace(/\/+$/, '');
+    return `${cleanBaseUrl}/`;
 };
 
 // Export the base URL for other uses

@@ -70,11 +70,11 @@ const AppContent = () => {
       setIsLoading(true);
       try {
         const isAuth = await authService.isAuthenticated();
+        console.log('Auth validation result:', isAuth);
         setIsLoggedIn(isAuth);
       } catch (error) {
         console.error('Auth validation failed:', error);
         setIsLoggedIn(false);
-        // Clear any invalid tokens
         authService.logout();
       } finally {
         setIsLoading(false);
@@ -164,15 +164,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <ErrorBoundary>
-      <Router>
-        <MusicProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </MusicProvider>
-      </Router>
-    </ErrorBoundary>
+    <Router>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    </Router>
   );
 };
 

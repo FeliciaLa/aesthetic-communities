@@ -370,7 +370,7 @@ const getImageUrl = (image) => {
     : `${API_BASE_URL}${image}`;
 };
 
-const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
+const ExploreCommunities = ({ setIsLoggedIn, onAuthClick, isLoggedIn }) => {
   const [communities, setCommunities] = useState([]);
   const [trendingCommunities, setTrendingCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -514,8 +514,6 @@ const ExploreCommunities = ({ setIsLoggedIn, onAuthClick }) => {
 
   // Get the filtered communities once
   const filteredCommunities = getFilteredCommunities();
-
-  const isLoggedIn = !!localStorage.getItem('token');
 
   return (
     <ErrorBoundary>
