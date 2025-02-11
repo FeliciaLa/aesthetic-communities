@@ -64,6 +64,14 @@ api.interceptors.response.use(
             message: error.message,
             hasAuthHeader: !!error.config?.headers?.Authorization
         });
+
+        // Handle 401 Unauthorized responses
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            window.location.href = '/';
+        }
         return Promise.reject(error);
     }
 );

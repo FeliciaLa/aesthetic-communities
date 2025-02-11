@@ -17,8 +17,6 @@ import { authService } from './services/authService';
 import { createContext, useContext } from 'react';
 import api from './services/api';
 
-const AuthContext = createContext(null);
-
 const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
