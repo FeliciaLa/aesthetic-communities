@@ -4,7 +4,7 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            const response = await api.post('api/auth/login/', {
+            const response = await api.post('/auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
@@ -89,7 +89,7 @@ export const authService = {
         if (!token) return false;
 
         try {
-            await api.get('/profile/');
+            await api.get('/auth/profile/');
             return true;
         } catch (error) {
             console.error('Token validation failed:', error);
@@ -125,6 +125,15 @@ export const authService = {
             return response.data;
         } catch (error) {
             throw error;
+        }
+    },
+
+    validateToken: async () => {
+        try {
+            const response = await api.get('/auth/profile/');
+            return response.status === 200;
+        } catch (error) {
+            return false;
         }
     }
 }; 
