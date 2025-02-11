@@ -15,7 +15,7 @@ import PasswordReset from './components/Auth/PasswordReset';
 import ErrorBoundary from './components/ErrorBoundary';
 import { authService } from './services/authService';
 import { createContext, useContext } from 'react';
-import api from './services/api';
+import api from './api';
 
 const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
