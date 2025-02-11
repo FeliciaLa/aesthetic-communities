@@ -58,16 +58,20 @@ const CommunityDetail = () => {
 
                 const response = await api.get(`/communities/${id}/`, {
                     headers: headers,
-                    withCredentials: true  // Add this to match other components
+                    withCredentials: true
                 });
 
-                if (!response?.data) {
-                    throw new Error('No data received');
-                }
+                // Add debugging
+                console.log('API Response:', {
+                    status: response.status,
+                    data: response.data,
+                    hasName: !!response.data?.name,
+                    hasEmail: !!response.data?.email // This shouldn't exist in community data
+                });
 
-                // Verify we got community data
-                if (!response.data.name) {
-                    throw new Error('Invalid community data received');
+                // Validate that we got community data, not user data
+                if (response.data?.email || !response.data?.name) {
+                    throw new Error('Received invalid community data');
                 }
 
                 const communityData = {
@@ -111,6 +115,10 @@ const CommunityDetail = () => {
 
         fetchData();
     }, [id]);
+
+    useEffect(() => {
+        console.log('Community state:', community);
+    }, [community]);
 
     if (loading) return <div className="loading">Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;

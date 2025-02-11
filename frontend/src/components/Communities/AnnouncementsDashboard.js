@@ -30,12 +30,15 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const checkIsCreator = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await api.get(`/communities/${communityId}/`, {
-        withCredentials: true
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
-      const token = localStorage.getItem('token');
-      if (token) {
+      if (token && response.data) {
         const currentUser = response.data.current_username;
         const communityCreator = response.data.creator_name;
         setIsCreator(currentUser === communityCreator);
