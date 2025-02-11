@@ -19,46 +19,6 @@ import api from './services/api';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        // Update authentication state when localStorage changes
-        const handleStorageChange = () => {
-            setIsAuthenticated(authService.isAuthenticated());
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
-
-    const login = async (credentials) => {
-        try {
-            const response = await authService.login(credentials);
-            setIsAuthenticated(true);
-            setUser(response.user);
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    const logout = () => {
-        authService.logout();
-        setIsAuthenticated(false);
-        setUser(null);
-    };
-
-    return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
-
-export const useAuth = () => useContext(AuthContext);
-
 const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

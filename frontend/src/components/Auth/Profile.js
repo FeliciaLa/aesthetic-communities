@@ -157,8 +157,18 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/');
+          return;
+        }
+
         const [profileRes, allCommunitiesRes] = await Promise.all([
-          api.get('/profile/'),
+          api.get('/profile/', {
+            headers: {
+              'Authorization': `Token ${token}`
+            }
+          }),
           api.get('/communities/')
         ]);
 
@@ -196,12 +206,13 @@ const Profile = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching profile data:', error);
+        setError('Failed to load profile');
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   if (loading) return <div className="profile-loading">Loading profile...</div>;
   if (error) return <div className="profile-error">{error}</div>;

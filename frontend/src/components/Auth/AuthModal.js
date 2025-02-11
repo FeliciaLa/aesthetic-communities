@@ -67,8 +67,8 @@ const Checkbox = styled.div`
 
 const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [mode, setMode] = useState(initialMode);
-  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isOver16, setIsOver16] = useState(false);
@@ -82,7 +82,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
       let response;
       if (mode === 'login') {
         response = await authService.login({
-          username: email,
+          username: username,
           password: password
         });
       } else {
@@ -112,22 +112,22 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         <h2>{mode === 'login' ? 'Log In' : 'Sign Up'}</h2>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
-          <input
-            type={mode === 'login' ? 'text' : 'email'}
-            placeholder={mode === 'login' ? 'Username' : 'Email'}
-            value={mode === 'login' ? username : email}
-            onChange={e => mode === 'login' ? setUsername(e.target.value) : setEmail(e.target.value)}
-            required
-          />
           {mode === 'register' && (
             <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               required
             />
           )}
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
           <input
             type="password"
             placeholder="Password"
