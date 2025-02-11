@@ -56,22 +56,41 @@ const CommunityDetail = () => {
                     headers: headers
                 });
 
+                // Add this before the API call
+                console.log('Making request to:', {
+                    fullUrl: `${api.defaults.baseURL}/communities/${id}/`,
+                    token: token ? 'present' : 'missing',
+                    headers: headers
+                });
+
                 const response = await api.get(`/communities/${id}/`, {
                     headers: headers,
                     withCredentials: true
                 });
 
-                // Add debugging
-                console.log('API Response:', {
+                // Enhanced error logging
+                console.log('Response details:', {
                     status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers,
                     data: response.data,
-                    hasName: !!response.data?.name,
-                    hasEmail: !!response.data?.email // This shouldn't exist in community data
+                    baseURL: api.defaults.baseURL,
+                    fullPath: response.config.url
                 });
 
-                // Validate that we got community data, not user data
-                if (response.data?.email || !response.data?.name) {
-                    throw new Error('Received invalid community data');
+                // More detailed validation
+                if (!response.data || typeof response.data !== 'object') {
+                    throw new Error('Invalid response format');
+                }
+
+                if ('email' in response.data) {
+                    console.error('Received user profile instead of community:', response.data);
+                    throw new Error('Received user profile instead of community data');
+                }
+
+                if (!response.data.name || !response.data.id) {
+                    console.error('Missing required community fields:', response.data);
+                    throw new Error('Invalid community data structure');
                 }
 
                 const communityData = {
