@@ -4,7 +4,7 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            const response = await api.post('auth/login/', {
+            const response = await api.post('api/auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
