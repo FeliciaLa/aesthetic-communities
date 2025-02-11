@@ -15,62 +15,31 @@ const AnnouncementsDashboard = ({ communityId }) => {
   }, [communityId]);
 
   const fetchAnnouncements = async () => {
-    console.log('Debug API Configuration:', {
-      apiBaseURL: api.defaults.baseURL,
-      apiInstance: api,
-      environmentURL: process.env.REACT_APP_API_URL,
-      nodeEnv: process.env.NODE_ENV
-    });
-
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { 'Authorization': `Token ${token}` } : {};
-      
-      console.log('Making announcement request:', {
-        method: 'GET',
-        url: `/communities/${communityId}/announcements/`,
-        baseURL: api.defaults.baseURL,
-        headers
-      });
-
       const response = await api.get(`/communities/${communityId}/announcements/`, {
-        headers,
         withCredentials: true
       });
       
       setAnnouncements(response.data);
       setError(null);
     } catch (err) {
-      console.error('Detailed Error Information:', {
-        error: err,
-        baseURL: api.defaults.baseURL,
-        environmentVariables: {
-          REACT_APP_API_URL: process.env.REACT_APP_API_URL,
-          NODE_ENV: process.env.NODE_ENV
-        },
-        requestConfig: err.config,
-        fullUrl: err.config?.baseURL + err.config?.url
-      });
+      console.error('Error fetching announcements:', err);
       setError('Failed to load announcements. Please try again later.');
     }
   };
 
   const checkIsCreator = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { 'Authorization': `Token ${token}` } : {};
-      
       const response = await api.get(`/communities/${communityId}/`, {
-        headers,
         withCredentials: true
       });
       
+      const token = localStorage.getItem('token');
       if (token) {
         const currentUser = response.data.current_username;
         const communityCreator = response.data.creator_name;
         setIsCreator(currentUser === communityCreator);
       }
-      setError(null);
     } catch (err) {
       console.error('Error checking creator status:', err);
       setError('Failed to check creator status.');
