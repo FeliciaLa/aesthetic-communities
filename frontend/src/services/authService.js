@@ -4,14 +4,12 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
-            const fullUrl = 'auth/login/';  // Remove 'api/' prefix
-            console.log('Attempting login with hardcoded URL:', {
-                fullUrl,
+            console.log('Attempting login with URL:', {
                 baseURL: api.defaults.baseURL,
                 credentials
             });
 
-            const response = await api.post(fullUrl, {
+            const response = await api.post('/auth/login/', {
                 username: credentials.username,
                 password: credentials.password
             });
@@ -28,10 +26,7 @@ export const authService = {
         } catch (error) {
             console.error('Login error details:', {
                 message: error.message,
-                code: error.code,
                 response: error.response?.data,
-                baseURL: api.defaults.baseURL,
-                fullURL: api.defaults.baseURL + 'auth/login/',
                 status: error.response?.status
             });
             
