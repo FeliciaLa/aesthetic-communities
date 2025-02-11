@@ -67,7 +67,7 @@ api.interceptors.response.use(
         });
 
         // Handle 401 Unauthorized responses
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !error.config.url.includes('/profile/update/')) {
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('username');

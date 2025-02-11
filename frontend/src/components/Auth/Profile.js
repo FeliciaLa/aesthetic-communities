@@ -136,8 +136,8 @@ const Profile = () => {
         formData,
         {
           headers: {
-            'Authorization': `Token ${token}`,
             'Content-Type': 'multipart/form-data',
+            'Authorization': `Token ${token}`
           }
         }
       );
