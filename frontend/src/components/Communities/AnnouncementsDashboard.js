@@ -9,8 +9,6 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('API base URL:', api.defaults.baseURL);
-    console.log('Community ID:', communityId);
     fetchAnnouncements();
     checkIsCreator();
   }, [communityId]);
@@ -21,19 +19,16 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
       const url = `/communities/${communityId}/announcements/`;
-      console.log('Fetching announcements from:', api.defaults.baseURL + url);
       
       const response = await api.get(url, {
         headers,
         withCredentials: true
       });
       
-      console.log('Announcements response:', response.data);
       setAnnouncements(response.data);
       setError(null);
     } catch (err) {
-      console.error('Full error:', err);
-      console.error('API base URL during error:', api.defaults.baseURL);
+      console.error('Error fetching announcements:', err);
       setError('Failed to load announcements. Please try again later.');
     }
   };
@@ -41,7 +36,6 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const checkIsCreator = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Checking creator status for community:', communityId);
       const headers = token ? { 'Authorization': `Token ${token}` } : {};
       
       const response = await api.get(`/communities/${communityId}/`, {
@@ -52,13 +46,12 @@ const AnnouncementsDashboard = ({ communityId }) => {
       if (token) {
         const currentUser = response.data.current_username;
         const communityCreator = response.data.creator_name;
-        console.log('Creator check:', { currentUser, communityCreator });
         setIsCreator(currentUser === communityCreator);
       }
       setError(null);
     } catch (err) {
-      console.error('Error checking creator status:', err.response?.data || err);
-      setError('Failed to verify creator status. Please try again later.');
+      console.error('Error checking creator status:', err);
+      setError('Failed to check creator status.');
     }
   };
 
