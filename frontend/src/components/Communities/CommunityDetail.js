@@ -13,7 +13,6 @@ import RecommendedProducts from './RecommendedProducts';
 import GalleryView from './GalleryView';
 import { getFullImageUrl } from '../../utils/imageUtils';
 
-
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -21,28 +20,24 @@ const CommunityDetail = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const trackView = async () => {
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
-                console.log('No token found');
-                return;
-            }
+            if (!token) return;
             
-            console.log(`Tracking view for community ${id}`);
-            const response = await api.post(
+            await api.post(
                 `/communities/${id}/view/`,
                 {},
                 {
                     headers: { 
                         'Authorization': `Token ${token}`,
                         'Content-Type': 'application/json'
-                    },
-                    withCredentials: true
+                    }
                 }
             );
-            console.log('View tracked successfully:', response.data);
         } catch (error) {
             console.error('Error tracking view:', error.response?.data || error.message);
         }
@@ -50,18 +45,21 @@ const CommunityDetail = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Token ${token}` } : {};
                 
-                const communityResponse = await api.get(`/communities/${id}/`);
+                const communityResponse = await api.get(`/communities/${id}/`, {
+                    headers: headers
+                });
 
-                // Transform the banner_image URL
+                // Transform banner_image URL if needed
                 const communityData = {
                     ...communityResponse.data,
-                    banner_image: getFullImageUrl(communityResponse.data.banner_image) || '/default-banner.jpg'
+                    banner_image: getFullImageUrl(communityResponse.data.banner_image)
                 };
-                
+
                 setCommunity(communityData);
 
                 if (token) {
@@ -71,7 +69,15 @@ const CommunityDetail = () => {
                     await trackView();
                 }
             } catch (error) {
-                console.error('Error:', error.response?.data || error);
+                console.error('Error fetching community:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message,
+                    url: error.config?.url
+                });
+                setError('Failed to load community');
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -80,7 +86,9 @@ const CommunityDetail = () => {
         }
     }, [id]);
 
-    console.log('isCreator value:', isCreator);
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div className="error-message">{error}</div>;
+    if (!community) return <div>Community not found</div>;
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
