@@ -79,17 +79,30 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     setError('');
 
     try {
-      const response = await authService.login({
-        username: email,
-        password: password
-      });
+      let response;
+      if (mode === 'login') {
+        response = await authService.login({
+          username: email,
+          password: password
+        });
+      } else {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          return;
+        }
+        response = await authService.register({
+          email,
+          username,
+          password
+        });
+      }
 
       if (response.token) {
         await onLoginSuccess();
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.error || 'An error occurred');
+      console.error('Auth error:', err);
+      setError(err.response?.data?.detail || err.response?.data?.error || 'An error occurred');
     }
   };
 
@@ -100,10 +113,10 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            type={mode === 'login' ? 'text' : 'email'}
+            placeholder={mode === 'login' ? 'Username' : 'Email'}
+            value={mode === 'login' ? username : email}
+            onChange={e => mode === 'login' ? setUsername(e.target.value) : setEmail(e.target.value)}
             required
           />
           {mode === 'register' && (
