@@ -11,8 +11,12 @@ if (!API_BASE_URL) {
 
 // Don't add /api/ here since it's part of the URL patterns
 export const getApiUrl = () => {
-    // Remove any trailing slashes and ensure single /api/ suffix
-    const cleanBaseUrl = API_BASE_URL?.replace(/\/+$/, '');
+    if (!API_BASE_URL) {
+        console.error('API_BASE_URL is not set');
+        return 'https://aesthetic-communities-production.up.railway.app/api/';
+    }
+    // Remove any trailing slashes
+    const cleanBaseUrl = API_BASE_URL.replace(/\/+$/, '');
     return `${cleanBaseUrl}/`;
 };
 
