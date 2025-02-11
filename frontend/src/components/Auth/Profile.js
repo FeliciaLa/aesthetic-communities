@@ -126,31 +126,30 @@ const Profile = () => {
     const formData = new FormData();
     
     formData.append('bio', bio);
-    
     if (profilePicture) {
-        formData.append('avatar', profilePicture);
+      formData.append('avatar', profilePicture);
     }
 
     try {
-        const response = await api.patch(
-            '/profile/update/',
-            formData,
-            {
-                headers: {
-                    'Authorization': `Token ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                }
-            }
-        );
-        
-        setProfile(response.data);
-        setBio(response.data.bio || '');
-        setEditMode(false);
-        
-        alert('Profile updated successfully!');
+      const response = await api.patch(
+        '/auth/profile/update/',
+        formData,
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'multipart/form-data',
+          }
+        }
+      );
+      
+      setProfile(response.data);
+      setBio(response.data.bio || '');
+      setEditMode(false);
+      
+      alert('Profile updated successfully!');
     } catch (err) {
-        console.error('Error updating profile:', err.response?.data || err.message);
-        setError('Failed to update profile');
+      console.error('Error updating profile:', err.response?.data || err.message);
+      setError('Failed to update profile');
     }
   };
 
@@ -164,7 +163,7 @@ const Profile = () => {
         }
 
         const [profileRes, allCommunitiesRes] = await Promise.all([
-          api.get('/profile/', {
+          api.get('/auth/profile/', {
             headers: {
               'Authorization': `Token ${token}`
             }
@@ -205,7 +204,7 @@ const Profile = () => {
         setProfile(profileRes.data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching profile data:', error);
+        console.error('Error fetching profile:', error);
         setError('Failed to load profile');
         setLoading(false);
       }
