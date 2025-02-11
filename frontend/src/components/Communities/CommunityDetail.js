@@ -26,25 +26,31 @@ const CommunityDetail = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!id) return;
-            
-            setLoading(true);
+            if (!id) {
+                setError('Invalid community ID');
+                setLoading(false);
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Token ${token}` } : {};
                 
-                const communityResponse = await api.get(`/communities/${id}/`, {
+                const response = await api.get(`/communities/${id}/`, {
                     headers: headers
                 });
 
-                if (!communityResponse.data) {
-                    throw new Error('No data received from server');
+                if (!response?.data) {
+                    throw new Error('No data received');
                 }
 
                 const communityData = {
-                    ...communityResponse.data,
-                    banner_image: communityResponse.data.banner_image ? 
-                        getFullImageUrl(communityResponse.data.banner_image) : null
+                    ...response.data,
+                    banner_image: response.data.banner_image ? 
+                        (response.data.banner_image.startsWith('http') ? 
+                            response.data.banner_image : 
+                            getFullImageUrl(response.data.banner_image)) 
+                        : null
                 };
 
                 setCommunity(communityData);
@@ -52,18 +58,13 @@ const CommunityDetail = () => {
                 if (token && communityData.current_username && communityData.creator_name) {
                     setIsCreator(communityData.current_username === communityData.creator_name);
                     
-                    // Track view after confirming we have valid data
                     try {
-                        await api.post(
-                            `/communities/${id}/view/`,
-                            {},
-                            {
-                                headers: { 
-                                    'Authorization': `Token ${token}`,
-                                    'Content-Type': 'application/json'
-                                }
+                        await api.post(`/communities/${id}/view/`, {}, {
+                            headers: { 
+                                'Authorization': `Token ${token}`,
+                                'Content-Type': 'application/json'
                             }
-                        );
+                        });
                     } catch (viewError) {
                         console.error('Error tracking view:', viewError);
                     }
@@ -84,9 +85,9 @@ const CommunityDetail = () => {
         fetchData();
     }, [id]);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div className="loading">Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
-    if (!community) return <div>Community not found</div>;
+    if (!community) return <div className="not-found">Community not found</div>;
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
