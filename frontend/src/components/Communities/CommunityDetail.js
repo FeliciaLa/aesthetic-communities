@@ -25,6 +25,11 @@ const CommunityDetail = () => {
     const [images, setImages] = useState([]);
 
     useEffect(() => {
+        console.log('Community ID:', id);
+        console.log('API Base URL:', api.defaults.baseURL);
+    }, [id]);
+
+    useEffect(() => {
         const fetchData = async () => {
             if (!id) {
                 setError('Invalid community ID');
@@ -36,9 +41,15 @@ const CommunityDetail = () => {
                 const token = localStorage.getItem('token');
                 const headers = token ? { 'Authorization': `Token ${token}` } : {};
                 
+                // Debug URL and request
+                console.log('Making request to:', `/communities/${id}/`);
+                console.log('Headers:', headers);
+                
                 const response = await api.get(`/communities/${id}/`, {
                     headers: headers
                 });
+
+                console.log('Response:', response); // Debug response
 
                 if (!response?.data) {
                     throw new Error('No data received');
@@ -74,7 +85,8 @@ const CommunityDetail = () => {
                     status: error.response?.status,
                     data: error.response?.data,
                     message: error.message,
-                    url: error.config?.url
+                    url: error.config?.url,
+                    baseURL: api.defaults.baseURL // Add this to debug the base URL
                 });
                 setError('Failed to load community');
             } finally {
