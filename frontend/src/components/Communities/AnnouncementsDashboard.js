@@ -9,6 +9,8 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('API base URL:', api.defaults.baseURL);
+    console.log('Community ID:', communityId);
     fetchAnnouncements();
     checkIsCreator();
   }, [communityId]);
@@ -16,16 +18,22 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Fetching announcements for community:', communityId);
-      const response = await api.get(`/communities/${communityId}/announcements/`, {
-        headers: { 'Authorization': `Token ${token}` },
+      const headers = token ? { 'Authorization': `Token ${token}` } : {};
+      
+      const url = `/communities/${communityId}/announcements/`;
+      console.log('Fetching announcements from:', api.defaults.baseURL + url);
+      
+      const response = await api.get(url, {
+        headers,
         withCredentials: true
       });
+      
       console.log('Announcements response:', response.data);
       setAnnouncements(response.data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', err.response?.data || err);
+      console.error('Full error:', err);
+      console.error('API base URL during error:', api.defaults.baseURL);
       setError('Failed to load announcements. Please try again later.');
     }
   };
@@ -34,14 +42,19 @@ const AnnouncementsDashboard = ({ communityId }) => {
     try {
       const token = localStorage.getItem('token');
       console.log('Checking creator status for community:', communityId);
+      const headers = token ? { 'Authorization': `Token ${token}` } : {};
+      
       const response = await api.get(`/communities/${communityId}/`, {
-        headers: { 'Authorization': `Token ${token}` },
+        headers,
         withCredentials: true
       });
-      const currentUser = response.data.current_username;
-      const communityCreator = response.data.creator_name;
-      console.log('Creator check:', { currentUser, communityCreator });
-      setIsCreator(currentUser === communityCreator);
+      
+      if (token) {
+        const currentUser = response.data.current_username;
+        const communityCreator = response.data.creator_name;
+        console.log('Creator check:', { currentUser, communityCreator });
+        setIsCreator(currentUser === communityCreator);
+      }
       setError(null);
     } catch (err) {
       console.error('Error checking creator status:', err.response?.data || err);
@@ -57,13 +70,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
       const token = localStorage.getItem('token');
       console.log('Sending announcement:', { content: newAnnouncement });
       const response = await api.post(
-        `/api/communities/${communityId}/announcements/`,
+        `/communities/${communityId}/announcements/`,
         { content: newAnnouncement },
         {
-          headers: { 
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Authorization': `Token ${token}` },
+          withCredentials: true
         }
       );
       console.log('Announcement response:', response.data);
