@@ -17,8 +17,6 @@ export const authService = {
             }
             throw new Error('Invalid login response');
         } catch (error) {
-            console.error('Login error:', error);
-            // Clear any existing invalid tokens
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('username');

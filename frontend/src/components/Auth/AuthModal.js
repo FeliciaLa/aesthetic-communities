@@ -65,9 +65,7 @@ const Checkbox = styled.div`
   }
 `;
 
-const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
-  console.log('AuthModal props:', { show, initialMode, setIsLoggedIn });
-
+const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -81,66 +79,13 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
     setError('');
 
     try {
-      let response;
-      if (mode === 'login') {
-        response = await authService.login({
-          username: email,
-          password: password
-        });
-      } else {
-        // Validation for registration
-        if (password !== confirmPassword) {
-          setError('Passwords do not match');
-          return;
-        }
-        if (!isOver16) {
-          setError('You must be 16 or older to register');
-          return;
-        }
-        if (password.length < 8) {
-          setError('Password must be at least 8 characters long');
-          return;
-        }
-        if (!username) {
-          setError('Username is required');
-          return;
-        }
-
-        try {
-          response = await authService.register({
-            email,
-            username,
-            password,
-            confirmPassword,
-            isOver16
-          });
-        } catch (err) {
-          // Handle specific validation errors
-          if (err.response?.data) {
-            const errors = err.response.data;
-            if (errors.username) {
-              setError(errors.username[0]);
-              return;
-            }
-            if (errors.email) {
-              setError(errors.email[0]);
-              return;
-            }
-          }
-          setError('Registration failed. Please try again.');
-          return;
-        }
-      }
+      const response = await authService.login({
+        username: email,
+        password: password
+      });
 
       if (response.token) {
-        // First set the logged in state
-        await setIsLoggedIn(true);
-        // Small delay before closing modal
-        setTimeout(() => {
-          onClose();
-          // Refresh the page to ensure all states are updated
-          window.location.reload();
-        }, 100);
+        await onLoginSuccess();
       }
     } catch (err) {
       console.error('Login error:', err);

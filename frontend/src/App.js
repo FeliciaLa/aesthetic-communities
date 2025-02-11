@@ -15,6 +15,7 @@ import PasswordReset from './components/Auth/PasswordReset';
 import ErrorBoundary from './components/ErrorBoundary';
 import { authService } from './services/authService';
 import { createContext, useContext } from 'react';
+import api from './services/api';
 
 const AuthContext = createContext(null);
 
@@ -65,24 +66,39 @@ const AppContent = () => {
   const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const validateAuth = async () => {
-      setIsLoading(true);
-      try {
-        const isAuth = await authService.isAuthenticated();
-        console.log('Auth validation result:', isAuth);
-        setIsLoggedIn(isAuth);
-      } catch (error) {
-        console.error('Auth validation failed:', error);
+  const validateAuth = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
         setIsLoggedIn(false);
-        authService.logout();
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    };
+      const response = await api.get('/profile/');
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Auth validation failed:', error);
+      setIsLoggedIn(false);
+      authService.logout();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     validateAuth();
   }, []);
+
+  const handleLoginSuccess = async () => {
+    await validateAuth();
+    setShowAuthModal(false);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -91,12 +107,6 @@ const AppContent = () => {
   const handleAuthClick = () => {
     setInitialAuthMode('register');
     setShowAuthModal(true);
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    setIsLoggedIn(false);
-    navigate('/');
   };
 
   return (
@@ -152,10 +162,7 @@ const AppContent = () => {
         <AuthModal
           initialMode={initialAuthMode}
           onClose={() => setShowAuthModal(false)}
-          onLoginSuccess={() => {
-            setIsLoggedIn(true);
-            setShowAuthModal(false);
-          }}
+          onLoginSuccess={handleLoginSuccess}
         />
       )}
     </MusicProvider>
