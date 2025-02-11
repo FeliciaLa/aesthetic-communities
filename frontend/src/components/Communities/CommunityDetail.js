@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../api';
 import Modal from '../Common/Modal';
@@ -23,25 +23,28 @@ const CommunityDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const trackView = async (communityId, token) => {
-            try {
-                await api.post(
-                    `/communities/${communityId}/view/`,
-                    {},
-                    {
-                        headers: { 
-                            'Authorization': `Token ${token}`,
-                            'Content-Type': 'application/json'
-                        }
+    const trackView = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token || !id) return;
+        
+        try {
+            await api.post(
+                `/communities/${id}/view/`,
+                {},
+                {
+                    headers: { 
+                        'Authorization': `Token ${token}`,
+                        'Content-Type': 'application/json'
                     }
-                );
-            } catch (error) {
-                console.error('Error tracking view:', error.response?.data || error.message);
-            }
-        };
+                }
+            );
+        } catch (error) {
+            console.error('Error tracking view:', error.response?.data || error.message);
+        }
+    }, [id]);
 
-        const fetchData = async () => {
+    useEffect(() => {
+        async function fetchData() {
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
@@ -62,7 +65,7 @@ const CommunityDetail = () => {
                     const currentUser = communityData.current_username;
                     const communityCreator = communityData.creator_name;
                     setIsCreator(currentUser === communityCreator);
-                    await trackView(id, token);
+                    await trackView();
                 }
             } catch (error) {
                 console.error('Error fetching community:', {
@@ -75,10 +78,10 @@ const CommunityDetail = () => {
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
         fetchData();
-    }, [id]);
+    }, [id, trackView]);
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
