@@ -23,28 +23,25 @@ const CommunityDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const trackView = async (communityId, token) => {
-        if (!token) return;
-        try {
-            await api.post(
-                `/communities/${communityId}/view/`,
-                {},
-                {
-                    headers: { 
-                        'Authorization': `Token ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-        } catch (error) {
-            console.error('Error tracking view:', error.response?.data || error.message);
-        }
-    };
-
     useEffect(() => {
+        const trackView = async (communityId, token) => {
+            try {
+                await api.post(
+                    `/communities/${communityId}/view/`,
+                    {},
+                    {
+                        headers: { 
+                            'Authorization': `Token ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error('Error tracking view:', error.response?.data || error.message);
+            }
+        };
+
         const fetchData = async () => {
-            if (!id) return;
-            
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
