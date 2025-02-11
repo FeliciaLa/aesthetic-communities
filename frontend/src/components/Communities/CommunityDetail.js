@@ -23,13 +23,11 @@ const CommunityDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const trackView = async () => {
+    const trackView = async (communityId, token) => {
+        if (!token) return;
         try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            
             await api.post(
-                `/communities/${id}/view/`,
+                `/communities/${communityId}/view/`,
                 {},
                 {
                     headers: { 
@@ -45,6 +43,8 @@ const CommunityDetail = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!id) return;
+            
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
@@ -54,7 +54,6 @@ const CommunityDetail = () => {
                     headers: headers
                 });
 
-                // Transform banner_image URL if needed
                 const communityData = {
                     ...communityResponse.data,
                     banner_image: getFullImageUrl(communityResponse.data.banner_image)
@@ -66,7 +65,7 @@ const CommunityDetail = () => {
                     const currentUser = communityData.current_username;
                     const communityCreator = communityData.creator_name;
                     setIsCreator(currentUser === communityCreator);
-                    await trackView();
+                    await trackView(id, token);
                 }
             } catch (error) {
                 console.error('Error fetching community:', {
@@ -81,9 +80,7 @@ const CommunityDetail = () => {
             }
         };
 
-        if (id) {
-            fetchData();
-        }
+        fetchData();
     }, [id]);
 
     if (loading) return <div>Loading...</div>;
@@ -337,7 +334,7 @@ const CommunityDetail = () => {
                     margin: 0 auto;
                     width: 100%;
                     color: white;
-                    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
                 }
 
                 .banner-content h1 {
