@@ -49,9 +49,9 @@ router.register('saved', SavedItemsViewSet, basename='saved')
 urlpatterns = [
     # Auth endpoints
     path('auth/login/', LoginView.as_view(), name='login'),
-    path('register/', RegisterView.as_view(), name='register'),
-    path('logout/', UserLogoutView.as_view(), name='logout'),
-    path('profile/', UserProfileView.as_view(), name='profile'),
+    path('auth/register/', RegisterView.as_view(), name='register'),
+    path('auth/logout/', UserLogoutView.as_view(), name='logout'),
+    path('auth/profile/', UserProfileView.as_view(), name='profile'),
     
     # Community endpoints
     path('communities/', CommunityListView.as_view(), name='community-list'),

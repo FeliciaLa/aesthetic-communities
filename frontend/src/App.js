@@ -74,6 +74,11 @@ const AppContent = () => {
     return () => window.removeEventListener('storage', checkAuth);
   }, []);
 
+  // Add console log for state changes
+  useEffect(() => {
+    console.log('Auth state changed:', isLoggedIn);
+  }, [isLoggedIn]);
+
   const handleAuthClick = () => {
     setInitialAuthMode('register');
     setShowAuthModal(true);

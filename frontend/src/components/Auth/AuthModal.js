@@ -66,6 +66,8 @@ const Checkbox = styled.div`
 `;
 
 const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
+  console.log('AuthModal props:', { show, initialMode, setIsLoggedIn });
+
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -81,10 +83,12 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
     try {
       let response;
       if (mode === 'login') {
+        console.log('Attempting login...');
         response = await authService.login({
           username: email,
           password: password
         });
+        console.log('Login successful:', response);
       } else {
         // Validation for registration
         if (password !== confirmPassword) {
@@ -131,10 +135,13 @@ const AuthModal = ({ show, onClose, initialMode, setIsLoggedIn }) => {
       }
 
       if (response.token) {
+        console.log('Setting logged in state...');
         setIsLoggedIn(true);
+        console.log('Closing modal...');
         onClose();
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.response?.data?.error || 'An error occurred');
     }
   };
