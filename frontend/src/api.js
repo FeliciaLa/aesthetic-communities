@@ -19,13 +19,18 @@ const api = axios.create({
     timeout: 15000
 });
 
-// Add request interceptor
+// Add request interceptor with URL logging
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
+        console.log('Making API request:', {
+            fullUrl: config.baseURL + config.url,
+            method: config.method,
+            hasToken: !!token
+        });
         return config;
     },
     (error) => {
