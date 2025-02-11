@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getApiUrl } from './config';
+import { authService } from './services/authService';
 
 const baseURL = getApiUrl();
 
