@@ -63,9 +63,17 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
     const cleanSpotifyUrl = (url) => {
         if (!url) return '';
-        const playlistId = url.match(/playlist\/([a-zA-Z0-9]+)/)?.[1];
-        if (!playlistId) return '';
-        return `https://open.spotify.com/playlist/${playlistId}`;
+        try {
+            // Match either the playlist ID or the full URL
+            const playlistMatch = url.match(/playlist[/:]([a-zA-Z0-9]+)/);
+            if (!playlistMatch) return '';
+            
+            const playlistId = playlistMatch[1];
+            return `https://open.spotify.com/playlist/${playlistId}`;
+        } catch (error) {
+            console.error('Error cleaning Spotify URL:', error);
+            return '';
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -77,29 +85,20 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
                 return;
             }
 
-            // Extract playlist ID from URL
-            let playlistId;
-            try {
-                const url = new URL(playlistUrl);
-                playlistId = url.pathname.split('/').pop();
-            } catch (urlError) {
-                console.error('URL parsing error:', urlError);
-                setError('Invalid Spotify URL format');
-                return;
-            }
-
-            if (!playlistId) {
-                setError('Could not extract playlist ID from URL');
+            // Use the cleanSpotifyUrl function to extract playlist ID
+            const cleanedUrl = cleanSpotifyUrl(playlistUrl);
+            if (!cleanedUrl) {
+                setError('Invalid Spotify playlist URL format');
                 return;
             }
 
             console.log('Submitting playlist:', {
-                url: playlistUrl,
-                playlistId: playlistId,
+                originalUrl: playlistUrl,
+                cleanedUrl: cleanedUrl,
                 communityId: communityId
             });
 
-            const response = await musicService.addSpotifyPlaylist(communityId, playlistId);
+            const response = await musicService.setSpotifyPlaylist(communityId, cleanedUrl);
             setPlaylist(response);
             setShowForm(false);
             setPlaylistUrl('');
