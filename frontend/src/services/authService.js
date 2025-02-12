@@ -59,21 +59,14 @@ export const authService = {
 
             const response = await api.post('/auth/register/', credentials);
 
-            // Add this log to see the actual response structure
             console.log('Raw register response:', response);
 
-            // More defensive checking of the response
             if (response && response.data) {
-                // Store token if it exists
-                if (response.data.token) {
-                    localStorage.setItem('token', response.data.token);
-                }
+                const { token, user_id, username } = response.data;
                 
-                // Store user info if it exists
-                if (response.data.user) {
-                    localStorage.setItem('userId', response.data.user.id.toString());
-                    localStorage.setItem('username', response.data.user.username);
-                }
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', user_id.toString());
+                localStorage.setItem('username', username);
                 
                 return response.data;
             }
