@@ -16,32 +16,29 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await api.get(`/communities/${communityId}/spotify/`, {
+            console.log('Fetching playlist for community:', communityId);
+            
+            // Using the correct endpoint
+            const response = await api.get(`/communities/${communityId}/spotify-playlist/`, {
                 headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
 
-            // If no playlist exists, don't treat it as an error
-            if (response.status === 404) {
-                setPlaylist(null);
-                setLoading(false);
-                return;
-            }
+            console.log('Playlist response:', response.data);
 
-            // Only set playlist if we have valid data
-            if (response.data && typeof response.data === 'string') {
-                setPlaylist(response.data);
-            } else if (response.data && response.data.url) {
-                setPlaylist(response.data.url);
+            if (response.data && response.data.spotify_playlist_url) {
+                setPlaylist(response.data.spotify_playlist_url);
             } else {
                 setPlaylist(null);
             }
-        } catch (error) {
-            console.log('Spotify fetch error:', error);
-            // Don't show error for 404 - it just means no playlist yet
-            if (error.response?.status !== 404) {
+        } catch (err) {
+            if (err.response?.status === 404) {
+                // No playlist exists yet - not an error
+                setPlaylist(null);
+            } else {
+                console.error('Error fetching playlist:', err);
                 setError('Unable to load playlist');
             }
         } finally {
