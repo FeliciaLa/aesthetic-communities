@@ -17,8 +17,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
       
       // Log both URL versions
       console.log('Announcements URL construction:', {
-        withSlash: `/communities/${communityId}/announcements/`,
-        withoutSlash: `communities/${communityId}/announcements/`,
+        endpoint: `/communities/${communityId}/announcements/`,
         baseURL: api.defaults.baseURL,
         token: token ? 'present' : 'missing'
       });
