@@ -47,15 +47,22 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const fetchAnnouncements = async () => {
     try {
+      const token = localStorage.getItem('token');
       const response = await api.get(`/communities/${communityId}/announcements/`, {
-        withCredentials: true
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      // Log the response for debugging
+      console.log('Announcements response:', response.data);
       
       // Ensure announcements is always an array
       setAnnouncements(Array.isArray(response.data) ? response.data : []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', err);
+      console.error('Error fetching announcements:', err.response || err);
       setError('Failed to load announcements. Please try again later.');
     } finally {
       setLoading(false);
