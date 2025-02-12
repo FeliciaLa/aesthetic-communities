@@ -9,25 +9,48 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchPlaylist = async () => {
+        if (!communityId) {
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response = await api.get(`/communities/${communityId}/spotify/`);
-            if (response.data && response.data.playlist_url) {
-                setPlaylist(response.data.playlist_url);
+            const token = localStorage.getItem('token');
+            const response = await api.get(`/communities/${communityId}/spotify/`, {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // If no playlist exists, don't treat it as an error
+            if (response.status === 404) {
+                setPlaylist(null);
+                setLoading(false);
+                return;
+            }
+
+            // Only set playlist if we have valid data
+            if (response.data && typeof response.data === 'string') {
+                setPlaylist(response.data);
+            } else if (response.data && response.data.url) {
+                setPlaylist(response.data.url);
             } else {
                 setPlaylist(null);
             }
-            setLoading(false);
         } catch (error) {
-            console.error('Error fetching playlist:', error);
-            setError('Failed to load playlist');
+            console.log('Spotify fetch error:', error);
+            // Don't show error for 404 - it just means no playlist yet
+            if (error.response?.status !== 404) {
+                setError('Unable to load playlist');
+            }
+        } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (communityId) {
-            fetchPlaylist();
-        }
+        fetchPlaylist();
     }, [communityId]);
 
     const cleanSpotifyUrl = (url) => {
@@ -108,32 +131,44 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         }
     };
 
+    // Simple loading and error states
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
+
+    // If no playlist and user is creator, show add button
+    if (!playlist && isCreator) {
+        return (
+            <div className="spotify-player">
+                <h2>Community Playlist</h2>
+                <button onClick={() => setShowForm(true)}>
+                    Add Playlist
+                </button>
+            </div>
+        );
+    }
+
+    // If no playlist and user is not creator, show message
+    if (!playlist) {
+        return (
+            <div className="spotify-player">
+                <h2>Community Playlist</h2>
+                <p>No playlist has been added yet.</p>
+            </div>
+        );
+    }
+
+    // Show the playlist if we have one
     return (
         <div className="spotify-player">
             <h2>Community Playlist</h2>
-            {loading ? (
-                <div>Loading playlist...</div>
-            ) : error ? (
-                <div className="error-message">{error}</div>
-            ) : playlist ? (
-                <iframe
-                    src={`https://open.spotify.com/embed/playlist/${playlist.split('/').pop()}`}
-                    width="100%"
-                    height="380"
-                    frameBorder="0"
-                    allowtransparency="true"
-                    allow="encrypted-media"
-                ></iframe>
-            ) : (
-                <div>
-                    {isCreator && (
-                        <button onClick={() => setShowForm(true)}>
-                            Add Playlist
-                        </button>
-                    )}
-                    {!isCreator && <p>No playlist has been added to this community yet.</p>}
-                </div>
-            )}
+            <iframe
+                src={`https://open.spotify.com/embed/playlist/${playlist.split('/').pop()}`}
+                width="100%"
+                height="380"
+                frameBorder="0"
+                allowtransparency="true"
+                allow="encrypted-media"
+            ></iframe>
         </div>
     );
 };
