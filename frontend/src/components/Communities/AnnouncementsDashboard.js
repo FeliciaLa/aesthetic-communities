@@ -17,11 +17,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
       
       // First, let's log the request we're about to make
       console.log('About to fetch announcements:', {
-        url: `/communities/${communityId}/announcements/`,
+        url: `communities/${communityId}/announcements/`,
         token: token ? 'present' : 'missing'
       });
 
-      const response = await api.get(`/communities/${communityId}/announcements/`, {
+      const response = await api.get(`communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
