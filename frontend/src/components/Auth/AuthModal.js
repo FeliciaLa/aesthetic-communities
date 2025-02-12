@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
+import api from '../../services/api';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -89,24 +90,37 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 return;
             }
             
-            const response = await authService.register({
+            console.log('Registration attempt:', {
+                mode,
+                hasUsername: !!username,
+                hasEmail: !!email,
+                hasPassword: !!password
+            });
+            
+            const response = await api.post('/auth/register/', {
                 username,
                 email,
                 password
             });
             
-            if (response && response.token) {
+            if (response && response.data?.token) {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userId', response.data.user.id.toString());
+                localStorage.setItem('username', response.data.user.username);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
             }
         } else {
-            const response = await authService.login({
+            const response = await api.post('/auth/login/', {
                 username,
                 password
             });
 
-            if (response && response.token) {
+            if (response && response.data?.token) {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userId', response.data.user.id.toString());
+                localStorage.setItem('username', response.data.user.username);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
