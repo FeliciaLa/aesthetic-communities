@@ -21,12 +21,34 @@ const AnnouncementsDashboard = ({ communityId }) => {
         withCredentials: true
       });
       
-      console.log('Announcements response:', response.data);
-      setAnnouncements(response.data);
+      // Debug the response structure
+      console.log('Raw announcements response:', response);
+      
+      // Handle different response structures
+      let announcementData;
+      if (response.data && typeof response.data === 'object') {
+        // If response.data is an object with an announcements property
+        announcementData = response.data.announcements || response.data;
+      } else {
+        // If response.data is the array directly
+        announcementData = response.data;
+      }
+      
+      // Ensure we're working with an array
+      const announcements = Array.isArray(announcementData) ? announcementData : [];
+      console.log('Processed announcements:', announcements);
+      
+      setAnnouncements(announcements);
+      setLoading(false);
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', err);
+      console.error('Detailed error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError('Failed to load announcements');
+      setLoading(false);
     }
   };
 
@@ -115,11 +137,18 @@ const AnnouncementsDashboard = ({ communityId }) => {
           )}
           
           <div className="announcements-list">
-            {announcements && announcements.length > 0 ? (
+            {Array.isArray(announcements) && announcements.length > 0 ? (
               announcements.map((announcement) => (
                 <div key={announcement.id} className="announcement">
-                  <p>{announcement.content}</p>
-                  <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
+                  <p>{announcement.content || ''}</p>
+                  <small>
+                    {announcement.created_at ? 
+                      new Date(announcement.created_at).toLocaleDateString() : 
+                      'No date'}
+                  </small>
+                  <small>
+                    {announcement.created_by?.username || 'Unknown user'}
+                  </small>
                 </div>
               ))
             ) : (
