@@ -109,35 +109,41 @@ const AnnouncementsDashboard = ({ communityId }) => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-  if (!community) return <div>No community found</div>;
-
   return (
     <div className="announcements-dashboard">
-      {isCreator && (
-        <form onSubmit={handleSubmit}>
-          <textarea
-            value={newAnnouncement}
-            onChange={(e) => setNewAnnouncement(e.target.value)}
-            placeholder="Write an announcement..."
-          />
-          <button type="submit">Post Announcement</button>
-        </form>
-      )}
+      <h2>Announcements</h2>
       
-      <div className="announcements-list">
-        {announcements.length > 0 ? (
-          announcements.map((announcement) => (
-            <div key={announcement.id} className="announcement">
-              <p>{announcement.content}</p>
-              <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
-            </div>
-          ))
-        ) : (
-          <p>No announcements yet.</p>
-        )}
-      </div>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          {isCreator && (
+            <form onSubmit={handleSubmit}>
+              <textarea
+                value={newAnnouncement}
+                onChange={(e) => setNewAnnouncement(e.target.value)}
+                placeholder="Write an announcement..."
+              />
+              <button type="submit">Post Announcement</button>
+            </form>
+          )}
+          
+          <div className="announcements-list">
+            {announcements.length > 0 ? (
+              announcements.map((announcement) => (
+                <div key={announcement.id} className="announcement">
+                  <p>{announcement.content}</p>
+                  <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
+                </div>
+              ))
+            ) : (
+              <p>No announcements yet.</p>
+            )}
+          </div>
+          
+          {error && <div className="error-message">{error}</div>}
+        </>
+      )}
     </div>
   );
 };
