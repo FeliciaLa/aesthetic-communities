@@ -61,7 +61,7 @@ export const authService = {
                 username: credentials.username,
                 password: credentials.password,
                 email: credentials.email,
-                confirm_password: credentials.password
+                confirm_password: credentials.confirm_password
             });
 
             console.log('Register response:', {
