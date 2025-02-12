@@ -217,6 +217,16 @@ const CommunityDetail = () => {
         // Implementation needed
     };
 
+    const handleEditSuccess = async () => {
+        try {
+            const response = await api.get(`/communities/${id}/`);
+            setCommunity(response.data);
+            setShowEditModal(false);
+        } catch (err) {
+            setError('Failed to refresh community data');
+        }
+    };
+
     return (
         <div className="community-detail">
             <button 
@@ -242,8 +252,11 @@ const CommunityDetail = () => {
 
             <div className="community-banner">
                 {isCreator && (
-                    <button onClick={() => setShowEditModal(true)} className="edit-button">
-                        Edit
+                    <button 
+                        className="edit-button"
+                        onClick={() => setShowEditModal(true)}
+                    >
+                        Edit Community
                     </button>
                 )}
                 <div className="banner-overlay"></div>
@@ -348,17 +361,10 @@ const CommunityDetail = () => {
             </div>
 
             {showEditModal && (
-                <Modal 
-                    isOpen={showEditModal} 
-                    onClose={() => setShowEditModal(false)}
-                    title="Edit Community"
-                >
+                <Modal onClose={() => setShowEditModal(false)}>
                     <EditCommunityForm
                         community={community}
-                        onSuccess={(updatedCommunity) => {
-                            setCommunity(updatedCommunity);
-                            setShowEditModal(false);
-                        }}
+                        onSuccess={handleEditSuccess}
                         onClose={() => setShowEditModal(false)}
                     />
                 </Modal>
