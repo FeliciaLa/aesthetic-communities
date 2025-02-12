@@ -92,11 +92,7 @@ const CommunityDetail = () => {
                         }
                     }
 
-                    // Ensure nested objects are properly structured
-                    if (data.spotify && typeof data.spotify === 'object') {
-                        data.spotify = data.spotify.url || null;
-                    }
-
+                    // Remove the spotify validation since it's handled by the SpotifyPlayer component
                     return data;
                 };
 

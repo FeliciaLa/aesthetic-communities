@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { musicService } from '../../services/musicService';
+import api from '../../api';
 
 const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [playlist, setPlaylist] = useState(null);
@@ -15,31 +16,25 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         }
 
         try {
-            console.log('Fetching playlist for community:', {
-                communityId,
-                baseURL: process.env.REACT_APP_API_URL || 'https://aesthetic-communities-production.up.railway.app/api'
-            });
-            
-            // Use the musicService instead of direct api call
-            const playlistData = await musicService.getSpotifyPlaylist(communityId);
-            console.log('Playlist response:', playlistData);
+            const data = await musicService.getSpotifyPlaylist(communityId);
+            console.log('Playlist data received:', data);
 
-            if (playlistData && playlistData.spotify_playlist_url) {
-                setPlaylist(playlistData.spotify_playlist_url);
+            if (data && data.spotify_playlist_url) {
+                setPlaylist(data.spotify_playlist_url);
             } else {
                 setPlaylist(null);
             }
             setError(null);
         } catch (err) {
-            console.error('Detailed error:', {
+            console.error('Spotify fetch error:', {
+                message: err.message,
                 status: err.response?.status,
-                data: err.response?.data,
                 url: err.config?.url,
-                baseURL: err.config?.baseURL
+                baseURL: err.config?.baseURL,
+                fullUrl: `${err.config?.baseURL}${err.config?.url}`
             });
             
             if (err.response?.status === 404) {
-                // No playlist exists yet - not an error state
                 setPlaylist(null);
             } else {
                 setError('Unable to load playlist');
@@ -50,7 +45,9 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     };
 
     useEffect(() => {
-        fetchPlaylist();
+        if (communityId) {
+            fetchPlaylist();
+        }
     }, [communityId]);
 
     const cleanSpotifyUrl = (url) => {
