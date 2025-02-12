@@ -77,12 +77,14 @@ const MediaGallery = ({ communityId, isCreator, onTabChange }) => {
       <div className="section-header">
         <h3>Media Gallery</h3>
         <div className="gallery-actions">
-          <button 
-            className="gallery-button"
-            onClick={() => setShowAddImage(true)}
-          >
-            +
-          </button>
+          {isCreator && (
+            <button 
+              className="gallery-button"
+              onClick={() => setShowAddImage(true)}
+            >
+              +
+            </button>
+          )}
           <button 
             className="gallery-button"
             onClick={() => onTabChange('gallery')}
