@@ -79,19 +79,42 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     setError('');
 
     try {
-      const response = await authService.login({
-        username: username,
-        password: password
-      });
+        if (mode === 'register') {
+            if (password !== confirmPassword) {
+                setError('Passwords do not match');
+                return;
+            }
+            if (!isOver16) {
+                setError('You must be over 16 to register');
+                return;
+            }
+            
+            const response = await authService.register({
+                username,
+                email,
+                password
+            });
+            
+            if (response && response.token) {
+                setTimeout(async () => {
+                    await onLoginSuccess();
+                }, 100);
+            }
+        } else {
+            const response = await authService.login({
+                username,
+                password
+            });
 
-      if (response && response.token) {
-        setTimeout(async () => {
-          await onLoginSuccess();
-        }, 100);
-      }
+            if (response && response.token) {
+                setTimeout(async () => {
+                    await onLoginSuccess();
+                }, 100);
+            }
+        }
     } catch (err) {
-      console.error('Auth error:', err);
-      setError(err.response?.data?.detail || err.response?.data?.error || 'An error occurred');
+        console.error('Auth error:', err);
+        setError(err.response?.data?.detail || err.response?.data?.error || 'An error occurred');
     }
   };
 

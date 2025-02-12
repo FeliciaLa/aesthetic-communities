@@ -52,47 +52,34 @@ export const authService = {
 
     register: async (credentials) => {
         try {
-            console.log('Attempting registration with:', {
-                email: credentials.email,
+            console.log('Register attempt:', {
                 username: credentials.username,
-                hasPassword: !!credentials.password,
-                hasConfirmPassword: !!credentials.confirmPassword,
-                isOver16: credentials.isOver16
+                timestamp: new Date().toISOString()
             });
 
-            const formData = {
+            const response = await api.post('/auth/register/', {
                 username: credentials.username,
-                email: credentials.email,
                 password: credentials.password,
-                confirm_password: credentials.confirmPassword,
-                is_over_16: credentials.isOver16
-            };
-
-            console.log('Registration URL:', `${api.defaults.baseURL}auth/register/`);
-
-            const response = await api.post('auth/register/', formData);
-            console.log('Registration response:', {
-                status: response.status,
-                data: response.data,
-                headers: response.headers
+                email: credentials.email
             });
-            
-            if (response.data.token) {
+
+            console.log('Register response:', {
+                success: !!response.data,
+                timestamp: new Date().toISOString()
+            });
+
+            if (response.data?.token) {
                 localStorage.setItem('token', response.data.token);
-                localStorage.setItem('username', response.data.username);
-                localStorage.setItem('userId', response.data.user_id?.toString());
+                localStorage.setItem('userId', response.data.user.id.toString());
+                localStorage.setItem('username', response.data.user.username);
                 return response.data;
-            } else {
-                console.error('No token in response:', response.data);
-                throw new Error('Registration failed: No token received');
             }
+            throw new Error('Invalid registration response');
         } catch (error) {
-            console.error('Registration error details:', {
+            console.error('Register error:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status,
-                url: error.config?.url,
-                method: error.config?.method
+                status: error.response?.status
             });
             throw error;
         }
