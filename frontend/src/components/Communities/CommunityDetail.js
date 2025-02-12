@@ -40,7 +40,7 @@ const CommunityDetail = () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const userId = localStorage.getItem('userId');
+                const username = localStorage.getItem('username');
                 
                 if (!token) {
                     setError('Authentication required to view this community');
@@ -84,12 +84,18 @@ const CommunityDetail = () => {
                 const communityData = response.data;
                 setCommunity(communityData);
 
-                if (communityData.created_by === userId) {
+                if (communityData.created_by === username) {
                     setIsCreator(true);
-                    console.log('Setting isCreator to true - User is creator');
+                    console.log('Setting isCreator to true - User is creator', {
+                        username,
+                        created_by: communityData.created_by
+                    });
                 } else {
                     setIsCreator(false);
-                    console.log('Setting isCreator to false - User is not creator');
+                    console.log('Setting isCreator to false - User is not creator', {
+                        username,
+                        created_by: communityData.created_by
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching community:', error);
