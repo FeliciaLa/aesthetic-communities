@@ -48,21 +48,35 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('token');
+      // Log the full URL for debugging
+      console.log('Fetching announcements from:', `${api.defaults.baseURL}/communities/${communityId}/announcements/`);
+      
       const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        // Add this to see if it's a CORS issue
+        withCredentials: true
       });
       
-      // Log the response for debugging
-      console.log('Announcements response:', response.data);
+      // Log the full response
+      console.log('Full announcements response:', response);
       
-      // Ensure announcements is always an array
-      setAnnouncements(Array.isArray(response.data) ? response.data : []);
+      if (response.data && Array.isArray(response.data)) {
+        setAnnouncements(response.data);
+      } else {
+        console.warn('Unexpected response format:', response.data);
+        setAnnouncements([]);
+      }
       setError(null);
     } catch (err) {
-      console.error('Error fetching announcements:', err.response || err);
+      console.error('Detailed error:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        url: err.config?.url
+      });
       setError('Failed to load announcements. Please try again later.');
     } finally {
       setLoading(false);
