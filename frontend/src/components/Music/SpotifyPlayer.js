@@ -19,21 +19,14 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
             const data = await musicService.getSpotifyPlaylist(communityId);
             console.log('Playlist data received:', data);
 
-            if (data && data.spotify_playlist_url) {
-                setPlaylist(data.spotify_playlist_url);
+            if (data) {
+                setPlaylist(data);
             } else {
                 setPlaylist(null);
             }
             setError(null);
         } catch (err) {
-            console.error('Spotify fetch error:', {
-                message: err.message,
-                status: err.response?.status,
-                url: err.config?.url,
-                baseURL: err.config?.baseURL,
-                fullUrl: `${err.config?.baseURL}${err.config?.url}`
-            });
-            
+            console.error('Spotify fetch error:', err);
             if (err.response?.status === 404) {
                 setPlaylist(null);
             } else {
