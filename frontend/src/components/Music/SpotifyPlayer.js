@@ -8,6 +8,15 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        console.log('SpotifyPlayer props:', {
+            communityId,
+            isCreator,
+            playlist,
+            loading
+        });
+    }, [communityId, isCreator, playlist, loading]);
+
     const fetchPlaylist = async () => {
         if (!communityId) {
             setLoading(false);
@@ -115,6 +124,10 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
     // If no playlist and user is creator, show add button and form
     if (!playlist && isCreator) {
+        console.log('Should show Add Playlist button:', {
+            playlist: playlist,
+            isCreator: isCreator
+        });
         return (
             <div className="spotify-player">
                 <h2>Community Playlist</h2>
