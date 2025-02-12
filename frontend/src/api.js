@@ -2,15 +2,16 @@ import axios from "axios";
 import { getApiUrl } from './config';
 import { authService } from './services/authService';
 
-const baseURL = getApiUrl();
+// Remove any trailing slashes from the base URL
+const baseURL = getApiUrl().replace(/\/+$/, '');
 
 console.log('API URL Construction:', {
     baseURL,
-    fullTestUrl: `${baseURL}auth/login/`
+    fullTestUrl: `${baseURL}/auth/login/`  // Note the added / here
 });
 
 const api = axios.create({
-    baseURL: baseURL,
+    baseURL: baseURL,  // This will not have a trailing slash
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
@@ -19,7 +20,7 @@ const api = axios.create({
     timeout: 15000
 });
 
-// Add request interceptor with URL logging
+// Update the request interceptor to show the correct URL construction
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -27,7 +28,7 @@ api.interceptors.request.use(
             config.headers.Authorization = `Token ${token}`;
         }
         console.log('Making API request:', {
-            fullUrl: config.baseURL + config.url,
+            fullUrl: `${config.baseURL}${config.url}`,  // This will now have correct slashes
             method: config.method,
             hasToken: !!token
         });

@@ -12,6 +12,7 @@ import AnnouncementsDashboard from './AnnouncementsDashboard';
 import RecommendedProducts from './RecommendedProducts';
 import GalleryView from './GalleryView';
 import { getFullImageUrl } from '../../utils/imageUtils';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -78,29 +79,28 @@ const CommunityDetail = () => {
                     fullPath: response.config.url
                 });
 
-                // More detailed validation
-                if (!response.data || typeof response.data !== 'object') {
-                    throw new Error('Invalid response format');
-                }
+                const validateCommunityData = (data) => {
+                    if (!data || typeof data !== 'object') {
+                        throw new Error('Invalid response format');
+                    }
 
-                if ('email' in response.data) {
-                    console.error('Received user profile instead of community:', response.data);
-                    throw new Error('Received user profile instead of community data');
-                }
+                    // Check for required primitive fields
+                    const requiredFields = ['id', 'name', 'description', 'created_by'];
+                    for (const field of requiredFields) {
+                        if (typeof data[field] === 'undefined') {
+                            throw new Error(`Missing required field: ${field}`);
+                        }
+                    }
 
-                if (!response.data.name || !response.data.id) {
-                    console.error('Missing required community fields:', response.data);
-                    throw new Error('Invalid community data structure');
-                }
+                    // Ensure nested objects are properly structured
+                    if (data.spotify && typeof data.spotify === 'object') {
+                        data.spotify = data.spotify.url || null;
+                    }
 
-                const communityData = {
-                    ...response.data,
-                    banner_image: response.data.banner_image ? 
-                        (response.data.banner_image.startsWith('http') ? 
-                            response.data.banner_image : 
-                            getFullImageUrl(response.data.banner_image)) 
-                        : null
+                    return data;
                 };
+
+                const communityData = validateCommunityData(response.data);
 
                 setCommunity(communityData);
 
@@ -199,11 +199,15 @@ const CommunityDetail = () => {
             </button>
 
             <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+                <ErrorBoundary fallback={<div>Failed to load announcements</div>}>
+                    <div className="sidebar-item">
+                        <AnnouncementsDashboard communityId={id} />
+                    </div>
+                </ErrorBoundary>
                 <div className="sidebar-item">
-                    <AnnouncementsDashboard communityId={id} />
-                </div>
-                <div className="sidebar-item">
-                    <SpotifyPlayer communityId={id} isCreator={isCreator} />
+                    <ErrorBoundary fallback={<div>Failed to load Spotify player</div>}>
+                        <SpotifyPlayer communityId={id} isCreator={isCreator} />
+                    </ErrorBoundary>
                 </div>
             </div>
 
@@ -263,11 +267,13 @@ const CommunityDetail = () => {
                 {activeTab === 'overview' && (
                     <div className="overview-layout">
                         <div className="side-column">
-                            <MediaGallery 
-                                communityId={id} 
-                                isCreator={isCreator}
-                                onTabChange={setActiveTab}
-                            />
+                            <ErrorBoundary fallback={<div>Failed to load gallery</div>}>
+                                <MediaGallery 
+                                    communityId={id} 
+                                    isCreator={isCreator}
+                                    onTabChange={setActiveTab}
+                                />
+                            </ErrorBoundary>
                             <Resources 
                                 communityId={id} 
                                 isCreator={isCreator}
