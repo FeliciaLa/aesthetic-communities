@@ -1,40 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
-import { API_BASE_URL } from '../../config';
-import { DEFAULT_AVATAR } from './CommunityFeed';
 import { getFullImageUrl } from '../../utils/imageUtils';
 
 const AnnouncementsDashboard = ({ communityId }) => {
   const [announcements, setAnnouncements] = useState([]);
+  const [community, setCommunity] = useState(null);
   const [newAnnouncement, setNewAnnouncement] = useState('');
-  const [isCreator, setIsCreator] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [community, setCommunity] = useState(null);
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
+    fetchCommunityData();
     fetchAnnouncements();
-    checkIsCreator();
   }, [communityId]);
 
-  const fetchAnnouncements = async () => {
-    try {
-      const response = await api.get(`/communities/${communityId}/announcements/`, {
-        withCredentials: true
-      });
-      
-      // Only set announcements from this endpoint
-      setAnnouncements(Array.isArray(response.data) ? response.data : []);
-      setError(null);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching announcements:', err);
-      setError('Failed to load announcements. Please try again later.');
-      setLoading(false);
-    }
-  };
-
-  const checkIsCreator = async () => {
+  const fetchCommunityData = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await api.get(`/communities/${communityId}/`, {
@@ -44,14 +25,39 @@ const AnnouncementsDashboard = ({ communityId }) => {
         }
       });
       
-      if (token && response.data) {
-        const currentUser = response.data.current_username;
-        const communityCreator = response.data.creator_name;
-        setIsCreator(currentUser === communityCreator);
-      }
+      const communityData = {
+        ...response.data,
+        banner_image: response.data.banner_image ? 
+          (response.data.banner_image.startsWith('http') ? 
+            response.data.banner_image : 
+            getFullImageUrl(response.data.banner_image)) 
+          : null
+      };
+      
+      setCommunity(communityData);
+      // Check if current user is creator
+      const currentUser = response.data.current_username;
+      const communityCreator = response.data.creator_name;
+      setIsCreator(currentUser === communityCreator);
     } catch (err) {
-      console.error('Error checking creator status:', err);
-      setError('Failed to check creator status.');
+      console.error('Error fetching community:', err);
+      setError('Failed to load community data');
+    }
+  };
+
+  const fetchAnnouncements = async () => {
+    try {
+      const response = await api.get(`/communities/${communityId}/announcements/`, {
+        withCredentials: true
+      });
+      
+      // Ensure announcements is always an array
+      setAnnouncements(Array.isArray(response.data) ? response.data : []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+      setError('Failed to load announcements. Please try again later.');
+    } finally {
       setLoading(false);
     }
   };
@@ -62,172 +68,57 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
     try {
       const token = localStorage.getItem('token');
-      console.log('Sending announcement:', { content: newAnnouncement });
       const response = await api.post(
         `/communities/${communityId}/announcements/`,
         { content: newAnnouncement },
         {
-          headers: { 'Authorization': `Token ${token}` },
+          headers: { 
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          },
           withCredentials: true
         }
       );
-      console.log('Announcement response:', response.data);
+      
       setNewAnnouncement('');
       setError(null);
+      // Refresh announcements after posting
       fetchAnnouncements();
     } catch (err) {
-      console.error('Error creating announcement:', err.response?.data);
+      console.error('Error creating announcement:', err);
       setError('Failed to create announcement. Please try again later.');
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) return <div className="error-message">{error}</div>;
   if (!community) return <div>No community found</div>;
 
   return (
     <div className="announcements-dashboard">
-      <h2>Announcements</h2>
-      
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
       {isCreator && (
-        <form onSubmit={handleSubmit} className="announcement-form">
+        <form onSubmit={handleSubmit}>
           <textarea
             value={newAnnouncement}
             onChange={(e) => setNewAnnouncement(e.target.value)}
-            placeholder="Write a new announcement..."
-            required
+            placeholder="Write an announcement..."
           />
-          <button type="submit" disabled={!newAnnouncement.trim()}>
-            Post Announcement
-          </button>
+          <button type="submit">Post Announcement</button>
         </form>
       )}
-
+      
       <div className="announcements-list">
-        {announcements.length === 0 ? (
-          <p className="no-announcements">No announcements yet.</p>
-        ) : (
+        {announcements.length > 0 ? (
           announcements.map((announcement) => (
             <div key={announcement.id} className="announcement">
-              <div className="announcement-content">
-                {announcement.content}
-              </div>
-              <div className="announcement-meta">
-                <span className="announcement-author">
-                  Posted by {announcement.created_by}
-                </span>
-                <span className="announcement-date">
-                  {formatDate(announcement.created_at)}
-                </span>
-              </div>
+              <p>{announcement.content}</p>
+              <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
             </div>
           ))
+        ) : (
+          <p>No announcements yet.</p>
         )}
       </div>
-
-      <style jsx>{`
-        .announcements-dashboard {
-          padding-right: 80px;
-          padding-left: 20px;
-          background: white;
-          border-radius: 12px;
-          padding: 0px;
-          margin: 20;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          height: 400px;
-          overflow-y: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        h2 {
-          margin: 0;
-          color: #333;
-        }
-
-        .announcement-form {
-          margin-bottom: 20px;
-        }
-
-        .announcement-input {
-          width: calc(100% - 24px);
-          padding: 12px;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          margin-bottom: 10px;
-          resize: vertical;
-          min-height: 80px;
-        }
-
-        .post-button {
-          padding: 8px 16px;
-          background-color: #ff6b6b;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .post-button:hover {
-          background-color: #ff5252;
-        }
-
-        .announcement-item {
-          padding: 10px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .announcement-header {
-          display: flex;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .avatar {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          margin-right: 8px;
-        }
-
-        .announcement-meta {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-        }
-
-        .username {
-          font-weight: 500;
-          font-size: 0.9em;
-        }
-
-        .timestamp {
-          font-size: 0.8em;
-          color: #666;
-        }
-
-        .announcement-content {
-          color: #333;
-          line-height: 1.4;
-          font-size: 0.9em;
-        }
-      `}</style>
     </div>
   );
 };
