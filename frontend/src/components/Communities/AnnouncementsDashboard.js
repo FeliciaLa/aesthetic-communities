@@ -15,43 +15,34 @@ const AnnouncementsDashboard = ({ communityId }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // Log the request details
-      console.log('Fetching announcements:', {
-        url: `/communities/${communityId}/announcements/`,
-        token: token ? 'present' : 'missing'
-      });
-
+      console.log('Fetching announcements for community:', communityId);
+      
       const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
-
-      // Log the raw response
-      console.log('Raw API response:', response);
-
-      // Safely handle the data
-      if (response && response.data) {
-        if (Array.isArray(response.data)) {
-          setAnnouncements(response.data);
-        } else {
-          console.warn('Unexpected data format:', response.data);
-          setAnnouncements([]);
-        }
-      } else {
-        setAnnouncements([]);
-      }
       
+      // Log the raw response for debugging
+      console.log('Announcements response:', {
+        status: response.status,
+        data: response.data,
+        isArray: Array.isArray(response.data)
+      });
+
+      // Ensure we're setting an array
+      const announcementsList = Array.isArray(response.data) ? response.data : [];
+      setAnnouncements(announcementsList);
       setError(null);
     } catch (err) {
       console.error('Announcement fetch error:', {
         message: err.message,
-        response: err.response,
+        status: err.response?.status,
         data: err.response?.data
       });
       setError('Failed to load announcements');
-      setAnnouncements([]);
+      setAnnouncements([]); // Reset to empty array on error
     } finally {
       setLoading(false);
     }
