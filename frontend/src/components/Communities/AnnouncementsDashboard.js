@@ -10,10 +10,32 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
 
+  const fetchAnnouncements = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.get(`/communities/${communityId}/announcements/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+      
+      console.log('Announcements response:', response.data);
+      setAnnouncements(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+      setError('Failed to load announcements');
+    }
+  };
+
   useEffect(() => {
-    fetchCommunityData();
-    fetchAnnouncements();
-  }, [communityId]);
+    if (communityId) {
+      fetchCommunityData();
+      fetchAnnouncements();
+    }
+  }, [communityId]); // Only depend on communityId
 
   const fetchCommunityData = async () => {
     try {
@@ -42,42 +64,6 @@ const AnnouncementsDashboard = ({ communityId }) => {
     } catch (err) {
       console.error('Error fetching community:', err);
       setError('Failed to load community data');
-    }
-  };
-
-  const fetchAnnouncements = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      console.log('Fetching announcements for community:', communityId); // Debug log
-      
-      const response = await api.get(`/communities/${communityId}/announcements/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Debug logs
-      console.log('Raw response:', response);
-      console.log('Response data:', response.data);
-      
-      // Handle both array and object responses
-      let announcementData = response.data;
-      if (!Array.isArray(announcementData) && announcementData.announcements) {
-        announcementData = announcementData.announcements;
-      }
-      
-      setAnnouncements(Array.isArray(announcementData) ? announcementData : []);
-      setError(null);
-    } catch (err) {
-      console.error('Detailed error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
-      setError('Failed to load announcements. Please try again later.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,14 +108,14 @@ const AnnouncementsDashboard = ({ communityId }) => {
               <textarea
                 value={newAnnouncement}
                 onChange={(e) => setNewAnnouncement(e.target.value)}
-                placeholder="Write an announcement..."
+                placeholder="Write a new announcement..."
               />
               <button type="submit">Post Announcement</button>
             </form>
           )}
           
           <div className="announcements-list">
-            {announcements.length > 0 ? (
+            {announcements && announcements.length > 0 ? (
               announcements.map((announcement) => (
                 <div key={announcement.id} className="announcement">
                   <p>{announcement.content}</p>
