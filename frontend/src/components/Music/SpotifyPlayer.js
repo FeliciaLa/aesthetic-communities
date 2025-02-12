@@ -8,14 +8,23 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    // Add immediate logging when component renders
+    console.log('SpotifyPlayer mounted:', {
+        communityId,
+        isCreator,
+        loading,
+        hasPlaylist: !!playlist
+    });
+
     useEffect(() => {
-        console.log('SpotifyPlayer props:', {
+        console.log('SpotifyPlayer state updated:', {
             communityId,
             isCreator,
-            playlist,
-            loading
+            loading,
+            hasPlaylist: !!playlist,
+            showForm
         });
-    }, [communityId, isCreator, playlist, loading]);
+    }, [communityId, isCreator, loading, playlist, showForm]);
 
     const fetchPlaylist = async () => {
         if (!communityId) {

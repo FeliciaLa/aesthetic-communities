@@ -92,7 +92,6 @@ const CommunityDetail = () => {
                         }
                     }
 
-                    // Remove the spotify validation since it's handled by the SpotifyPlayer component
                     return data;
                 };
 
@@ -101,6 +100,13 @@ const CommunityDetail = () => {
                 setCommunity(communityData);
 
                 if (token && communityData.current_username && communityData.creator_name) {
+                    // Add creator status logging here
+                    console.log('Creator status check:', {
+                        currentUsername: communityData.current_username,
+                        creatorName: communityData.creator_name,
+                        willBeCreator: communityData.current_username === communityData.creator_name
+                    });
+
                     setIsCreator(communityData.current_username === communityData.creator_name);
                     
                     try {
@@ -113,6 +119,14 @@ const CommunityDetail = () => {
                     } catch (viewError) {
                         console.error('Error tracking view:', viewError);
                     }
+                } else {
+                    // Log why creator status wasn't set
+                    console.log('Creator status not set:', {
+                        hasToken: !!token,
+                        hasCurrentUsername: !!communityData.current_username,
+                        hasCreatorName: !!communityData.creator_name,
+                        communityData
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching community:', {
@@ -120,7 +134,7 @@ const CommunityDetail = () => {
                     data: error.response?.data,
                     message: error.message,
                     url: error.config?.url,
-                    baseURL: api.defaults.baseURL // Add this to debug the base URL
+                    baseURL: api.defaults.baseURL
                 });
                 setError('Failed to load community');
             } finally {
@@ -134,6 +148,14 @@ const CommunityDetail = () => {
     useEffect(() => {
         console.log('Community state:', community);
     }, [community]);
+
+    // Add a new useEffect to track isCreator changes
+    useEffect(() => {
+        console.log('isCreator state changed:', {
+            isCreator,
+            communityId: id
+        });
+    }, [isCreator, id]);
 
     if (loading) return <div className="loading">Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
