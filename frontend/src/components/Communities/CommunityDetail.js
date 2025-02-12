@@ -157,6 +157,17 @@ const CommunityDetail = () => {
         });
     }, [isCreator, id]);
 
+    useEffect(() => {
+        // Debug localStorage contents
+        console.log('LocalStorage Debug:', {
+            username: localStorage.getItem('username'),
+            token: localStorage.getItem('token') ? 'present' : 'missing',
+            userId: localStorage.getItem('userId'),
+            allKeys: Object.keys(localStorage),
+            timestamp: new Date().toISOString()
+        });
+    }, []);
+
     if (loading) return <div className="loading">Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
     if (!community) return <div className="not-found">Community not found</div>;
