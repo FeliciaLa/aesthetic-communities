@@ -65,7 +65,9 @@ export const authService = {
 
             console.log('Register response:', {
                 success: !!response.data,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                endpoint: '/auth/register/',
+                baseURL: api.defaults.baseURL
             });
 
             if (response.data?.token) {
@@ -79,7 +81,9 @@ export const authService = {
             console.error('Register error:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status
+                status: error.response?.status,
+                endpoint: '/auth/register/',
+                baseURL: api.defaults.baseURL
             });
             throw error;
         }

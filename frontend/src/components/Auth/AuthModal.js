@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
-import api from '../../api';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -90,37 +89,30 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 return;
             }
             
-            console.log('Registration attempt:', {
-                mode,
-                hasUsername: !!username,
-                hasEmail: !!email,
-                hasPassword: !!password
-            });
-            
-            const response = await api.post('/auth/register/', {
+            const response = await authService.register({
                 username,
                 email,
                 password
             });
             
-            if (response && response.data?.token) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('userId', response.data.user.id.toString());
-                localStorage.setItem('username', response.data.user.username);
+            if (response && response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('userId', response.user.id.toString());
+                localStorage.setItem('username', response.user.username);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
             }
         } else {
-            const response = await api.post('/auth/login/', {
+            const response = await authService.login({
                 username,
                 password
             });
 
-            if (response && response.data?.token) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('userId', response.data.user.id.toString());
-                localStorage.setItem('username', response.data.user.username);
+            if (response && response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('userId', response.user.id.toString());
+                localStorage.setItem('username', response.user.username);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
