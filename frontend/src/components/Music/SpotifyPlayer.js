@@ -59,32 +59,26 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-
-        const cleanedUrl = cleanSpotifyUrl(playlistUrl);
-        if (!cleanedUrl) {
-            setError('Please enter a valid Spotify playlist URL');
-            return;
-        }
-
         try {
+            const cleanedUrl = cleanSpotifyUrl(playlistUrl);
+            if (!cleanedUrl) {
+                setError('Please enter a valid Spotify playlist URL');
+                return;
+            }
+
             if (playlist?.id) {
-                await musicService.updateSpotifyPlaylist(communityId, cleanedUrl);
+                await musicService.updateSpotifyPlaylist(communityId, playlist.id, cleanedUrl);
             } else {
-                await musicService.addSpotifyPlaylist(communityId, cleanedUrl);
+                await musicService.setSpotifyPlaylist(communityId, cleanedUrl);
             }
 
             await fetchPlaylist();
-            
             setShowForm(false);
             setPlaylistUrl('');
             setError('');
         } catch (err) {
-            console.error('Error handling playlist:', err);
-            const errorMessage = err.response?.data?.error || 
-                               err.response?.data?.spotify_playlist_url?.[0] ||
-                               'Failed to handle playlist. Please check the URL and try again.';
-            setError(errorMessage);
+            console.error('Error updating playlist:', err);
+            setError('Failed to update playlist');
         }
     };
 
