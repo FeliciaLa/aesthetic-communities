@@ -98,8 +98,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             
             if (response && response.token) {
                 localStorage.setItem('token', response.token);
-                localStorage.setItem('userId', response.user.id.toString());
-                localStorage.setItem('username', response.user.username);
+                localStorage.setItem('userId', response.user_id.toString());
+                localStorage.setItem('username', response.username);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
