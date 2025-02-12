@@ -251,18 +251,22 @@ const CommunityDetail = () => {
             </div>
 
             <div className="community-banner">
-                {isCreator && (
-                    <button 
-                        className="edit-button"
-                        onClick={() => setShowEditModal(true)}
-                    >
-                        Edit Community
-                    </button>
-                )}
+                <div className="community-header">
+                    <div className="title-section">
+                        <h1>{community?.name}</h1>
+                        {isCreator && (
+                            <button 
+                                className="edit-button"
+                                onClick={() => setShowEditModal(true)}
+                            >
+                                Edit Community
+                            </button>
+                        )}
+                    </div>
+                    <p>{community?.description}</p>
+                </div>
                 <div className="banner-overlay"></div>
                 <div className="banner-content">
-                    <h1>{community?.name}</h1>
-                    <p className="description">{community?.description}</p>
                     <div className="creator-info">
                         Created by {community?.creator_name || 'Unknown'} • {formatDate(community?.created_at)}
                     </div>
@@ -442,9 +446,6 @@ const CommunityDetail = () => {
                 }
 
                 .edit-button {
-                    position: absolute;
-                    top: 20px;
-                    right: 20px;
                     padding: 6px 16px;
                     background: rgba(0, 0, 0, 0.4);
                     color: white;
@@ -455,6 +456,7 @@ const CommunityDetail = () => {
                     transition: all 0.3s ease;
                     font-size: 0.9rem;
                     z-index: 2;
+                    margin-left: 10px;
                 }
 
                 .edit-button:hover {
