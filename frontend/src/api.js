@@ -20,18 +20,25 @@ const api = axios.create({
     timeout: 15000
 });
 
-// Update the request interceptor to show the correct URL construction
+// Update the request interceptor to preserve the URL
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-        console.log('Making API request:', {
-            fullUrl: `${config.baseURL}${config.url}`,  // This will now have correct slashes
-            method: config.method,
-            hasToken: !!token
-        });
+        
+        // Ensure URL is not being transformed
+        if (config.url.includes('spotify-playlist')) {
+            console.log('Spotify request details:', {
+                originalUrl: config.url,
+                baseURL: config.baseURL,
+                fullUrl: `${config.baseURL}${config.url}`,
+                method: config.method,
+                headers: config.headers
+            });
+        }
+        
         return config;
     },
     (error) => {

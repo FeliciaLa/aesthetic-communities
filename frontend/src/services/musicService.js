@@ -4,19 +4,31 @@ export const musicService = {
     async getSpotifyPlaylist(communityId) {
         try {
             const token = localStorage.getItem('token');
-            const response = await api.get(`/communities/${communityId}/spotify-playlist/`, {
+            const endpoint = `/communities/${communityId}/spotify-playlist/`;
+            
+            console.log('Spotify request configuration:', {
+                endpoint,
+                baseURL: api.defaults.baseURL,
+                token: token ? 'Present' : 'Missing',
+                fullUrl: `${api.defaults.baseURL}${endpoint}`
+            });
+
+            const response = await api.get(endpoint, {
                 headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            console.log('Music service response:', response.data);
+            
+            console.log('Spotify response:', response);
             return Array.isArray(response.data) ? response.data[0] : response.data;
         } catch (error) {
-            console.error('Music service error:', {
+            console.error('Spotify request failed:', {
+                endpoint: `/communities/${communityId}/spotify-playlist/`,
+                actualUrl: error.config?.url,  // This will show what URL was actually used
+                baseURL: error.config?.baseURL,
                 status: error.response?.status,
-                data: error.response?.data,
-                url: error.config?.url
+                data: error.response?.data
             });
             throw error;
         }
