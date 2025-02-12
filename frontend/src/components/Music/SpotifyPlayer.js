@@ -71,25 +71,42 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const cleanedUrl = cleanSpotifyUrl(playlistUrl);
-            if (!cleanedUrl) {
+            // Validate URL format first
+            if (!playlistUrl || typeof playlistUrl !== 'string') {
                 setError('Please enter a valid Spotify playlist URL');
                 return;
             }
 
-            if (playlist?.id) {
-                await musicService.updateSpotifyPlaylist(communityId, playlist.id, cleanedUrl);
-            } else {
-                await musicService.setSpotifyPlaylist(communityId, cleanedUrl);
+            // Extract playlist ID from URL
+            let playlistId;
+            try {
+                const url = new URL(playlistUrl);
+                playlistId = url.pathname.split('/').pop();
+            } catch (urlError) {
+                console.error('URL parsing error:', urlError);
+                setError('Invalid Spotify URL format');
+                return;
             }
 
-            await fetchPlaylist();
+            if (!playlistId) {
+                setError('Could not extract playlist ID from URL');
+                return;
+            }
+
+            console.log('Submitting playlist:', {
+                url: playlistUrl,
+                playlistId: playlistId,
+                communityId: communityId
+            });
+
+            const response = await musicService.addSpotifyPlaylist(communityId, playlistId);
+            setPlaylist(response);
             setShowForm(false);
             setPlaylistUrl('');
             setError('');
         } catch (err) {
-            console.error('Error updating playlist:', err);
-            setError('Failed to update playlist');
+            console.error('Error adding playlist:', err);
+            setError('Failed to add playlist. Please check the URL and try again.');
         }
     };
 
@@ -147,9 +164,9 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
                             value={playlistUrl}
                             onChange={(e) => setPlaylistUrl(e.target.value)}
                             placeholder="Enter Spotify playlist URL"
+                            required
                         />
-                        <button type="submit">Save Playlist</button>
-                        <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                        <button type="submit">Submit</button>
                     </form>
                 ) : (
                     <button onClick={() => setShowForm(true)}>
