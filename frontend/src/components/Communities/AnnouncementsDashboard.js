@@ -15,35 +15,27 @@ const AnnouncementsDashboard = ({ communityId }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // First, let's log the request we're about to make
-      console.log('About to fetch announcements:', {
-        url: `communities/${communityId}/announcements/`,
+      // Log both URL versions
+      console.log('Announcements URL construction:', {
+        withSlash: `/communities/${communityId}/announcements/`,
+        withoutSlash: `communities/${communityId}/announcements/`,
+        baseURL: api.defaults.baseURL,
         token: token ? 'present' : 'missing'
       });
 
-      const response = await api.get(`communities/${communityId}/announcements/`, {
+      const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
       
-      // Let's log EXACTLY what we get back
-      console.log('API Response:', {
-        fullResponse: response,
-        data: response.data,
-        keys: response.data ? Object.keys(response.data) : null,
-        type: typeof response.data
+      console.log('Announcements Response:', {
+        status: response.status,
+        url: response.config.url,
+        fullUrl: `${api.defaults.baseURL}${response.config.url}`
       });
 
-      // If we're getting a user object, let's see what it looks like
-      if (response.data && response.data.id && response.data.username) {
-        console.error('Received user object instead of announcements:', response.data);
-        setError('Received incorrect data type');
-        return;
-      }
-
-      // Only set announcements if we get an array
       if (Array.isArray(response.data)) {
         setAnnouncements(response.data);
         setError(null);
@@ -51,11 +43,12 @@ const AnnouncementsDashboard = ({ communityId }) => {
         console.error('Received non-array data:', response.data);
         setError('Invalid data format received');
       }
-    } catch (err) {
+    } catch (error) {
       console.error('Fetch error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
+        message: error.message,
+        config: error.config,
+        url: error.config?.url,
+        baseUrl: error.config?.baseURL
       });
       setError('Failed to load announcements');
     } finally {
