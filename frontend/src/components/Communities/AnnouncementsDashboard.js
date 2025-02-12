@@ -48,34 +48,32 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const fetchAnnouncements = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Log the full URL for debugging
-      console.log('Fetching announcements from:', `${api.defaults.baseURL}/communities/${communityId}/announcements/`);
+      console.log('Fetching announcements for community:', communityId); // Debug log
       
       const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
-        },
-        // Add this to see if it's a CORS issue
-        withCredentials: true
+        }
       });
       
-      // Log the full response
-      console.log('Full announcements response:', response);
+      // Debug logs
+      console.log('Raw response:', response);
+      console.log('Response data:', response.data);
       
-      if (response.data && Array.isArray(response.data)) {
-        setAnnouncements(response.data);
-      } else {
-        console.warn('Unexpected response format:', response.data);
-        setAnnouncements([]);
+      // Handle both array and object responses
+      let announcementData = response.data;
+      if (!Array.isArray(announcementData) && announcementData.announcements) {
+        announcementData = announcementData.announcements;
       }
+      
+      setAnnouncements(Array.isArray(announcementData) ? announcementData : []);
       setError(null);
     } catch (err) {
       console.error('Detailed error:', {
         message: err.message,
-        status: err.response?.status,
-        data: err.response?.data,
-        url: err.config?.url
+        response: err.response?.data,
+        status: err.response?.status
       });
       setError('Failed to load announcements. Please try again later.');
     } finally {
