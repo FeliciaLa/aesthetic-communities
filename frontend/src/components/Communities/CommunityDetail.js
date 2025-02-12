@@ -258,6 +258,13 @@ const CommunityDetail = () => {
                             <button 
                                 className="edit-button"
                                 onClick={() => setShowEditModal(true)}
+                                style={{
+                                    position: 'fixed',
+                                    top: '20px',
+                                    right: '20px',
+                                    zIndex: 1000,
+                                    cursor: 'pointer'
+                                }}
                             >
                                 Edit Community
                             </button>
@@ -446,6 +453,9 @@ const CommunityDetail = () => {
                 }
 
                 .edit-button {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
                     padding: 6px 16px;
                     background: rgba(0, 0, 0, 0.4);
                     color: white;
@@ -456,7 +466,6 @@ const CommunityDetail = () => {
                     transition: all 0.3s ease;
                     font-size: 0.9rem;
                     z-index: 2;
-                    margin-left: 10px;
                 }
 
                 .edit-button:hover {
