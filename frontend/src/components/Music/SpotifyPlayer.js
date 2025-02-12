@@ -113,14 +113,28 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
-    // If no playlist and user is creator, show add button
+    // If no playlist and user is creator, show add button and form
     if (!playlist && isCreator) {
         return (
             <div className="spotify-player">
                 <h2>Community Playlist</h2>
-                <button onClick={() => setShowForm(true)}>
-                    Add Playlist
-                </button>
+                {showForm ? (
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            value={playlistUrl}
+                            onChange={(e) => setPlaylistUrl(e.target.value)}
+                            placeholder="Enter Spotify playlist URL"
+                        />
+                        <button type="submit">Save Playlist</button>
+                        <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                    </form>
+                ) : (
+                    <button onClick={() => setShowForm(true)}>
+                        Add Playlist
+                    </button>
+                )}
+                {error && <div className="error">{error}</div>}
             </div>
         );
     }
