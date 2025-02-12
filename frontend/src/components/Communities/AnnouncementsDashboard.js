@@ -23,17 +23,8 @@ const AnnouncementsDashboard = ({ communityId }) => {
         withCredentials: true
       });
       
-      const communityData = {
-        ...response.data,
-        banner_image: response.data.banner_image ? 
-            (response.data.banner_image.startsWith('http') ? 
-                response.data.banner_image : 
-                getFullImageUrl(response.data.banner_image)) 
-            : null
-      };
-
-      setCommunity(communityData);
-      setAnnouncements(response.data);
+      // Only set announcements from this endpoint
+      setAnnouncements(Array.isArray(response.data) ? response.data : []);
       setError(null);
       setLoading(false);
     } catch (err) {
