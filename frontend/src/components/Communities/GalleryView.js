@@ -45,11 +45,13 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
     }, []);
 
     const handleImageUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
         const formData = new FormData();
-        formData.append('image', file);
+        for (let i = 0; i < files.length; i++) {
+            formData.append('images', files[i]);
+        }
 
         try {
             const response = await api.post(
@@ -61,9 +63,9 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     }
                 }
             );
-            setImages([...images, response.data]);
+            setImages([...images, ...response.data]);
         } catch (error) {
-            console.error('Error uploading image:', error);
+            console.error('Error uploading images:', error);
         }
     };
 
@@ -95,24 +97,28 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
     };
 
     return (
-        <div className="gallery-view">
+        <div className="gallery-container">
+            <h2>{communityTitle}</h2>
+            
+            {/* Only show upload button for creators */}
+            {isCreator && (
+                <div className="upload-section">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="file-input"
+                    />
+                    <button onClick={() => document.querySelector('.file-input').click()}>
+                        Upload Images
+                    </button>
+                </div>
+            )}
+            
             <div className="gallery-header">
                 <h3>Media Gallery</h3>
                 <div className="gallery-actions">
-                    {isCreator && (
-                        <div className="upload-container">
-                            <label className="upload-button" htmlFor="gallery-upload">
-                                + Add Image
-                            </label>
-                            <input
-                                id="gallery-upload"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                style={{ display: 'none' }}
-                            />
-                        </div>
-                    )}
                     <button 
                         className="expand-button" 
                         onClick={() => setIsFullscreen(true)}
@@ -166,7 +172,7 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
             )}
 
             <style jsx>{`
-                .gallery-view {
+                .gallery-container {
                     padding: 2rem;
                     width: 100%;
                     box-sizing: border-box;
@@ -192,7 +198,15 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     align-items: center;
                 }
 
-                .upload-button {
+                .upload-section {
+                    margin-bottom: 2rem;
+                }
+
+                .file-input {
+                    display: none;
+                }
+
+                .button {
                     padding: 8px 16px;
                     border-radius: 20px;
                     font-size: 0.9rem;
