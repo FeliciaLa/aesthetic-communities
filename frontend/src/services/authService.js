@@ -57,12 +57,7 @@ export const authService = {
                 timestamp: new Date().toISOString()
             });
 
-            const response = await api.post('/auth/register/', {
-                username: credentials.username,
-                password: credentials.password,
-                email: credentials.email,
-                confirm_password: credentials.confirm_password
-            });
+            const response = await api.post('/auth/register/', credentials);
 
             console.log('Register response:', {
                 success: !!response.data,
