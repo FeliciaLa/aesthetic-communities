@@ -4,19 +4,45 @@ import { API_BASE_URL } from '../config';
 export const authService = {
     login: async (credentials) => {
         try {
+            console.log('Login attempt:', {
+                username: credentials.username,
+                timestamp: new Date().toISOString()
+            });
+
             const response = await api.post('/auth/login/', {
                 username: credentials.username,
                 password: credentials.password
+            });
+
+            console.log('Login response:', {
+                hasToken: !!response.data?.token,
+                hasUser: !!response.data?.user,
+                username: response.data?.user?.username,
+                timestamp: new Date().toISOString()
             });
 
             if (response.data?.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userId', response.data.user.id.toString());
                 localStorage.setItem('username', response.data.user.username);
+
+                // Verify storage
+                console.log('LocalStorage after login:', {
+                    storedToken: !!localStorage.getItem('token'),
+                    storedUserId: localStorage.getItem('userId'),
+                    storedUsername: localStorage.getItem('username'),
+                    allKeys: Object.keys(localStorage)
+                });
+
                 return response.data;
             }
             throw new Error('Invalid login response');
         } catch (error) {
+            console.error('Login error:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
             localStorage.removeItem('username');
