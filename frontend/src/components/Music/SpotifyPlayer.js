@@ -118,13 +118,21 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     // Function to render the Spotify embed
     const renderSpotifyEmbed = (url) => {
         if (!url) {
-            console.log('No URL provided to renderSpotifyEmbed'); // Debug log
+            console.log('No URL provided to renderSpotifyEmbed');
             return null;
         }
         
         try {
-            console.log('Attempting to render playlist URL:', url); // Debug log
-            const embedUrl = url.replace('open.spotify.com', 'open.spotify.com/embed');
+            console.log('Attempting to render playlist:', { url });
+            // Extract playlist ID using regex instead of split
+            const playlistMatch = url.match(/playlist\/([a-zA-Z0-9]+)/);
+            if (!playlistMatch) {
+                console.error('Invalid playlist URL format');
+                return null;
+            }
+            
+            const playlistId = playlistMatch[1];
+            const embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}`;
             
             return (
                 <iframe
@@ -142,6 +150,16 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
             return null;
         }
     };
+
+    useEffect(() => {
+        if (playlist) {
+            console.log('Playlist data:', {
+                playlist,
+                url: playlist.spotify_playlist_url,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }, [playlist]);
 
     // Simple loading and error states
     if (loading) return <div>Loading...</div>;
@@ -187,20 +205,19 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         );
     }
 
-    // Show the playlist if we have one
-    return (
-        <div className="spotify-player">
-            <h2>Community Playlist</h2>
-            <iframe
-                src={`https://open.spotify.com/embed/playlist/${playlist.split('/').pop()}`}
-                width="100%"
-                height="380"
-                frameBorder="0"
-                allowtransparency="true"
-                allow="encrypted-media"
-            ></iframe>
-        </div>
-    );
+    // If we have a playlist, show it
+    if (playlist) {
+        return (
+            <div className="spotify-player">
+                <h2>Community Playlist</h2>
+                {playlist.spotify_playlist_url ? (
+                    renderSpotifyEmbed(playlist.spotify_playlist_url)
+                ) : (
+                    <p>Invalid playlist URL</p>
+                )}
+            </div>
+        );
+    }
 };
 
 export default SpotifyPlayer; 
