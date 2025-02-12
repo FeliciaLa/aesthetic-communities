@@ -15,8 +15,12 @@ const AnnouncementsDashboard = ({ communityId }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      console.log('Fetching announcements for community:', communityId);
-      
+      // First, let's log the request we're about to make
+      console.log('About to fetch announcements:', {
+        url: `/communities/${communityId}/announcements/`,
+        token: token ? 'present' : 'missing'
+      });
+
       const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
@@ -24,25 +28,36 @@ const AnnouncementsDashboard = ({ communityId }) => {
         }
       });
       
-      // Log the raw response for debugging
-      console.log('Announcements response:', {
-        status: response.status,
+      // Let's log EXACTLY what we get back
+      console.log('API Response:', {
+        fullResponse: response,
         data: response.data,
-        isArray: Array.isArray(response.data)
+        keys: response.data ? Object.keys(response.data) : null,
+        type: typeof response.data
       });
 
-      // Ensure we're setting an array
-      const announcementsList = Array.isArray(response.data) ? response.data : [];
-      setAnnouncements(announcementsList);
-      setError(null);
+      // If we're getting a user object, let's see what it looks like
+      if (response.data && response.data.id && response.data.username) {
+        console.error('Received user object instead of announcements:', response.data);
+        setError('Received incorrect data type');
+        return;
+      }
+
+      // Only set announcements if we get an array
+      if (Array.isArray(response.data)) {
+        setAnnouncements(response.data);
+        setError(null);
+      } else {
+        console.error('Received non-array data:', response.data);
+        setError('Invalid data format received');
+      }
     } catch (err) {
-      console.error('Announcement fetch error:', {
+      console.error('Fetch error:', {
         message: err.message,
-        status: err.response?.status,
-        data: err.response?.data
+        response: err.response?.data,
+        status: err.response?.status
       });
       setError('Failed to load announcements');
-      setAnnouncements([]); // Reset to empty array on error
     } finally {
       setLoading(false);
     }
@@ -140,10 +155,16 @@ const AnnouncementsDashboard = ({ communityId }) => {
                 console.log('Rendering announcement:', announcement);
                 
                 return (
-                  <div key={announcement.id || 'unknown'} className="announcement">
-                    <p>{typeof announcement === 'object' ? announcement.content : 'Invalid announcement'}</p>
-                    {announcement.created_at && (
-                      <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
+                  <div key={announcement.id || Math.random()} className="announcement">
+                    {typeof announcement === 'object' ? (
+                      <>
+                        <p>{announcement.content || 'No content'}</p>
+                        {announcement.created_at && (
+                          <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
+                        )}
+                      </>
+                    ) : (
+                      <p>Invalid announcement format</p>
                     )}
                   </div>
                 );
