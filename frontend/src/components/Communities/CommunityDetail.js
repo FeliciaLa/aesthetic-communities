@@ -40,6 +40,8 @@ const CommunityDetail = () => {
 
             try {
                 const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userId');
+                
                 if (!token) {
                     setError('Authentication required to view this community');
                     setLoading(false);
@@ -79,63 +81,18 @@ const CommunityDetail = () => {
                     fullPath: response.config.url
                 });
 
-                const validateCommunityData = (data) => {
-                    if (!data || typeof data !== 'object') {
-                        throw new Error('Invalid response format');
-                    }
-
-                    // Check for required primitive fields
-                    const requiredFields = ['id', 'name', 'description', 'created_by'];
-                    for (const field of requiredFields) {
-                        if (typeof data[field] === 'undefined') {
-                            throw new Error(`Missing required field: ${field}`);
-                        }
-                    }
-
-                    return data;
-                };
-
-                const communityData = validateCommunityData(response.data);
-
+                const communityData = response.data;
                 setCommunity(communityData);
 
-                if (token && communityData.created_by) {
-                    const username = localStorage.getItem('username');
-                    // Add creator status logging here
-                    console.log('Creator status check:', {
-                        username: username,
-                        created_by: communityData.created_by,
-                        willBeCreator: username === communityData.created_by
-                    });
-
-                    setIsCreator(username === communityData.created_by);
-                    
-                    try {
-                        await api.post(`/communities/${id}/view/`, {}, {
-                            headers: { 
-                                'Authorization': `Token ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                    } catch (viewError) {
-                        console.error('Error tracking view:', viewError);
-                    }
+                if (communityData.created_by === userId) {
+                    setIsCreator(true);
+                    console.log('Setting isCreator to true - User is creator');
                 } else {
-                    // Log why creator status wasn't set
-                    console.log('Creator status not set:', {
-                        hasToken: !!token,
-                        hasCreatedBy: !!communityData.created_by,
-                        communityData
-                    });
+                    setIsCreator(false);
+                    console.log('Setting isCreator to false - User is not creator');
                 }
             } catch (error) {
-                console.error('Error fetching community:', {
-                    status: error.response?.status,
-                    data: error.response?.data,
-                    message: error.message,
-                    url: error.config?.url,
-                    baseURL: api.defaults.baseURL
-                });
+                console.error('Error fetching community:', error);
                 setError('Failed to load community');
             } finally {
                 setLoading(false);
