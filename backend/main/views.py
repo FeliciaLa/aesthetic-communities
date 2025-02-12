@@ -255,35 +255,45 @@ class GalleryImageView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    def get(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            images = GalleryImage.objects.filter(community=community)
+            serializer = GalleryImageSerializer(images, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in get: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     def post(self, request, community_id):
         try:
             community = get_object_or_404(Community, id=community_id)
             
-            # Check if user is the creator using your existing pattern
-            if request.user.username != community.created_by:
+            # Check if user is the creator
+            if request.user != community.created_by:
                 return Response(
                     {'error': 'Only the community creator can upload images'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-
-            images = request.FILES.getlist('images')
-            uploaded_images = []
             
-            for image in images:
-                gallery_image = GalleryImage.objects.create(
-                    community=community,
-                    uploaded_by=request.user,
-                    image=image
-                )
-                uploaded_images.append(gallery_image)
+            # Create a new GalleryImage instance
+            gallery_image = GalleryImage(
+                community=community,
+                uploaded_by=request.user,
+                image=request.data.get('image')
+            )
+            gallery_image.save()
             
-            serializer = GalleryImageSerializer(uploaded_images, many=True)
+            serializer = GalleryImageSerializer(gallery_image)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            print(f"Error uploading gallery images: {str(e)}")
+            print(f"Error in post: {str(e)}")
             return Response(
-                {'error': str(e)},
+                {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
