@@ -92,7 +92,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             const response = await authService.register({
                 username,
                 email,
-                password
+                password,
+                confirmPassword: confirmPassword
             });
             
             if (response && response.token) {

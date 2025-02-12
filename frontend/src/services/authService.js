@@ -60,7 +60,8 @@ export const authService = {
             const response = await api.post('/auth/register/', {
                 username: credentials.username,
                 password: credentials.password,
-                email: credentials.email
+                email: credentials.email,
+                confirm_password: credentials.password
             });
 
             console.log('Register response:', {
