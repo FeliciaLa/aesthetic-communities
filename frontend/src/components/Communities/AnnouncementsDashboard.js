@@ -12,52 +12,58 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   const fetchAnnouncements = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
+      
+      // Log the request details
+      console.log('Fetching announcements:', {
+        url: `/communities/${communityId}/announcements/`,
+        token: token ? 'present' : 'missing'
+      });
+
       const response = await api.get(`/communities/${communityId}/announcements/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
-        },
-        withCredentials: true
+        }
       });
-      
-      // Debug the response structure
-      console.log('Raw announcements response:', response);
-      
-      // Handle different response structures
-      let announcementData;
-      if (response.data && typeof response.data === 'object') {
-        // If response.data is an object with an announcements property
-        announcementData = response.data.announcements || response.data;
+
+      // Log the raw response
+      console.log('Raw API response:', response);
+
+      // Safely handle the data
+      if (response && response.data) {
+        if (Array.isArray(response.data)) {
+          setAnnouncements(response.data);
+        } else {
+          console.warn('Unexpected data format:', response.data);
+          setAnnouncements([]);
+        }
       } else {
-        // If response.data is the array directly
-        announcementData = response.data;
+        setAnnouncements([]);
       }
       
-      // Ensure we're working with an array
-      const announcements = Array.isArray(announcementData) ? announcementData : [];
-      console.log('Processed announcements:', announcements);
-      
-      setAnnouncements(announcements);
-      setLoading(false);
       setError(null);
     } catch (err) {
-      console.error('Detailed error:', {
+      console.error('Announcement fetch error:', {
         message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
+        response: err.response,
+        data: err.response?.data
       });
       setError('Failed to load announcements');
+      setAnnouncements([]);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     if (communityId) {
+      console.log('Component mounted with communityId:', communityId);
       fetchCommunityData();
       fetchAnnouncements();
     }
-  }, [communityId]); // Only depend on communityId
+  }, [communityId]);
 
   const fetchCommunityData = async () => {
     try {
@@ -138,19 +144,19 @@ const AnnouncementsDashboard = ({ communityId }) => {
           
           <div className="announcements-list">
             {Array.isArray(announcements) && announcements.length > 0 ? (
-              announcements.map((announcement) => (
-                <div key={announcement.id} className="announcement">
-                  <p>{announcement.content || ''}</p>
-                  <small>
-                    {announcement.created_at ? 
-                      new Date(announcement.created_at).toLocaleDateString() : 
-                      'No date'}
-                  </small>
-                  <small>
-                    {announcement.created_by?.username || 'Unknown user'}
-                  </small>
-                </div>
-              ))
+              announcements.map((announcement) => {
+                // Debug log for each announcement
+                console.log('Rendering announcement:', announcement);
+                
+                return (
+                  <div key={announcement.id || 'unknown'} className="announcement">
+                    <p>{typeof announcement === 'object' ? announcement.content : 'Invalid announcement'}</p>
+                    {announcement.created_at && (
+                      <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
+                    )}
+                  </div>
+                );
+              })
             ) : (
               <p>No announcements yet.</p>
             )}
