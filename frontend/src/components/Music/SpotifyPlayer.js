@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { musicService } from '../../services/musicService';
-import api from '../../api';
 
 const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [playlist, setPlaylist] = useState(null);
@@ -16,6 +15,7 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         }
 
         try {
+            console.log('Fetching playlist for community:', communityId);
             const data = await musicService.getSpotifyPlaylist(communityId);
             console.log('Playlist data received:', data);
 
