@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api';
+import { musicService } from '../../services/musicService';
 
 const SpotifyPlayer = ({ communityId, isCreator }) => {
     const [playlist, setPlaylist] = useState(null);
@@ -15,30 +15,33 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            console.log('Fetching playlist for community:', communityId);
-            
-            // Using the correct endpoint
-            const response = await api.get(`/communities/${communityId}/spotify-playlist/`, {
-                headers: {
-                    'Authorization': `Token ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            console.log('Fetching playlist for community:', {
+                communityId,
+                baseURL: process.env.REACT_APP_API_URL || 'https://aesthetic-communities-production.up.railway.app/api'
             });
+            
+            // Use the musicService instead of direct api call
+            const playlistData = await musicService.getSpotifyPlaylist(communityId);
+            console.log('Playlist response:', playlistData);
 
-            console.log('Playlist response:', response.data);
-
-            if (response.data && response.data.spotify_playlist_url) {
-                setPlaylist(response.data.spotify_playlist_url);
+            if (playlistData && playlistData.spotify_playlist_url) {
+                setPlaylist(playlistData.spotify_playlist_url);
             } else {
                 setPlaylist(null);
             }
+            setError(null);
         } catch (err) {
+            console.error('Detailed error:', {
+                status: err.response?.status,
+                data: err.response?.data,
+                url: err.config?.url,
+                baseURL: err.config?.baseURL
+            });
+            
             if (err.response?.status === 404) {
-                // No playlist exists yet - not an error
+                // No playlist exists yet - not an error state
                 setPlaylist(null);
             } else {
-                console.error('Error fetching playlist:', err);
                 setError('Unable to load playlist');
             }
         } finally {
@@ -69,15 +72,9 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
 
         try {
             if (playlist?.id) {
-                await api.put(
-                    `/communities/${communityId}/spotify/${playlist.id}/`,
-                    { spotify_playlist_url: cleanedUrl }
-                );
+                await musicService.updateSpotifyPlaylist(communityId, cleanedUrl);
             } else {
-                await api.post(
-                    `/communities/${communityId}/spotify/`,
-                    { spotify_playlist_url: cleanedUrl }
-                );
+                await musicService.addSpotifyPlaylist(communityId, cleanedUrl);
             }
 
             await fetchPlaylist();
