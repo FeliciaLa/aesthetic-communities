@@ -59,17 +59,22 @@ export const authService = {
 
             const response = await api.post('/auth/register/', credentials);
 
-            console.log('Register response:', {
-                success: !!response.data,
-                timestamp: new Date().toISOString(),
-                endpoint: '/auth/register/',
-                baseURL: api.defaults.baseURL
-            });
+            // Add this log to see the actual response structure
+            console.log('Raw register response:', response);
 
-            if (response.data?.token) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('userId', response.data.user.id.toString());
-                localStorage.setItem('username', response.data.user.username);
+            // More defensive checking of the response
+            if (response && response.data) {
+                // Store token if it exists
+                if (response.data.token) {
+                    localStorage.setItem('token', response.data.token);
+                }
+                
+                // Store user info if it exists
+                if (response.data.user) {
+                    localStorage.setItem('userId', response.data.user.id.toString());
+                    localStorage.setItem('username', response.data.user.username);
+                }
+                
                 return response.data;
             }
             throw new Error('Invalid registration response');
