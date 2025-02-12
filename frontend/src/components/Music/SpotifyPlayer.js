@@ -11,10 +11,15 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     const fetchPlaylist = async () => {
         try {
             const response = await api.get(`/communities/${communityId}/spotify/`);
-            setPlaylist(response.data);
+            if (response.data && response.data.playlist_url) {
+                setPlaylist(response.data.playlist_url);
+            } else {
+                setPlaylist(null);
+            }
             setLoading(false);
         } catch (error) {
             console.error('Error fetching playlist:', error);
+            setError('Failed to load playlist');
             setLoading(false);
         }
     };
@@ -104,213 +109,31 @@ const SpotifyPlayer = ({ communityId, isCreator }) => {
     };
 
     return (
-        <div className="spotify-card">
+        <div className="spotify-player">
             <h2>Community Playlist</h2>
-            <div className="section-header">
-                {console.log('Debug values:', {
-                    isCreator,
-                    hasPlaylist: Boolean(playlist?.spotify_playlist_url),
-                    playlistUrl: playlist?.spotify_playlist_url
-                })}
-                {isCreator && !showForm && (
-                    <button 
-                        className="add-playlist-button"
-                        onClick={() => setShowForm(true)}
-                    >
-                        {playlist ? 'Update Playlist' : 'Add Spotify Playlist'}
-                    </button>
-                )}
-            </div>
-
             {loading ? (
-                <div>Loading...</div>
+                <div>Loading playlist...</div>
+            ) : error ? (
+                <div className="error-message">{error}</div>
+            ) : playlist ? (
+                <iframe
+                    src={`https://open.spotify.com/embed/playlist/${playlist.split('/').pop()}`}
+                    width="100%"
+                    height="380"
+                    frameBorder="0"
+                    allowtransparency="true"
+                    allow="encrypted-media"
+                ></iframe>
             ) : (
-                <>
-                    {error && (
-                        <div className="error-message">
-                            {error}
-                            <button className="close-error" onClick={() => setError('')}>×</button>
-                        </div>
+                <div>
+                    {isCreator && (
+                        <button onClick={() => setShowForm(true)}>
+                            Add Playlist
+                        </button>
                     )}
-
-                    {showForm ? (
-                        <form onSubmit={handleSubmit} className="playlist-form">
-                            <input
-                                type="text"
-                                value={playlistUrl}
-                                onChange={(e) => setPlaylistUrl(e.target.value)}
-                                placeholder="Enter Spotify playlist URL"
-                                className="playlist-input"
-                                required
-                            />
-                            <div className="form-buttons">
-                                <button type="submit" className="submit-button">
-                                    {playlist ? 'Update' : 'Add'} Playlist
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="cancel-button"
-                                    onClick={() => {
-                                        setShowForm(false);
-                                        setError('');
-                                        setPlaylistUrl('');
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    ) : (
-                        <>
-                            {playlist?.spotify_playlist_url ? (
-                                <div className="playlist-container">
-                                    <iframe
-                                        src={playlist.spotify_playlist_url.replace('open.spotify.com', 'open.spotify.com/embed')}
-                                        width="100%"
-                                        height="380"
-                                        frameBorder="0"
-                                        allowtransparency="true"
-                                        allow="encrypted-media"
-                                        title="Spotify Playlist"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="empty-playlist">
-                                    <p>No playlist has been added to this community yet.</p>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </>
+                    {!isCreator && <p>No playlist has been added to this community yet.</p>}
+                </div>
             )}
-
-            <style jsx>{`
-                .spotify-card {
-                    background: white;
-                    border-radius: 8px;
-                    padding: 20px;
-                    margin-bottom: 20px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    height: auto;  /* Allow container to grow */
-                    min-height: 600px;  /* Minimum height to show playlist */
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .spotify-embed {
-                    flex: 1;
-                    width: 100%;
-                    min-height: 500px;  /* Ensure enough space for playlist */
-                    margin-top: 15px;
-                }
-
-                .section-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 15px;
-                }
-
-                .edit-button, .add-playlist-button {
-                    padding: 8px 16px;
-                    background: #1DB954;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 14px;
-                }
-
-                .edit-button:hover, .add-playlist-button:hover {
-                    background: #1ed760;
-                }
-
-                .playlist-container {
-                    width: 100%;
-                    box-sizing: border-box;
-                }
-
-                .playlist-container iframe {
-                    width: 100% !important;
-                    height: 355px !important;
-                    border-radius: 8px;
-                    box-sizing: border-box;
-                }
-
-                .playlist-actions {
-                    margin-top: 15px;
-                    display: flex;
-                    justify-content: flex-end;
-                }
-
-                .empty-playlist {
-                    text-align: center;
-                    padding: 40px 20px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    color: #666;
-                }
-
-                .empty-playlist p {
-                    margin-bottom: 20px;
-                }
-
-                .playlist-form {
-                    margin-top: 20px;
-                }
-
-                .playlist-input {
-                    width: 100%;
-                    padding: 10px;
-                    margin-bottom: 15px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    font-size: 14px;
-                }
-
-                .form-buttons {
-                    display: flex;
-                    gap: 10px;
-                }
-
-                .submit-button, .cancel-button {
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 14px;
-                }
-
-                .submit-button {
-                    background: #1DB954;
-                    color: white;
-                    border: none;
-                }
-
-                .cancel-button {
-                    background: white;
-                    border: 1px solid #ddd;
-                }
-
-                .error-message {
-                    background-color: #fee;
-                    border: 1px solid #fcc;
-                    color: #c00;
-                    padding: 10px;
-                    margin: 10px 0;
-                    border-radius: 4px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-
-                .close-error {
-                    background: none;
-                    border: none;
-                    color: #c00;
-                    cursor: pointer;
-                    font-size: 18px;
-                }
-            `}</style>
         </div>
     );
 };
