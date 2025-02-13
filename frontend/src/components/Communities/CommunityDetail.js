@@ -215,31 +215,33 @@ const CommunityDetail = () => {
 
             <div className="community-banner">
                 <div className="community-header">
-                    <div className="title-section" style={{ position: 'relative', zIndex: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative', zIndex: 10 }}>
-                            <h1>{community?.name}</h1>
-                            {isCreator && (
-                                <button 
-                                    onClick={() => setShowEditModal(true)}
-                                    style={{
-                                        background: 'rgba(255, 255, 255, 0.2)',
-                                        border: '1px solid rgba(255, 255, 255, 0.6)',
-                                        color: 'white',
-                                        padding: '6px 16px',
-                                        borderRadius: '20px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.9rem',
-                                        backdropFilter: 'blur(5px)',
-                                        transition: 'all 0.2s ease',
-                                        position: 'relative',
-                                        zIndex: 10
-                                    }}
-                                >
-                                    Edit
-                                </button>
-                            )}
+                    <div className="title-section">
+                        <div className="header-content">
+                            <div className="title-row">
+                                <h1>{community?.name}</h1>
+                                {isCreator && (
+                                    <button 
+                                        onClick={() => setShowEditModal(true)}
+                                        style={{
+                                            background: 'rgba(255, 255, 255, 0.2)',
+                                            border: '1px solid rgba(255, 255, 255, 0.6)',
+                                            color: 'white',
+                                            padding: '6px 16px',
+                                            borderRadius: '20px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            backdropFilter: 'blur(5px)',
+                                            transition: 'all 0.2s ease',
+                                            marginLeft: '1rem'
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
+                                )}
+                            </div>
+                            <p className="description">{community?.description}</p>
+                            <p className="creator-info">Created by {community?.creator_name} • {community?.created_at}</p>
                         </div>
-                        <p>{community?.description}</p>
                     </div>
                 </div>
                 <div className="banner-overlay"></div>
@@ -623,6 +625,50 @@ const CommunityDetail = () => {
                     width: 90%;
                     max-height: 90vh;
                     overflow-y: auto;
+                }
+
+                .community-header {
+                    position: relative;
+                    z-index: 10;
+                    width: 100%;
+                    padding: 2rem;
+                }
+
+                .title-section {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+
+                .header-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 1rem;
+                }
+
+                .title-row {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                }
+
+                .title-row h1 {
+                    margin: 0;
+                    color: white;
+                    font-size: 2.5rem;
+                }
+
+                .description {
+                    color: white;
+                    font-size: 1.1rem;
+                    margin: 0;
+                    max-width: 800px;
+                }
+
+                .creator-info {
+                    color: rgba(255, 255, 255, 0.8);
+                    font-size: 0.9rem;
+                    margin: 0;
                 }
             `}</style>
         </div>
