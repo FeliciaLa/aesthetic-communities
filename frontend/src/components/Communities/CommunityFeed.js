@@ -364,10 +364,10 @@ const CommunityFeed = ({ communityId }) => {
                     <span className="timestamp">
                       {new Date(question.created_at).toLocaleDateString()}
                     </span>
+                    <div className="question-content">
+                      {question.content}
+                    </div>
                   </div>
-                </div>
-                <div className="question-content">
-                  {question.content}
                 </div>
               </div>
               
@@ -461,26 +461,36 @@ const CommunityFeed = ({ communityId }) => {
             min-width: 0;
             word-wrap: break-word;
           }
-          .question-header, .answer-header {
+          .question-header {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 16px;
+            width: 100%;
+          }
+          .question-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .username {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 15px;
+          }
+          .timestamp {
+            font-size: 13px;
+            color: #94a3b8;
+          }
+          .question-content {
+            margin-top: 8px;
+            color: #334155;
+            line-height: 1.6;
+            font-size: 15px;
           }
           .avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-          }
-          .username {
-            font-weight: 500;
-          }
-          .timestamp {
-            color: #666;
-            font-size: 0.9em;
-          }
-          .question-content, .answer-content {
-            margin: 10px 0;
           }
           .answer-input-container {
             position: relative;
