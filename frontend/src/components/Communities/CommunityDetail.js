@@ -217,21 +217,6 @@ const CommunityDetail = () => {
                 <div className="community-header">
                     <div className="title-section">
                         <h1>{community?.name}</h1>
-                        {isCreator && (
-                            <button 
-                                className="edit-button"
-                                onClick={() => setShowEditModal(true)}
-                                style={{
-                                    position: 'fixed',
-                                    top: '20px',
-                                    right: '20px',
-                                    zIndex: 1000,
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Edit Community
-                            </button>
-                        )}
                     </div>
                     <p>{community?.description}</p>
                 </div>
@@ -413,27 +398,6 @@ const CommunityDetail = () => {
                     opacity: 0.8;
                     margin-top: 8px;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-                }
-
-                .edit-button {
-                    position: absolute;
-                    top: 20px;
-                    right: 20px;
-                    padding: 6px 16px;
-                    background: rgba(0, 0, 0, 0.4);
-                    color: white;
-                    border: 1px solid rgba(255, 255, 255, 0.6);
-                    border-radius: 20px;
-                    cursor: pointer;
-                    backdrop-filter: blur(5px);
-                    transition: all 0.3s ease;
-                    font-size: 0.9rem;
-                    z-index: 2;
-                }
-
-                .edit-button:hover {
-                    background: rgba(0, 0, 0, 0.6);
-                    border-color: white;
                 }
 
                 .community-tabs {
