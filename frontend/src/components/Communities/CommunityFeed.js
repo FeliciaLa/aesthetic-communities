@@ -418,9 +418,9 @@ const CommunityFeed = ({ communityId }) => {
                     />
                     <button 
                       onClick={() => handleAnswerSubmit(question.id)}
-                      className="submit-arrow"
+                      className="submit-answer"
                     >
-                      <i className="fas fa-arrow-up"></i>
+                      Submit
                     </button>
                   </div>
                 </div>
@@ -491,36 +491,27 @@ const CommunityFeed = ({ communityId }) => {
             width: 100%;
             min-height: 80px;
             padding: 12px;
-            padding-right: 38px;
+            padding-right: 100px;
             border: 1px solid #ddd;
             border-radius: 8px;
             resize: vertical;
           }
-          .submit-arrow {
+          .submit-answer {
             position: absolute;
             bottom: 8px;
             right: 8px;
-            background: white;
-            border: 1px solid #fa8072;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #fa8072;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            z-index: 1;
           }
-          .submit-arrow i {
-            color: #fa8072;
-            font-size: 0.8rem;
-          }
-          .submit-arrow:hover {
-            background: #fff1f0;
+          .submit-answer:hover {
+            background: #ff9288;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           }
           .vote-section {
             display: flex;
