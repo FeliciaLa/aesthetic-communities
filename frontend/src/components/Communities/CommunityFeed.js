@@ -374,34 +374,21 @@ const CommunityFeed = ({ communityId }) => {
               <div className="answers-list">
                 {question.answers?.map(answer => (
                   <div key={answer.id} className="answer-item">
-                    <div className="vote-section">
-                      <button 
-                        className={`vote-button upvote ${answer.user_vote === 'up' ? 'active' : ''}`}
-                        onClick={() => handleAnswerVote(answer.id, 'up')}
-                      >
-                        ▲
-                      </button>
-                      <span className="vote-count">{answer.votes || 0}</span>
-                      <button 
-                        className={`vote-button downvote ${answer.user_vote === 'down' ? 'active' : ''}`}
-                        onClick={() => handleAnswerVote(answer.id, 'down')}
-                      >
-                        ▼
-                      </button>
-                    </div>
                     <div className="answer-header">
                       <img 
                         src={answer.created_by.avatar || DEFAULT_AVATAR} 
                         alt="avatar" 
                         className="avatar"
                       />
-                      <span className="username">{answer.created_by.username}</span>
-                      <span className="timestamp">
-                        {new Date(answer.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="answer-content">
-                      {answer.content}
+                      <div className="answer-meta">
+                        <span className="username">{answer.created_by.username}</span>
+                        <span className="timestamp">
+                          {new Date(answer.created_at).toLocaleDateString()}
+                        </span>
+                        <div className="answer-content">
+                          {answer.content}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -451,10 +438,10 @@ const CommunityFeed = ({ communityId }) => {
             box-sizing: border-box;
           }
           .answer-item {
-            display: flex;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin: 8px 0;
           }
           .question-content, .answer-content {
             flex: 1;
