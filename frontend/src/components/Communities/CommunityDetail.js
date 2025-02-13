@@ -230,7 +230,9 @@ const CommunityDetail = () => {
                                         cursor: 'pointer',
                                         fontSize: '0.9rem',
                                         backdropFilter: 'blur(5px)',
-                                        transition: 'all 0.2s ease'
+                                        transition: 'all 0.2s ease',
+                                        position: 'relative',
+                                        zIndex: 2
                                     }}
                                 >
                                     Edit
