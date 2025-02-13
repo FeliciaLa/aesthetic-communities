@@ -215,8 +215,8 @@ const CommunityDetail = () => {
 
             <div className="community-banner">
                 <div className="community-header">
-                    <div className="title-section">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div className="title-section" style={{ position: 'relative', zIndex: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative', zIndex: 10 }}>
                             <h1>{community?.name}</h1>
                             {isCreator && (
                                 <button 
@@ -232,7 +232,7 @@ const CommunityDetail = () => {
                                         backdropFilter: 'blur(5px)',
                                         transition: 'all 0.2s ease',
                                         position: 'relative',
-                                        zIndex: 2
+                                        zIndex: 10
                                     }}
                                 >
                                     Edit
