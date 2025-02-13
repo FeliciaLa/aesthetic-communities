@@ -246,9 +246,6 @@ const CommunityDetail = () => {
                 </div>
                 <div className="banner-overlay"></div>
                 <div className="banner-content">
-                    <div className="creator-info">
-                        Created by {community?.creator_name || 'Unknown'} • {formatDate(community?.created_at)}
-                    </div>
                     <div className="banner-actions">
                         {!isCreator && <JoinCommunityButton communityId={id} />}
                     </div>
