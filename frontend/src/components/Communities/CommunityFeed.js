@@ -498,13 +498,13 @@ const CommunityFeed = ({ communityId }) => {
           }
           .submit-arrow {
             position: absolute;
-            bottom: 16px;
-            right: -4px;
+            bottom: 8px;
+            right: 8px;
             background: white;
             border: 1px solid #fa8072;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -515,11 +515,11 @@ const CommunityFeed = ({ communityId }) => {
           }
           .submit-arrow i {
             color: #fa8072;
-            font-size: 1rem;
+            font-size: 0.8rem;
           }
           .submit-arrow:hover {
             background: #fff1f0;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           }
           .vote-section {
@@ -929,8 +929,8 @@ const CommunityFeed = ({ communityId }) => {
           background: white;
           border: 1px solid #fa8072;
           border-radius: 50%;
-          width: 32px;
-          height: 32px;
+          width: 24px;
+          height: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -942,12 +942,12 @@ const CommunityFeed = ({ communityId }) => {
 
         .submit-arrow i {
           color: #fa8072;
-          font-size: 1rem;
+          font-size: 0.8rem;
         }
 
         .submit-arrow:hover {
           background: #fff1f0;
-          transform: translateY(-2px);
+          transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
