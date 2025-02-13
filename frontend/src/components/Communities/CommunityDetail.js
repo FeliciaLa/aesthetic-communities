@@ -186,7 +186,7 @@ const CommunityDetail = () => {
             const response = await api.get(`/communities/${id}`);
             setCommunity(response.data);
         } catch (error) {
-            console.error('Error refreshing community data:', error);
+            console.error('Error refreshing community:', error);
         }
     };
 
@@ -342,13 +342,15 @@ const CommunityDetail = () => {
             </div>
 
             {showEditModal && (
-                <Modal onClose={() => setShowEditModal(false)}>
-                    <EditCommunityForm
-                        community={community}
-                        onSuccess={handleEditSuccess}
-                        onClose={() => setShowEditModal(false)}
-                    />
-                </Modal>
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <EditCommunityForm
+                            community={community}
+                            onSuccess={handleEditSuccess}
+                            onClose={() => setShowEditModal(false)}
+                        />
+                    </div>
+                </div>
             )}
 
             <style jsx>{`
@@ -598,6 +600,29 @@ const CommunityDetail = () => {
                 :global(#root) {
                     margin: 0;
                     padding: 0;
+                }
+
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+
+                .modal-content {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    max-width: 500px;
+                    width: 90%;
+                    max-height: 90vh;
+                    overflow-y: auto;
                 }
             `}</style>
         </div>
