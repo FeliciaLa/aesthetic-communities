@@ -381,7 +381,9 @@ const CommunityFeed = ({ communityId }) => {
                         className="avatar"
                       />
                       <div className="answer-meta">
-                        <span className="username">{answer.created_by.username}</span>
+                        <div className="user-info">
+                          <span className="username">{answer.created_by.username}</span>
+                        </div>
                         <span className="timestamp">
                           {new Date(answer.created_at).toLocaleDateString()}
                         </span>
@@ -439,25 +441,21 @@ const CommunityFeed = ({ communityId }) => {
           }
           .answer-item {
             padding: 16px;
-            border-radius: 8px;
-            background: #f8f9fa;
             margin: 8px 0;
           }
-          .question-content, .answer-content {
-            flex: 1;
-            min-width: 0;
-            word-wrap: break-word;
-          }
-          .question-header {
+          .answer-header {
             display: flex;
             gap: 12px;
-            margin-bottom: 16px;
             width: 100%;
           }
-          .question-meta {
+          .answer-meta {
             display: flex;
             flex-direction: column;
             gap: 4px;
+          }
+          .user-info {
+            display: flex;
+            align-items: center;
           }
           .username {
             font-weight: 600;
@@ -468,7 +466,7 @@ const CommunityFeed = ({ communityId }) => {
             font-size: 13px;
             color: #94a3b8;
           }
-          .question-content {
+          .answer-content {
             margin-top: 8px;
             color: #334155;
             line-height: 1.6;
