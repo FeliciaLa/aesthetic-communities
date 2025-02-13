@@ -181,12 +181,12 @@ const CommunityDetail = () => {
     };
 
     const handleEditSuccess = async () => {
+        setShowEditModal(false);
         try {
-            const response = await api.get(`/communities/${id}/`);
+            const response = await api.get(`/communities/${id}`);
             setCommunity(response.data);
-            setShowEditModal(false);
-        } catch (err) {
-            setError('Failed to refresh community data');
+        } catch (error) {
+            console.error('Error refreshing community data:', error);
         }
     };
 

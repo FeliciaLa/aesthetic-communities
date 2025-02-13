@@ -7,6 +7,7 @@ import CollectionDetailPage from './CollectionDetailPage';
 import AddResourceForm from './AddResourceForm';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import EditCommunityForm from './EditCommunityForm';
 
 const Resources = ({ communityId, isCreator, onTabChange }) => {
     const [collections, setCollections] = useState([]);
@@ -22,6 +23,7 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
         total_views: 0
     });
     const navigate = useNavigate();
+    const [showEditModal, setShowEditModal] = useState(false);
 
     const fetchCollections = async () => {
         try {
@@ -364,6 +366,18 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
                                 setShowEditCollection(false);
                                 setEditingCollection(null);
                             }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {showEditModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <EditCommunityForm
+                            community={community}
+                            onSuccess={handleEditSuccess}
+                            onClose={() => setShowEditModal(false)}
                         />
                     </div>
                 </div>
