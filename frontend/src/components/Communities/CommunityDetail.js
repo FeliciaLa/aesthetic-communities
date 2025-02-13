@@ -216,9 +216,29 @@ const CommunityDetail = () => {
             <div className="community-banner">
                 <div className="community-header">
                     <div className="title-section">
-                        <h1>{community?.name}</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <h1>{community?.name}</h1>
+                            {isCreator && (
+                                <button 
+                                    onClick={() => setShowEditModal(true)}
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.2)',
+                                        border: '1px solid rgba(255, 255, 255, 0.6)',
+                                        color: 'white',
+                                        padding: '6px 16px',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        backdropFilter: 'blur(5px)',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    Edit
+                                </button>
+                            )}
+                        </div>
+                        <p>{community?.description}</p>
                     </div>
-                    <p>{community?.description}</p>
                 </div>
                 <div className="banner-overlay"></div>
                 <div className="banner-content">
