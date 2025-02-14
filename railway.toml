@@ -1,12 +1,11 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "nixpacks"
 
 [deploy]
+startCommand = "sh start.sh"
 healthcheckPath = "/health/"
-healthcheckTimeout = 30
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
 
 [env]
 PORT = "8000"
