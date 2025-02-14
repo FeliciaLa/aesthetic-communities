@@ -232,16 +232,18 @@ const SavedItems = () => {
                                         savedCollections.map(collection => (
                                             <SavedCollection key={collection.id}>
                                                 <CollectionPreview>
-                                                    {collection.preview_image ? (
+                                                    {collection.preview_image && (
                                                         <img
                                                             src={collection.preview_image?.startsWith('http') 
                                                                 ? collection.preview_image 
-                                                                : `${api.defaults.baseURL}${collection.preview_image}`
-                                                            }
+                                                                : collection.preview_image 
+                                                                    ? `${api.defaults.baseURL}${collection.preview_image}`
+                                                                    : null}
                                                             alt={collection.name}
                                                             className="collection-preview-image"
                                                         />
-                                                    ) : (
+                                                    )}
+                                                    {!collection.preview_image && (
                                                         <PlaceholderImage>
                                                             No preview image
                                                         </PlaceholderImage>
