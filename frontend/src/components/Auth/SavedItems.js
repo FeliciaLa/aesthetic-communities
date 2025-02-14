@@ -127,6 +127,7 @@ const SavedItems = () => {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
             });
             console.log('Saved collections data:', collectionsRes.data);
+            console.log('Collection preview_image:', collectionsRes.data[0]?.preview_image);
             setSavedCollections(collectionsRes.data);
 
             // Fetch saved resources
@@ -234,7 +235,9 @@ const SavedItems = () => {
                                                 <CollectionPreview>
                                                     {collection.preview_image ? (
                                                         <img
-                                                            src={collection.preview_image}
+                                                            src={collection.preview_image?.startsWith('http') 
+                                                                ? collection.preview_image 
+                                                                : `${process.env.REACT_APP_API_URL}${collection.preview_image}`}
                                                             alt={collection.name}
                                                             className="collection-preview-image"
                                                             onError={(e) => {
