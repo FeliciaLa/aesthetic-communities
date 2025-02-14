@@ -203,6 +203,7 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
                         position: relative;
                         width: 100%;
                         margin: 0;
+                        overflow: hidden;
                     }
 
                     .collections-header {
@@ -216,7 +217,21 @@ const Resources = ({ communityId, isCreator, onTabChange }) => {
                         padding: 10px 0;
                         -webkit-overflow-scrolling: touch;
                         scrollbar-width: thin;
-                        scrollbar-color: #888 #f1f1f1;
+                        scrollbar-color: #fa8072 #f1f1f1;
+                    }
+
+                    .collections-scroll::-webkit-scrollbar {
+                        height: 6px;
+                    }
+
+                    .collections-scroll::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 3px;
+                    }
+
+                    .collections-scroll::-webkit-scrollbar-thumb {
+                        background: #fa8072;
+                        border-radius: 3px;
                     }
 
                     .collection-card {
