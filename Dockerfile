@@ -27,9 +27,6 @@ COPY backend/ .
 # Create static directories
 RUN mkdir -p staticfiles && mkdir -p static
 
-# Collect static files without database check
-RUN python manage.py collectstatic --noinput --no-input
-
 # Expose the port the app runs on
 EXPOSE 8000
 
