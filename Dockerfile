@@ -31,5 +31,7 @@ RUN mkdir -p staticfiles && mkdir -p static
 EXPOSE 8000
 
 # Command to run the application
-CMD echo "Starting Gunicorn..." && \
+CMD python manage.py wait_for_db && \
+    python manage.py migrate --noinput && \
+    echo "Starting Gunicorn..." && \
     gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --log-level debug --timeout 30 --workers 1 --threads 2
