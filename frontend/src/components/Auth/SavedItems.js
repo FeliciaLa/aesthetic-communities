@@ -272,7 +272,7 @@ const SavedItems = () => {
                                                 <p>{collection.description}</p>
                                                 <p>{collection.resource_count} resources</p>
                                                 <Link 
-                                                    to={`/collections/${collection.id}`}
+                                                    to={`/collections/${collection.collection_id}`}
                                                     className="view-collection-button"
                                                 >
                                                     View Collection
