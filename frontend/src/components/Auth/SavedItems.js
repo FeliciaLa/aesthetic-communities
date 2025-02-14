@@ -3,21 +3,6 @@ import api from '../../api';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-// Add these styled components at the top of your file, after the imports
-const CollectionPreview = styled.div`
-    width: 100%;
-    height: 150px;
-    overflow: hidden;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-`;
-
 const PreviewImage = styled.img`
     width: 100%;
     height: 100%;
@@ -33,35 +18,6 @@ const PlaceholderImage = styled.div`
     justify-content: center;
     color: #666;
     font-size: 14px;
-`;
-
-const SavedCollection = styled.div`
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-    .view-collection-button {
-        display: inline-block;
-        margin-top: 12px;
-        padding: 8px 16px;
-        background-color: #fa8072;  // Base coral
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-
-        &:hover {
-            background-color: #ff9288;  // Lighter coral
-        }
-    }
-`;
-
-const CollectionsGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
 `;
 
 const ResourcesGrid = styled.div`
