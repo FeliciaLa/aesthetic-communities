@@ -236,7 +236,7 @@ const SavedItems = () => {
                                                         <img
                                                             src={collection.preview_image.startsWith('http') 
                                                                 ? collection.preview_image 
-                                                                : `${api.defaults.baseURL}/api${collection.preview_image}`}
+                                                                : `${api.defaults.baseURL}/${collection.preview_image}`}
                                                             alt={collection.name}
                                                             className="collection-preview-image"
                                                             onError={(e) => {
