@@ -236,52 +236,6 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     object-fit: contain;
                 }
 
-                .delete-button {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.9);
-                    border: none;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 18px;
-                    color: #666;
-                    opacity: 0;
-                    transition: all 0.2s ease;
-                }
-
-                .image-container:hover .delete-button {
-                    opacity: 1;
-                }
-
-                .delete-button:hover {
-                    background: rgba(255, 255, 255, 1);
-                    transform: scale(1.1);
-                }
-
-                .expand-button {
-                    padding: 8px;
-                    border-radius: 20px;
-                    cursor: pointer;
-                    background: white;
-                    color: #0061ff;
-                    border: 1px solid #0061ff;
-                    transition: all 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .expand-button:hover {
-                    background: #f0f7ff;
-                    transform: scale(1.05);
-                }
-
                 .image-actions {
                     position: absolute;
                     top: 10px;
@@ -309,15 +263,50 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     font-size: 18px;
                     color: #666;
                     transition: all 0.2s ease;
+                    margin-right: 45px;
                 }
 
-                .save-button:hover {
+                .delete-button {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.9);
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    color: #ff4444;
+                    transition: all 0.2s ease;
+                }
+
+                .save-button:hover,
+                .delete-button:hover {
                     background: rgba(255, 255, 255, 1);
                     transform: scale(1.1);
                 }
 
                 .save-button.saved {
                     color: #ffd700;
+                }
+
+                .expand-button {
+                    padding: 8px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    background: white;
+                    color: #0061ff;
+                    border: 1px solid #0061ff;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .expand-button:hover {
+                    background: #f0f7ff;
+                    transform: scale(1.05);
                 }
 
                 @media (max-width: 1200px) {
