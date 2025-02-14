@@ -144,23 +144,25 @@ const AnnouncementsDashboard = ({ communityId }) => {
               </form>
             )}
             
-            <div className="announcements-list">
-              {Array.isArray(announcements) && announcements.length > 0 ? (
-                announcements.map((announcement) => (
-                  <div key={announcement.id || Math.random()} className="announcement-card">
-                    <div className="announcement-content">
-                      {announcement.content || 'No content'}
-                    </div>
-                    {announcement.created_at && (
-                      <div className="announcement-date">
-                        {new Date(announcement.created_at).toLocaleDateString()}
+            <div className="announcements-scroll-container">
+              <div className="announcements-list">
+                {Array.isArray(announcements) && announcements.length > 0 ? (
+                  announcements.map((announcement) => (
+                    <div key={announcement.id || Math.random()} className="announcement-card">
+                      <div className="announcement-content">
+                        {announcement.content || 'No content'}
                       </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-announcements">No announcements yet.</p>
-              )}
+                      {announcement.created_at && (
+                        <div className="announcement-date">
+                          {new Date(announcement.created_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-announcements">No announcements yet.</p>
+                )}
+              </div>
             </div>
           </>
         )}
@@ -181,6 +183,31 @@ const AnnouncementsDashboard = ({ communityId }) => {
           width: 100%;
           box-sizing: border-box;
           margin: 0;
+        }
+
+        .announcements-scroll-container {
+          height: 300px;
+          overflow-y: auto;
+          margin-top: 16px;
+          padding-right: 8px;
+          
+          /* Scrollbar styling */
+          scrollbar-width: thin;
+          scrollbar-color: #fa8072 #f0f0f0;
+        }
+
+        .announcements-scroll-container::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .announcements-scroll-container::-webkit-scrollbar-track {
+          background: #f0f0f0;
+          border-radius: 3px;
+        }
+
+        .announcements-scroll-container::-webkit-scrollbar-thumb {
+          background-color: #fa8072;
+          border-radius: 3px;
         }
 
         h2 {
