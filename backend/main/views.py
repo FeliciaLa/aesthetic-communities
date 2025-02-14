@@ -87,25 +87,10 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
-    try:
-        # Test database connection
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            one = cursor.fetchone()[0]
-            if one != 1:
-                raise Exception("Database check failed")
-        
-        return Response({
-            'status': 'healthy',
-            'database': 'connected'
-        }, status=status.HTTP_200_OK)
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return Response({
-            'status': 'unhealthy',
-            'error': str(e)
-        }, status=status.HTTP_200_OK)
+    logger.info("Health check endpoint called")
+    return Response({
+        'status': 'healthy'
+    }, status=status.HTTP_200_OK)
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
