@@ -93,14 +93,16 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 username,
                 email,
                 password,
-                password_confirm: confirmPassword
+                confirm_password: confirmPassword
             });
             
-            if (response && response.message) {
-                setError(response.message);
-                setTimeout(() => {
-                    onClose();
-                }, 3000);
+            if (response && response.token) {
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('userId', response.user_id.toString());
+                localStorage.setItem('username', response.username);
+                setTimeout(async () => {
+                    await onLoginSuccess();
+                }, 100);
             }
         } else {
             const response = await authService.login({

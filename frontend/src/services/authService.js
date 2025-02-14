@@ -59,15 +59,8 @@ export const authService = {
 
             const response = await api.post('/auth/register/', credentials);
 
-            console.log('Raw register response:', response);
-
             if (response && response.data) {
-                const { token, user_id, username } = response.data;
-                
-                localStorage.setItem('token', token);
-                localStorage.setItem('userId', user_id.toString());
-                localStorage.setItem('username', username);
-                
+                // We're no longer storing token/user data here since user needs to verify email
                 return response.data;
             }
             throw new Error('Invalid registration response');
