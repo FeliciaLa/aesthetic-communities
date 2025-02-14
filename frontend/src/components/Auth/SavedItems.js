@@ -203,7 +203,6 @@ const SavedItems = () => {
                                             </div>
                                             <h4>{resource.title}</h4>
                                             <p className="collection-name">{resource.collection_name}</p>
-                                            <p className="catalogue-name">{resource.catalogue_name}</p>
                                             <a 
                                                 href={resource.url} 
                                                 target="_blank" 
