@@ -63,6 +63,8 @@ const SavedResource = styled.div`
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 `;
 
+const FALLBACK_IMAGE = '/default-product.png';
+
 const SavedItems = () => {
     const [activeTab, setActiveTab] = useState('images');
     const [savedImages, setSavedImages] = useState([]);
@@ -565,12 +567,12 @@ const ProductCard = ({ product }) => {
                 if (proxyResponse.data.image_url) {
                     setImageUrl(proxyResponse.data.image_url);
                 } else {
-                    setImageUrl('/default-product.jpg');
+                    setImageUrl(FALLBACK_IMAGE);
                 }
 
             } catch (err) {
                 console.error('Error fetching image:', err);
-                setImageUrl('/default-product.jpg');
+                setImageUrl(FALLBACK_IMAGE);
             }
         };
 
@@ -581,10 +583,10 @@ const ProductCard = ({ product }) => {
         <div className="saved-product">
             <div className="product-image">
                 <img 
-                    src={imageUrl || '/default-product.jpg'} 
+                    src={imageUrl || FALLBACK_IMAGE} 
                     alt={product.title}
                     onError={(e) => {
-                        e.target.src = '/default-product.jpg';
+                        e.target.src = FALLBACK_IMAGE;
                     }}
                 />
             </div>

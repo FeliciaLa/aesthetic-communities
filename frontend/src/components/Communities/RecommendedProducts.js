@@ -12,6 +12,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const FALLBACK_IMAGE = '/default-product.png';
+
     useEffect(() => {
         fetchProducts();
     }, [communityId, activeCatalogue]);
@@ -155,11 +157,11 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     }
 
                     // If all attempts fail, set default image
-                    setImageUrl('/default-product.jpg');
+                    setImageUrl(FALLBACK_IMAGE);
 
                 } catch (err) {
                     console.error('Error fetching image:', err);
-                    setImageUrl('/default-product.jpg');
+                    setImageUrl(FALLBACK_IMAGE);
                 } finally {
                     setLoading(false);
                 }
@@ -181,8 +183,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                             alt={product.title} 
                             className="product-image"
                             onError={(e) => {
-                                e.target.onerror = null; // Prevent infinite loop
-                                e.target.src = '/placeholder-product.png'; // Replace with your placeholder image path
+                                e.target.onerror = null;
+                                e.target.src = FALLBACK_IMAGE;
                             }}
                         />
                     ) : (
