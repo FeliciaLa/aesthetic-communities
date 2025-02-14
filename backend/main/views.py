@@ -99,10 +99,10 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            # Instead of creating user, store data temporarily in cache
+            # Add debug logging
+            print("DEBUG: Registration data validated successfully")
             registration_id = str(uuid.uuid4())
             
-            # Check if email already exists in actual users
             email = serializer.validated_data['email']
             if User.objects.filter(email=email).exists():
                 return Response(
@@ -110,16 +110,20 @@ class RegisterView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Store validated data in cache for 24 hours
+            # Store validated data in cache
             cache.set(
                 f'registration_{registration_id}',
                 serializer.validated_data,
-                timeout=60 * 60 * 24  # 24 hours
+                timeout=60 * 60 * 24
             )
             
             activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
             
             try:
+                print(f"DEBUG: Sending activation email to {email}")
+                print(f"DEBUG: Activation URL: {activation_url}")
+                print(f"DEBUG: Email settings - FROM:{settings.DEFAULT_FROM_EMAIL}")
+                
                 send_mail(
                     'Activate Your Account',
                     f'Click the following link to activate your account: {activation_url}',
@@ -127,15 +131,18 @@ class RegisterView(APIView):
                     [email],
                     fail_silently=False,
                 )
+                print("DEBUG: Email sent successfully")
                 return Response({
                     'message': 'Registration successful. Please check your email to activate your account.'
                 }, status=status.HTTP_201_CREATED)
             except Exception as e:
-                # Clean up cache if email fails
+                print(f"DEBUG: Email sending failed - {str(e)}")
                 cache.delete(f'registration_{registration_id}')
                 return Response({
-                    'error': 'Failed to send activation email.'
+                    'error': f'Failed to send activation email: {str(e)}'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        print(f"DEBUG: Validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -1710,7 +1717,7 @@ class TrendingCommunitiesView(APIView):
 
 class AccountActivationView(APIView):
     permission_classes = [AllowAny]
-
+    
     def post(self, request, registration_id):
         # Get registration data from cache
         registration_data = cache.get(f'registration_{registration_id}')
