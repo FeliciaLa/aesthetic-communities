@@ -27,12 +27,8 @@ COPY backend/ .
 # Create static directory
 RUN mkdir -p staticfiles
 
-# Collect static files without database check
-RUN python manage.py collectstatic --noinput --no-input
-
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
-CMD echo "Starting Gunicorn..." && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --log-level debug --timeout 30 --workers 1 --threads 2 
+# Use start.sh to run the application
+CMD ["sh", "start.sh"] 
