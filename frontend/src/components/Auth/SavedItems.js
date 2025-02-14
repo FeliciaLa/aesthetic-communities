@@ -233,17 +233,13 @@ const SavedItems = () => {
                                             <SavedCollection key={collection.id}>
                                                 <CollectionPreview>
                                                     {collection.preview_image ? (
-                                                        <img 
-                                                            src={collection.preview_image.startsWith('http') 
+                                                        <img
+                                                            src={collection.preview_image?.startsWith('http') 
                                                                 ? collection.preview_image 
-                                                                : `${process.env.REACT_APP_API_URL}${collection.preview_image}`
+                                                                : `${api.defaults.baseURL}${collection.preview_image}`
                                                             }
                                                             alt={collection.name}
                                                             className="collection-preview-image"
-                                                            onError={(e) => {
-                                                                e.target.onerror = null;
-                                                                e.target.src = '/default-banner.jpg';
-                                                            }}
                                                         />
                                                     ) : (
                                                         <PlaceholderImage>
@@ -251,16 +247,11 @@ const SavedItems = () => {
                                                         </PlaceholderImage>
                                                     )}
                                                 </CollectionPreview>
-                                                <h4>{collection.name}</h4>
-                                                <p className="community-name">
-                                                    {collection.community_name}
-                                                </p>
-                                                <div className="collection-stats">
-                                                    <span>{collection.resource_count} resources</span>
-                                                    <span>{collection.views} views</span>
-                                                </div>
+                                                <h3>{collection.name}</h3>
+                                                <p>{collection.description}</p>
+                                                <p>{collection.resource_count} resources</p>
                                                 <Link 
-                                                    to={`/communities/${collection.community_id}/resources/${collection.collection_id}`}
+                                                    to={`/communities/${collection.community}/collections/${collection.id}`}
                                                     className="view-collection-button"
                                                 >
                                                     View Collection
