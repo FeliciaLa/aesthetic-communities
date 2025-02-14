@@ -201,16 +201,18 @@ const SavedItems = () => {
                                                     }}
                                                 />
                                             </div>
-                                            <h4>{resource.title}</h4>
-                                            <p className="collection-name">{resource.collection_name}</p>
-                                            <a 
-                                                href={resource.url} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="visit-resource-button"
-                                            >
-                                                Visit Resource
-                                            </a>
+                                            <div className="resource-info">
+                                                <h4>{resource.title}</h4>
+                                                <p className="collection-name">From: {resource.collection_name}</p>
+                                                <a 
+                                                    href={resource.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="visit-resource-button"
+                                                >
+                                                    Visit Resource
+                                                </a>
+                                            </div>
                                         </SavedResource>
                                     ))
                                 )}
@@ -465,12 +467,20 @@ const SavedItems = () => {
                 .SavedResource {
                     display: flex;
                     flex-direction: column;
+                    height: 100%;
                 }
 
-                .collection-name, .catalogue-name {
+                .resource-info {
+                    display: flex;
+                    flex-direction: column;
+                    flex-grow: 1;
+                    padding: 1rem;
+                }
+
+                .collection-name {
                     color: #666;
                     font-size: 0.9rem;
-                    margin: 0.25rem 0;
+                    margin: 0.5rem 0;
                 }
 
                 .visit-resource-button {
