@@ -4,7 +4,9 @@ FROM python:3.9-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    DJANGO_SETTINGS_MODULE=config.settings_prod
+    DJANGO_SETTINGS_MODULE=config.settings_prod \
+    DATABASE_URL=postgres://none \
+    DISABLE_COLLECTSTATIC=0
 
 # Install system dependencies
 RUN apt-get update && \
@@ -27,7 +29,7 @@ COPY backend/ .
 # Create static directory
 RUN mkdir -p staticfiles
 
-# Collect static files without database check
+# Collect static files with a dummy database URL
 RUN python manage.py collectstatic --noinput --no-input
 
 # Command to run the application
