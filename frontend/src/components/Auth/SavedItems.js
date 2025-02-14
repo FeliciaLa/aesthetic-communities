@@ -560,7 +560,6 @@ const ProductCard = ({ product }) => {
             </div>
             <div className="product-info">
                 <h4>{product.title}</h4>
-                <span className="catalogue-tag">{product.catalogue_name}</span>
                 <a 
                     href={product.url} 
                     target="_blank" 
