@@ -40,6 +40,21 @@ const SavedCollection = styled.div`
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    .view-collection-button {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 8px 16px;
+        background-color: #fa8072;  // Base coral
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #ff9288;  // Lighter coral
+        }
+    }
 `;
 
 const CollectionsGrid = styled.div`
@@ -257,7 +272,7 @@ const SavedItems = () => {
                                                 <p>{collection.description}</p>
                                                 <p>{collection.resource_count} resources</p>
                                                 <Link 
-                                                    to={`/communities/${collection.community}/collections/${collection.id}`}
+                                                    to={`/collections/${collection.collection_id}`}
                                                     className="view-collection-button"
                                                 >
                                                     View Collection
