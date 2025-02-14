@@ -244,13 +244,14 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     gap: 8px;
                     opacity: 0;
                     transition: opacity 0.2s ease;
+                    z-index: 10;
                 }
 
                 .image-container:hover .image-actions {
                     opacity: 1;
                 }
 
-                .save-button {
+                .save-button, .delete-button {
                     width: 30px;
                     height: 30px;
                     border-radius: 50%;
@@ -261,34 +262,21 @@ const GalleryView = ({ communityId, isCreator, communityTitle = 'Gallery' }) => 
                     align-items: center;
                     justify-content: center;
                     font-size: 18px;
-                    color: #666;
                     transition: all 0.2s ease;
-                    margin-right: 45px;
+                }
+
+                .save-button {
+                    color: #666;
                 }
 
                 .delete-button {
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.9);
-                    border: none;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 18px;
                     color: #ff4444;
-                    transition: all 0.2s ease;
                 }
 
                 .save-button:hover,
                 .delete-button:hover {
                     background: rgba(255, 255, 255, 1);
                     transform: scale(1.1);
-                }
-
-                .save-button.saved {
-                    color: #ffd700;
                 }
 
                 .expand-button {
