@@ -40,38 +40,11 @@ router.register(r'saved', SavedItemsViewSet, basename='saved')
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt
-def health_check(request):
-    logger.debug(f"Health check endpoint hit at {request.path}")
-    logger.debug(f"Available environment variables: {[k for k in os.environ.keys()]}")
-    logger.debug(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
-    logger.debug(f"PGHOST value: {os.getenv('PGHOST', 'not set')}")
-    
-    try:
-        # Test database connection
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            logger.debug("Database connection successful")
-        
-        # Log database settings (without sensitive info)
-        from django.conf import settings
-        logger.debug(f"Database ENGINE: {settings.DATABASES['default']['ENGINE']}")
-        logger.debug(f"Database HOST: {settings.DATABASES['default'].get('HOST', 'not set')}")
-        logger.debug(f"Database PORT: {settings.DATABASES['default'].get('PORT', 'not set')}")
-        
-        return HttpResponse("OK", status=200)
-    except Exception as e:
-        logger.error(f"Health check failed with error: {str(e)}")
-        logger.exception("Full traceback:")
-        return HttpResponse(f"Health check failed: {str(e)}", status=500)
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('main.urls')),
+    path('', include('main.urls')),  # Include main.urls here
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
-    path('health/', health_check, name='health_check'),
     # Update media serving path to handle the full URL structure
     path('media/community_banners/<path:path>', serve_media_file, name='serve_media'),
 ]

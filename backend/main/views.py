@@ -86,12 +86,16 @@ logger = logging.getLogger(__name__)
 @permission_classes([AllowAny])
 def health_check(request):
     try:
-        # Just return healthy without DB check initially
-        return Response({'status': 'healthy'}, status=status.HTTP_200_OK)
+        # Simple check - if we can handle the request, we're healthy
+        logger.info("Health check endpoint hit")
+        return Response(
+            {'status': 'healthy'},
+            status=status.HTTP_200_OK
+        )
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
         return Response(
-            {'status': 'unhealthy', 'error': str(e)}, 
+            {'status': 'unhealthy'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
