@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    UserRegistrationView,
+    RegisterView,
     UserLogoutView,
     CommunityView,
     CommunityDetailView,
@@ -34,7 +34,6 @@ from .views import (
     RecommendedCommunitiesView,
     CommunityMembersView,
     ProfileUpdateView,
-    RegisterView,
     LoginView,
     PasswordResetView,
     PasswordResetConfirmView,
