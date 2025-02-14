@@ -264,7 +264,7 @@ const CollectionDetailPage = () => {
                         <img 
                             src={collection.preview_image.startsWith('http') 
                                 ? collection.preview_image 
-                                : `http://localhost:8000${collection.preview_image}`}
+                                : `${api.defaults.baseURL}${collection.preview_image}`}
                             alt={collection.name}
                         />
                     </div>
@@ -296,40 +296,14 @@ const CollectionDetailPage = () => {
 
             <div className="content-wrapper">
                 <div className="actions-container">
-                    <div className="collection-stats">
-                        <span>
-                            <i className="far fa-eye"></i> {stats.total_views} views
-                        </span>
-                        <span>
-                            <i className="far fa-file"></i> {stats.total_resources} resources
-                        </span>
-                        <span>
-                            <i className="far fa-thumbs-up"></i> {stats.total_votes} votes
-                        </span>
+                    <div style={{ marginLeft: 'auto' }}>
+                        <button 
+                            className="add-resource-button"
+                            onClick={() => setShowAddResource(true)}
+                        >
+                            + Add Resource
+                        </button>
                     </div>
-                    {collection?.is_creator && (
-                        <div className="actions-wrapper">
-                            <button 
-                                className="actions-button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowActionsMenu(!showActionsMenu);
-                                }}
-                            >
-                                <i className="fas fa-ellipsis-v"></i>
-                            </button>
-                            {showActionsMenu && (
-                                <div className="actions-menu">
-                                    <button onClick={handleEdit}>
-                                        <i className="fas fa-edit"></i> Edit Collection
-                                    </button>
-                                    <button onClick={handleDelete} className="delete-button">
-                                        <i className="fas fa-trash"></i> Delete Collection
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {showAddResource && (
