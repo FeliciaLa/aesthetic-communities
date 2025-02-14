@@ -65,6 +65,12 @@ const SavedResource = styled.div`
 
 const FALLBACK_IMAGE = '/default-product.png';
 
+const getImageUrl = (image) => {
+    return image?.startsWith('http') 
+        ? image 
+        : `${api.defaults.baseURL}${image}`;
+};
+
 const SavedItems = () => {
     const [activeTab, setActiveTab] = useState('images');
     const [savedImages, setSavedImages] = useState([]);
