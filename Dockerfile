@@ -36,9 +36,6 @@ RUN chmod +x backend/manage.py
 # Set the working directory to backend
 WORKDIR /app/backend
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
 # Command to run the application
 CMD python manage.py wait_for_db && \
     python manage.py migrate --noinput && \
