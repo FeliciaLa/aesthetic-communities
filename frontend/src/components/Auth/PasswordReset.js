@@ -64,7 +64,7 @@ const PasswordReset = () => {
     setError("");
 
     try {
-      const response = await api.post("/auth/password-reset/", { email });
+      const response = await api.post("/password-reset/", { email });
       if (response.data) {
         navigate("/", { 
           state: { message: "Password reset instructions sent to your email." }
