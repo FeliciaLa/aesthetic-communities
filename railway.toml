@@ -1,18 +1,18 @@
 [build]
-builder = "nixpacks"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --log-level debug --timeout 30 --workers 1 --threads 2"
 healthcheckPath = "/health/"
-healthcheckTimeout = 60
-restartPolicy = "on-failure"
-healthcheckInterval = "10s"
-healthcheckRetries = 3
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
 
 [env]
+PORT = "8000"
 DJANGO_SETTINGS_MODULE = "config.settings_prod"
 DATABASE_URL = "${DATABASE_URL}"
-PORT = "8000"
+PGPORT = "5432"
 
 [phases.setup]
 nixPkgs = [
@@ -25,4 +25,8 @@ name = "web"
 template = "dockerfile"
 
 [[services.connects]]
-name = "postgres" 
+name = "postgres"
+
+[service]
+rootDirectory = "."
+startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --log-level debug --timeout 30 --workers 1 --threads 2" 
