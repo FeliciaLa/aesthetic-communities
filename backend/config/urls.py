@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 urlpatterns = [
     path('health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
-    path('', include('main.urls')),
+    path('api/', include('main.urls')),
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
     path('media/community_banners/<path:path>', serve_media_file, name='serve_media'),
