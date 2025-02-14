@@ -26,6 +26,7 @@ from .utils import get_preview_data  # Add this import at the top
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
 
@@ -65,39 +66,33 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
-class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    email = serializers.EmailField(required=True)
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ('username', 'email', 'password', 'password_confirm')
+        extra_kwargs = {
+            'email': {'required': True}
+        }
 
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is already registered.")
-        return value
-
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is already taken.")
-        return value
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("Password must be at least 8 characters long.")
-        return value
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({
+                "password": "Password fields didn't match."
+            })
+        return attrs
 
     def create(self, validated_data):
-        try:
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password']
-            )
-            return user
-        except Exception as e:
-            raise serializers.ValidationError(str(e))
+        validated_data.pop('password_confirm')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            is_active=False  # User starts inactive until email verification
+        )
+        return user
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()  # Change from identifier to username

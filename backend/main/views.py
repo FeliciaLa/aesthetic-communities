@@ -85,15 +85,28 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({
-                'token': token.key,
-                'user_id': user.pk,
-                'username': user.username
-            }, status=status.HTTP_201_CREATED)
+            user = serializer.save(is_active=False)  # Create inactive user
+            token = default_token_generator.make_token(user)
+            activation_url = f"{settings.FRONTEND_URL}/activate/{user.id}/{token}"
+            
+            try:
+                send_mail(
+                    'Activate Your Account',
+                    f'Click the following link to activate your account: {activation_url}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                return Response({
+                    'message': 'Registration successful. Please check your email to activate your account.'
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                user.delete()  # Delete the user if email sending fails
+                return Response({
+                    'error': 'Failed to send activation email.'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -1683,4 +1696,24 @@ class TrendingCommunitiesView(APIView):
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class AccountActivationView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request, user_id, token):
+        try:
+            user = User.objects.get(id=user_id)
+            if default_token_generator.check_token(user, token):
+                user.is_active = True
+                user.save()
+                return Response({'message': 'Account activated successfully'})
+            return Response(
+                {'error': 'Invalid activation link'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
             )

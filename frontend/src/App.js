@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { authService } from './services/authService';
 import { createContext, useContext } from 'react';
 import api from './api';
+import AccountActivation from './components/Auth/AccountActivation';
 
 const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -126,6 +127,7 @@ const AppContent = () => {
         } />
         <Route path="/password-reset" element={<PasswordReset />} />
         <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+        <Route path="/activate/:userId/:token" element={<AccountActivation />} />
       </Routes>
 
       {showAuthModal && (
