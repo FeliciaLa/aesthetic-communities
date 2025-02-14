@@ -28,10 +28,10 @@ COPY backend/ .
 RUN mkdir -p staticfiles && mkdir -p static
 
 # Expose the port the app runs on
-EXPOSE $PORT
+EXPOSE ${PGPORT}
 
 # Command to run the application
 CMD python manage.py wait_for_db && \
     python manage.py migrate --noinput && \
     echo "Starting Gunicorn..." && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --log-level debug --timeout 30 --workers 1 --threads 2
+    gunicorn config.wsgi:application --bind 0.0.0.0:${PGPORT} --log-level debug --timeout 30 --workers 1 --threads 2
