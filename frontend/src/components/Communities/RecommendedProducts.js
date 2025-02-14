@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import './RecommendedProducts.css';
 import AddProductModal from './AddProductModal';
+import styled from 'styled-components';
 
 const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [products, setProducts] = useState([]);
@@ -11,6 +12,9 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [savedProducts, setSavedProducts] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [offset, setOffset] = useState(0);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
 
     useEffect(() => {
         fetchProducts();
@@ -214,6 +218,22 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         }
     };
 
+    const handlePrevClick = () => {
+        const newOffset = offset + 300;
+        setOffset(Math.min(newOffset, 0));
+        setCanScrollRight(true);
+        setCanScrollLeft(newOffset < 0);
+    };
+
+    const handleNextClick = () => {
+        const container = document.querySelector('.products-grid');
+        const maxOffset = -(container.scrollWidth - container.clientWidth);
+        const newOffset = offset - 300;
+        setOffset(Math.max(newOffset, maxOffset));
+        setCanScrollLeft(true);
+        setCanScrollRight(newOffset > maxOffset);
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error-message">{error}</div>;
 
@@ -252,21 +272,39 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     ))}
                 </div>
 
-                <div className="products-grid">
-                    {products.length === 0 ? (
-                        <div className="product-placeholder">
-                            <div className="placeholder-content">
-                                <i className="fas fa-box"></i>
-                                <p>No products added yet</p>
+                <div className="products-container">
+                    <CarouselButton 
+                        className="prev" 
+                        onClick={handlePrevClick} 
+                        disabled={!canScrollLeft}
+                    >
+                        ←
+                    </CarouselButton>
+                    
+                    <div className="products-grid" style={{ transform: `translateX(${offset}px)` }}>
+                        {products.length === 0 ? (
+                            <div className="product-placeholder">
+                                <div className="placeholder-content">
+                                    <i className="fas fa-box"></i>
+                                    <p>No products added yet</p>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        products
-                            .filter(product => activeCatalogue === 'all' || product.catalogue_name === activeCatalogue)
-                            .map(product => (
-                                <ProductCard key={product.id} product={product} />
-                            ))
-                    )}
+                        ) : (
+                            products
+                                .filter(product => activeCatalogue === 'all' || product.catalogue_name === activeCatalogue)
+                                .map(product => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))
+                        )}
+                    </div>
+
+                    <CarouselButton 
+                        className="next" 
+                        onClick={handleNextClick} 
+                        disabled={!canScrollRight}
+                    >
+                        →
+                    </CarouselButton>
                 </div>
 
                 {showAddProduct && (
@@ -351,21 +389,21 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     font-weight: 500;
                 }
 
+                .products-container {
+                    position: relative;
+                    overflow: hidden;
+                    padding: 0 40px;
+                }
+
                 .products-grid {
                     display: flex;
                     gap: 2rem;
-                    overflow-x: auto;
-                    padding: 0.5rem 0;
-                    scroll-behavior: smooth;
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-
-                .products-grid::-webkit-scrollbar {
-                    display: none;
+                    transition: transform 0.3s ease;
+                    padding: 1rem 0;
                 }
 
                 .product-card {
+                    flex: 0 0 300px;
                     background: white;
                     border-radius: 8px;
                     padding: 1rem;
@@ -511,5 +549,39 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         </div>
     );
 };
+
+const CarouselButton = styled.button`
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    &:hover {
+        background: #f8f8f8;
+    }
+
+    &.prev {
+        left: 0;
+    }
+
+    &.next {
+        right: 0;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+`;
 
 export default RecommendedProducts; 
