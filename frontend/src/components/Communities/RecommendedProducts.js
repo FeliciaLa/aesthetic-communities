@@ -180,7 +180,10 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                             src={imageUrl} 
                             alt={product.title} 
                             className="product-image"
-                            onError={() => setImageUrl('/default-product.jpg')}
+                            onError={(e) => {
+                                e.target.onerror = null; // Prevent infinite loop
+                                e.target.src = '/placeholder-product.png'; // Replace with your placeholder image path
+                            }}
                         />
                     ) : (
                         <div className="product-image-placeholder">
