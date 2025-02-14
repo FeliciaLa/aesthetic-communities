@@ -195,8 +195,16 @@ const SavedItems = () => {
                                 savedImages.map(savedImage => (
                                     <div key={savedImage.id} className="saved-image">
                                         <img 
-                                            src={`http://localhost:8000${savedImage.image_url}`}
+                                            src={savedImage.image_url.startsWith('http') 
+                                                ? savedImage.image_url 
+                                                : `${process.env.REACT_APP_API_URL}${savedImage.image_url}`
+                                            }
                                             alt={`Image from ${savedImage.community_name}`}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = FALLBACK_IMAGE;
+                                            }}
+                                            className="saved-image-preview"
                                         />
                                         <div className="image-overlay">
                                             <Link 
