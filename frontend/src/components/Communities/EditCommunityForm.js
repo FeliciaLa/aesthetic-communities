@@ -123,27 +123,39 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
 
         .button-group {
           display: flex;
-          gap: 10px;
+          gap: 12px;
           justify-content: flex-end;
-          margin-top: 20px;
+          margin-top: 24px;
         }
 
-        button {
-          padding: 8px 16px;
-          border-radius: 4px;
+        .cancel-button, .save-button {
+          padding: 10px 20px;
+          border-radius: 6px;
           cursor: pointer;
-          font-size: 0.9rem;
+          font-size: 15px;
+          transition: all 0.2s ease;
         }
 
         .cancel-button {
-          background: #f5f5f5;
+          background: white;
+          color: #666;
           border: 1px solid #ddd;
         }
 
+        .cancel-button:hover {
+          background: #f5f5f5;
+          border-color: #ccc;
+        }
+
         .save-button {
-          background: #0061ff;
+          background: #fa8072;
           color: white;
           border: none;
+        }
+
+        .save-button:hover {
+          background: #ff9288;
+          transform: translateY(-1px);
         }
 
         .error-message {
