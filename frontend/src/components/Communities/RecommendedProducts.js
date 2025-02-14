@@ -411,11 +411,16 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 .view-product-button {
                     display: inline-block;
                     padding: 8px 16px;
-                    background: #0061ff;
+                    background: #fa8072;
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
                     margin-top: 1rem;
+                    transition: background 0.2s ease;
+                }
+
+                .view-product-button:hover {
+                    background: #ff9288;
                 }
 
                 .error-message {

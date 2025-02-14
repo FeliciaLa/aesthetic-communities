@@ -499,7 +499,7 @@ const SavedItems = () => {
                 .view-product-button {
                     display: inline-block;
                     padding: 0.5rem 1rem;
-                    background: #0061ff;
+                    background: #fa8072;
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
@@ -509,7 +509,7 @@ const SavedItems = () => {
                 }
 
                 .view-product-button:hover {
-                    background: #0056e0;
+                    background: #ff9288;
                 }
 
                 .resource-preview {
