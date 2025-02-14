@@ -123,52 +123,149 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
   return (
     <div className="announcements-dashboard">
-      <h2>Announcements</h2>
-      
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          {isCreator && (
-            <form onSubmit={handleSubmit}>
-              <textarea
-                value={newAnnouncement}
-                onChange={(e) => setNewAnnouncement(e.target.value)}
-                placeholder="Write a new announcement..."
-              />
-              <button type="submit">Post Announcement</button>
-            </form>
-          )}
-          
-          <div className="announcements-list">
-            {Array.isArray(announcements) && announcements.length > 0 ? (
-              announcements.map((announcement) => {
-                // Debug log for each announcement
-                console.log('Rendering announcement:', announcement);
-                
-                return (
-                  <div key={announcement.id || Math.random()} className="announcement">
-                    {typeof announcement === 'object' ? (
-                      <>
-                        <p>{announcement.content || 'No content'}</p>
-                        {announcement.created_at && (
-                          <small>{new Date(announcement.created_at).toLocaleDateString()}</small>
-                        )}
-                      </>
-                    ) : (
-                      <p>Invalid announcement format</p>
+      <div className="announcements-container">
+        <h2>Announcements</h2>
+        
+        {loading ? (
+          <div className="loading">Loading...</div>
+        ) : (
+          <>
+            {isCreator && (
+              <form onSubmit={handleSubmit} className="announcement-form">
+                <textarea
+                  value={newAnnouncement}
+                  onChange={(e) => setNewAnnouncement(e.target.value)}
+                  placeholder="Write a new announcement..."
+                  className="announcement-input"
+                />
+                <button type="submit" className="post-announcement-btn">
+                  Post Announcement
+                </button>
+              </form>
+            )}
+            
+            <div className="announcements-list">
+              {Array.isArray(announcements) && announcements.length > 0 ? (
+                announcements.map((announcement) => (
+                  <div key={announcement.id || Math.random()} className="announcement-card">
+                    <div className="announcement-content">
+                      {announcement.content || 'No content'}
+                    </div>
+                    {announcement.created_at && (
+                      <div className="announcement-date">
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </div>
                     )}
                   </div>
-                );
-              })
-            ) : (
-              <p>No announcements yet.</p>
-            )}
-          </div>
-          
-          {error && <div className="error-message">{error}</div>}
-        </>
-      )}
+                ))
+              ) : (
+                <p className="no-announcements">No announcements yet.</p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <style jsx>{`
+        .announcements-dashboard {
+          padding: 20px;
+        }
+
+        .announcements-container {
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          border: 1px solid #eee;
+        }
+
+        h2 {
+          font-size: 1.75rem;
+          color: #2c3e50;
+          margin-bottom: 24px;
+          font-weight: 600;
+        }
+
+        .announcement-form {
+          margin-bottom: 32px;
+        }
+
+        .announcement-input {
+          width: 100%;
+          min-height: 100px;
+          padding: 16px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          margin-bottom: 16px;
+          font-size: 15px;
+          resize: vertical;
+          transition: border-color 0.2s ease;
+        }
+
+        .announcement-input:focus {
+          outline: none;
+          border-color: #fa8072;
+        }
+
+        .post-announcement-btn {
+          background: #fa8072;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 15px;
+          transition: all 0.2s ease;
+        }
+
+        .post-announcement-btn:hover {
+          background: #ff9288;
+          transform: translateY(-1px);
+        }
+
+        .announcements-list {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .announcement-card {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          border: 1px solid #eee;
+          transition: transform 0.2s ease;
+        }
+
+        .announcement-card:hover {
+          transform: translateY(-2px);
+        }
+
+        .announcement-content {
+          color: #334155;
+          line-height: 1.6;
+          font-size: 15px;
+          margin-bottom: 12px;
+        }
+
+        .announcement-date {
+          color: #94a3b8;
+          font-size: 13px;
+        }
+
+        .no-announcements {
+          color: #94a3b8;
+          text-align: center;
+          padding: 32px;
+          font-size: 15px;
+        }
+
+        .loading {
+          text-align: center;
+          padding: 32px;
+          color: #94a3b8;
+        }
+      `}</style>
     </div>
   );
 };
