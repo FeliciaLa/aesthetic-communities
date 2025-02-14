@@ -99,50 +99,45 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            # Add debug logging
-            print("DEBUG: Registration data validated successfully")
             registration_id = str(uuid.uuid4())
-            
             email = serializer.validated_data['email']
-            if User.objects.filter(email=email).exists():
-                return Response(
-                    {'email': ['User with this email already exists.']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Store validated data in cache
+            
+            # Store in cache
             cache.set(
                 f'registration_{registration_id}',
                 serializer.validated_data,
-                timeout=60 * 60 * 24
+                timeout=60 * 60 * 24  # 24 hours
             )
             
             activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
+            email_subject = 'Activate Your Account'
+            email_message = f'''
+            Thank you for registering! 
+            Please click the following link to activate your account: 
+            {activation_url}
+            '''
             
             try:
-                print(f"DEBUG: Sending activation email to {email}")
-                print(f"DEBUG: Activation URL: {activation_url}")
-                print(f"DEBUG: Email settings - FROM:{settings.DEFAULT_FROM_EMAIL}")
-                
                 send_mail(
-                    'Activate Your Account',
-                    f'Click the following link to activate your account: {activation_url}',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
+                    subject=email_subject,
+                    message=email_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
                     fail_silently=False,
                 )
-                print("DEBUG: Email sent successfully")
+                
                 return Response({
                     'message': 'Registration successful. Please check your email to activate your account.'
                 }, status=status.HTTP_201_CREATED)
+                
             except Exception as e:
-                print(f"DEBUG: Email sending failed - {str(e)}")
+                # Clean up cache if email fails
                 cache.delete(f'registration_{registration_id}')
+                print(f"Email sending failed: {str(e)}")  # For debugging
                 return Response({
-                    'error': f'Failed to send activation email: {str(e)}'
+                    'error': 'Failed to send activation email'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        print(f"DEBUG: Validation errors: {serializer.errors}")
+                
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
