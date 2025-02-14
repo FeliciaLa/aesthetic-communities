@@ -19,7 +19,6 @@ const CollectionDetailPage = () => {
     const [previews, setPreviews] = useState({});
     const [showAddResource, setShowAddResource] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
     const [savedResources, setSavedResources] = useState(new Set());
 
     const fetchCollection = async () => {
@@ -66,22 +65,6 @@ const CollectionDetailPage = () => {
         }
     };
 
-    const checkIfSaved = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await api.get(
-                '/saved/collections/',
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
-            const savedCollectionIds = response.data.map(item => item.collection_id);
-            setIsSaved(savedCollectionIds.includes(Number(collectionId)));
-        } catch (error) {
-            console.error('Error checking saved status:', error);
-        }
-    };
-
     const checkSavedResources = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -105,7 +88,6 @@ const CollectionDetailPage = () => {
                 await fetchResources();
                 await fetchStats();
                 await incrementCategoryViews();
-                await checkIfSaved();
                 await checkSavedResources();
             }
         };
@@ -246,24 +228,6 @@ const CollectionDetailPage = () => {
         };
     }, [showActionsMenu]);
 
-    const handleSaveCollection = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await api.post(
-                `/saved/${collectionId}/save_collection/`,
-                {},
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
-            );
-            
-            setIsSaved(response.data.status === 'saved');
-            console.log(`Collection ${response.data.status}`);
-        } catch (error) {
-            console.error('Error saving collection:', error);
-        }
-    };
-
     const handleSaveResource = async (resourceId) => {
         try {
             const token = localStorage.getItem('token');
@@ -327,26 +291,45 @@ const CollectionDetailPage = () => {
                             <span className="stat-label">VIEWS</span>
                         </div>
                     </div>
-                    <button 
-                        onClick={handleSaveCollection}
-                        className={`save-button ${isSaved ? 'saved' : ''}`}
-                        title={isSaved ? 'Unsave Collection' : 'Save Collection'}
-                    >
-                        {isSaved ? '★' : '☆'}
-                    </button>
                 </div>
             </div>
 
             <div className="content-wrapper">
                 <div className="actions-container">
-                    <div style={{ marginLeft: 'auto' }}>
-                        <button 
-                            className="add-resource-button"
-                            onClick={() => setShowAddResource(true)}
-                        >
-                            + Add Resource
-                        </button>
+                    <div className="collection-stats">
+                        <span>
+                            <i className="far fa-eye"></i> {stats.total_views} views
+                        </span>
+                        <span>
+                            <i className="far fa-file"></i> {stats.total_resources} resources
+                        </span>
+                        <span>
+                            <i className="far fa-thumbs-up"></i> {stats.total_votes} votes
+                        </span>
                     </div>
+                    {collection?.is_creator && (
+                        <div className="actions-wrapper">
+                            <button 
+                                className="actions-button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowActionsMenu(!showActionsMenu);
+                                }}
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {showActionsMenu && (
+                                <div className="actions-menu">
+                                    <button onClick={handleEdit}>
+                                        <i className="fas fa-edit"></i> Edit Collection
+                                    </button>
+                                    <button onClick={handleDelete} className="delete-button">
+                                        <i className="fas fa-trash"></i> Delete Collection
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {showAddResource && (
