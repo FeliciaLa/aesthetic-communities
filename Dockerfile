@@ -5,7 +5,7 @@ FROM python:3.9-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     DJANGO_SETTINGS_MODULE=config.settings_prod \
-    PORT=5432
+    PORT=8000
 
 # Install system dependencies
 RUN apt-get update && \
@@ -29,10 +29,10 @@ COPY backend/ .
 RUN mkdir -p staticfiles && mkdir -p static
 
 # Expose the port the app runs on
-EXPOSE 5432
+EXPOSE 8000
 
 # Command to run the application
 CMD python manage.py wait_for_db && \
     python manage.py migrate --noinput && \
     echo "Starting Gunicorn..." && \
-    gunicorn config.wsgi:application --bind 0.0.0.0:5432 --log-level debug --timeout 30 --workers 1 --threads 2
+    gunicorn config.wsgi:application --bind 0.0.0.0:8000 --log-level debug --timeout 30 --workers 1 --threads 2
