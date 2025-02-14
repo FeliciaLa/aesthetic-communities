@@ -134,6 +134,11 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
           cursor: pointer;
           font-size: 15px;
           transition: all 0.2s ease;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 100px;
         }
 
         .cancel-button {
