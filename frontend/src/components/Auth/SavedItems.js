@@ -203,6 +203,7 @@ const SavedItems = () => {
                                             </div>
                                             <h4>{resource.title}</h4>
                                             <p className="collection-name">{resource.collection_name}</p>
+                                            <p className="catalogue-name">{resource.catalogue_name}</p>
                                             <a 
                                                 href={resource.url} 
                                                 target="_blank" 
@@ -460,6 +461,33 @@ const SavedItems = () => {
                 h2 {
                     text-align: left;
                     margin-bottom: 1rem;
+                }
+
+                .SavedResource {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .collection-name, .catalogue-name {
+                    color: #666;
+                    font-size: 0.9rem;
+                    margin: 0.25rem 0;
+                }
+
+                .visit-resource-button {
+                    margin-top: auto;
+                    display: inline-block;
+                    padding: 0.5rem 1rem;
+                    background: #fa8072;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    text-align: center;
+                    transition: background 0.2s ease;
+                }
+
+                .visit-resource-button:hover {
+                    background: #ff9288;
                 }
             `}</style>
         </div>
