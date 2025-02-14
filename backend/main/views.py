@@ -96,11 +96,12 @@ def health_check(request):
             if one != 1:
                 raise Exception("Database check failed")
         
-        logger.info("Health check passed")
-        return Response({'status': 'healthy'}, status=status.HTTP_200_OK)
+        return Response({
+            'status': 'healthy',
+            'database': 'connected'
+        }, status=status.HTTP_200_OK)
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        # Return 200 to pass Railway's check but include error details
         return Response({
             'status': 'unhealthy',
             'error': str(e)
