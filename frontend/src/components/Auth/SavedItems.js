@@ -232,18 +232,19 @@ const SavedItems = () => {
                                         savedCollections.map(collection => (
                                             <SavedCollection key={collection.id}>
                                                 <CollectionPreview>
-                                                    {collection.preview_image && (
+                                                    {collection.preview_image ? (
                                                         <img
-                                                            src={collection.preview_image?.startsWith('http') 
+                                                            src={collection.preview_image.startsWith('http') 
                                                                 ? collection.preview_image 
-                                                                : collection.preview_image 
-                                                                    ? `${api.defaults.baseURL}${collection.preview_image}`
-                                                                    : null}
+                                                                : `${process.env.REACT_APP_API_URL}${collection.preview_image}`}
                                                             alt={collection.name}
                                                             className="collection-preview-image"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = '/default-banner.jpg';
+                                                            }}
                                                         />
-                                                    )}
-                                                    {!collection.preview_image && (
+                                                    ) : (
                                                         <PlaceholderImage>
                                                             No preview image
                                                         </PlaceholderImage>
