@@ -243,8 +243,8 @@ const SavedItems = () => {
                                                         src={collection.preview_image?.startsWith('http') 
                                                             ? collection.preview_image 
                                                             : collection.preview_image 
-                                                                ? `${api.defaults.baseURL}${collection.preview_image}`
-                                                                : null}
+                                                                ? `${api.defaults.baseURL}/${collection.preview_image}`
+                                                                : '/default-banner.jpg'}
                                                         alt={collection.name}
                                                         className="collection-preview-image"
                                                         onError={(e) => {
