@@ -89,13 +89,9 @@ const getImageUrl = (image) => {
 const SavedItems = () => {
     const [activeTab, setActiveTab] = useState('images');
     const [savedImages, setSavedImages] = useState([]);
-    const [savedResources, setSavedResources] = useState([]);
     const [savedProducts, setSavedProducts] = useState([]);
-    const [savedCollections, setSavedCollections] = useState([]);
+    const [savedResources, setSavedResources] = useState([]);
     const [previews, setPreviews] = useState({});
-    const [collectionPreviews, setCollectionPreviews] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const getPreviewImage = async (url) => {
         try {
@@ -143,14 +139,6 @@ const SavedItems = () => {
             });
             setSavedProducts(productsRes.data);
 
-            // Fetch saved collections
-            const collectionsRes = await api.get('saved/collections/', {
-                headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
-            });
-            console.log('Saved collections data:', collectionsRes.data);
-            console.log('Collection preview_image:', collectionsRes.data[0]?.preview_image);
-            setSavedCollections(collectionsRes.data);
-
             // Fetch saved resources
             const resourcesRes = await api.get('saved/resources/', {
                 headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
@@ -172,9 +160,6 @@ const SavedItems = () => {
             setPreviews(previewMap);
         } catch (error) {
             console.error('Error fetching saved items:', error);
-            setError('Failed to load saved items');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -244,45 +229,6 @@ const SavedItems = () => {
 
                     {activeTab === 'resources' && (
                         <div className="saved-resources-container">
-                            {/* Collections Section */}
-                            <div className="saved-collections">
-                                <h3>Saved Collections</h3>
-                                <CollectionsGrid>
-                                    {savedCollections.length === 0 ? (
-                                        <p className="empty-message">No saved collections yet</p>
-                                    ) : (
-                                        savedCollections.map(collection => (
-                                            <SavedCollection key={collection.id}>
-                                                <CollectionPreview>
-                                                    <img
-                                                        src={collection.preview_image?.startsWith('http') 
-                                                            ? collection.preview_image 
-                                                            : collection.preview_image 
-                                                                ? `${api.defaults.baseURL}/${collection.preview_image}`
-                                                                : '/default-banner.jpg'}
-                                                        alt={collection.name}
-                                                        className="collection-preview-image"
-                                                        onError={(e) => {
-                                                            e.target.onerror = null;
-                                                            e.target.src = '/default-banner.jpg';
-                                                        }}
-                                                    />
-                                                </CollectionPreview>
-                                                <h3>{collection.name}</h3>
-                                                <p>{collection.description}</p>
-                                                <p>{collection.resource_count} resources</p>
-                                                <Link 
-                                                    to={`/collections/${collection.collection_id}`}
-                                                    className="view-collection-button"
-                                                >
-                                                    View Collection
-                                                </Link>
-                                            </SavedCollection>
-                                        ))
-                                    )}
-                                </CollectionsGrid>
-                            </div>
-
                             {/* Resources Section */}
                             <div className="saved-resources">
                                 <h3>Saved Resources</h3>
