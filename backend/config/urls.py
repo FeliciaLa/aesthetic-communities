@@ -3,7 +3,7 @@ from django.urls import path, include  # Import `include` to reference app-speci
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from main.views import SavedItemsViewSet, LoginView, UserRegistrationView, health_check
+from main.views import SavedItemsViewSet, LoginView, RegisterView, health_check  
 from django.http import HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
