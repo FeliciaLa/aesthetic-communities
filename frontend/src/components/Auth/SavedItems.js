@@ -173,20 +173,59 @@ const SavedItems = () => {
                         Images
                     </button>
                     <button 
+                        className={`tab ${activeTab === 'collections' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('collections')}
+                    >
+                        Collections
+                    </button>
+                    <button 
                         className={`tab ${activeTab === 'resources' ? 'active' : ''}`}
                         onClick={() => setActiveTab('resources')}
                     >
                         Resources
                     </button>
-                    <button 
-                        className={`tab ${activeTab === 'products' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('products')}
-                    >
-                        Products
-                    </button>
                 </div>
 
                 <div className="saved-items-content">
+                    {activeTab === 'collections' && (
+                        <CollectionsGrid>
+                            {savedCollections.length === 0 ? (
+                                <p className="empty-message">No saved collections yet</p>
+                            ) : (
+                                savedCollections.map(collection => (
+                                    <SavedCollection key={collection.id}>
+                                        <CollectionPreview>
+                                            {collection.preview_image && (
+                                                <img
+                                                    src={collection.preview_image?.startsWith('http') 
+                                                        ? collection.preview_image 
+                                                        : collection.preview_image 
+                                                            ? `${api.defaults.baseURL}${collection.preview_image}`
+                                                            : null}
+                                                    alt={collection.name}
+                                                    className="collection-preview-image"
+                                                />
+                                            )}
+                                            {!collection.preview_image && (
+                                                <PlaceholderImage>
+                                                    No preview image
+                                                </PlaceholderImage>
+                                            )}
+                                        </CollectionPreview>
+                                        <h3>{collection.name}</h3>
+                                        <p>{collection.description}</p>
+                                        <Link 
+                                            to={`/communities/${collection.community}/collections/${collection.id}`}
+                                            className="view-collection-button"
+                                        >
+                                            View Collection
+                                        </Link>
+                                    </SavedCollection>
+                                ))
+                            )}
+                        </CollectionsGrid>
+                    )}
+
                     {activeTab === 'images' && (
                         <div className="saved-images-grid">
                             {savedImages.length === 0 ? (
@@ -222,48 +261,6 @@ const SavedItems = () => {
 
                     {activeTab === 'resources' && (
                         <div className="saved-resources-container">
-                            {/* Collections Section */}
-                            <div className="saved-collections">
-                                <h3>Saved Collections</h3>
-                                <CollectionsGrid>
-                                    {savedCollections.length === 0 ? (
-                                        <p className="empty-message">No saved collections yet</p>
-                                    ) : (
-                                        savedCollections.map(collection => (
-                                            <SavedCollection key={collection.id}>
-                                                <CollectionPreview>
-                                                    {collection.preview_image && (
-                                                        <img
-                                                            src={collection.preview_image?.startsWith('http') 
-                                                                ? collection.preview_image 
-                                                                : collection.preview_image 
-                                                                    ? `${api.defaults.baseURL}${collection.preview_image}`
-                                                                    : null}
-                                                            alt={collection.name}
-                                                            className="collection-preview-image"
-                                                        />
-                                                    )}
-                                                    {!collection.preview_image && (
-                                                        <PlaceholderImage>
-                                                            No preview image
-                                                        </PlaceholderImage>
-                                                    )}
-                                                </CollectionPreview>
-                                                <h3>{collection.name}</h3>
-                                                <p>{collection.description}</p>
-                                                <p>{collection.resource_count} resources</p>
-                                                <Link 
-                                                    to={`/communities/${collection.community}/collections/${collection.id}`}
-                                                    className="view-collection-button"
-                                                >
-                                                    View Collection
-                                                </Link>
-                                            </SavedCollection>
-                                        ))
-                                    )}
-                                </CollectionsGrid>
-                            </div>
-
                             {/* Resources Section */}
                             <div className="saved-resources">
                                 <h3>Saved Resources</h3>
