@@ -192,6 +192,16 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                             No image available
                         </div>
                     )}
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleSaveProduct(product.id);
+                        }}
+                        className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                        title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
+                    >
+                        {savedProducts.has(product.id) ? '★' : '☆'}
+                    </button>
                 </div>
                 <div className="product-info">
                     <h3>{product.title}</h3>
@@ -346,14 +356,10 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 }
 
                 .product-image-container {
+                    position: relative;
                     width: 100%;
                     height: 200px;
-                    background: #f5f5f5;
                     overflow: hidden;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 8px;
                 }
 
                 .product-image {
@@ -444,27 +450,32 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 }
 
                 .save-button {
-                    width: 30px;
-                    height: 30px;
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 32px;
+                    height: 32px;
                     border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.9);
-                    border: none;
+                    background: white;
+                    border: 1px solid #fa8072;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 18px;
-                    color: #666;
-                    transition: all 0.2s ease;
+                    font-size: 20px;
+                    color: #fa8072;
+                    transition: all 0.2s;
                 }
 
                 .save-button:hover {
-                    background: rgba(255, 255, 255, 1);
-                    transform: scale(1.1);
+                    background: #ff9288;
+                    color: white;
+                    border-color: #ff9288;
                 }
 
                 .save-button.saved {
                     color: #ffd700;
+                    border-color: #ffd700;
                 }
 
                 .loading-spinner {
