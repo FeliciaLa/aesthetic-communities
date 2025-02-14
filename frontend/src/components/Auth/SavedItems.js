@@ -232,18 +232,24 @@ const SavedItems = () => {
                                         savedCollections.map(collection => (
                                             <SavedCollection key={collection.id}>
                                                 <CollectionPreview>
-                                                    <img 
-                                                        src={collection.preview_image.startsWith('http') 
-                                                            ? collection.preview_image 
-                                                            : `${process.env.REACT_APP_API_URL}/media/${collection.preview_image}`
-                                                        }
-                                                        alt={collection.name}
-                                                        className="collection-preview-image"
-                                                        onError={(e) => {
-                                                            e.target.onerror = null;
-                                                            e.target.src = FALLBACK_IMAGE;
-                                                        }}
-                                                    />
+                                                    {collection.preview_image ? (
+                                                        <img 
+                                                            src={collection.preview_image.startsWith('http') 
+                                                                ? collection.preview_image 
+                                                                : `${process.env.REACT_APP_API_URL}${collection.preview_image}`
+                                                            }
+                                                            alt={collection.name}
+                                                            className="collection-preview-image"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = '/default-banner.jpg';
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <PlaceholderImage>
+                                                            No preview image
+                                                        </PlaceholderImage>
+                                                    )}
                                                 </CollectionPreview>
                                                 <h4>{collection.name}</h4>
                                                 <p className="community-name">
