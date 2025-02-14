@@ -93,7 +93,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 username,
                 email,
                 password,
-                confirm_password: confirmPassword
+                password_confirm: confirmPassword
             });
             
             if (response && response.token) {
