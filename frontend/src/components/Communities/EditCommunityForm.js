@@ -87,7 +87,7 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
             Cancel
           </button>
           <button type="submit" className="save-button">
-            Save Changes
+            Save
           </button>
         </div>
       </form>
