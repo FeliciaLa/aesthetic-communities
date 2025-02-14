@@ -4,10 +4,10 @@ builder = "nixpacks"
 [deploy]
 startCommand = "sh start.sh"
 healthcheckPath = "/health/"
-healthcheckTimeout = 60
+healthcheckTimeout = 30
 restartPolicy = "on-failure"
-healthcheckInterval = "10s"
-healthcheckRetries = 3
+healthcheckInterval = "15s"
+healthcheckRetries = 2
 
 [env]
 PORT = "8000"

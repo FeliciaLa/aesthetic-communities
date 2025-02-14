@@ -78,6 +78,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import json
 import os
+from django.http import HttpResponse
 
 User = get_user_model()
 
@@ -86,21 +87,7 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
-    try:
-        # Just check if we can access basic environment variables
-        settings_module = os.getenv('DJANGO_SETTINGS_MODULE', 'Not set')
-        logger.info(f"Health check called. Using settings: {settings_module}")
-        
-        return Response({
-            'status': 'healthy',
-            'settings': settings_module
-        }, status=status.HTTP_200_OK)
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return Response({
-            'status': 'unhealthy',
-            'error': str(e)
-        }, status=status.HTTP_200_OK)  # Return 200 even on error to pass Railway check
+    return HttpResponse("OK", status=200)
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
