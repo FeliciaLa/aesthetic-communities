@@ -48,7 +48,6 @@ router = DefaultRouter()
 router.register('saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
-    path('health/', health_check, name='health_check'),
     # Auth endpoints
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/register/', RegisterView.as_view(), name='register'),
@@ -64,6 +63,7 @@ urlpatterns = [
     # Resource endpoints
     path('resources/categories/', ResourceCategoryView.as_view(), name='resource-categories'),
     path('resources/categories/<int:pk>/', ResourceCategoryView.as_view(), name='resource-category-detail'),
+
     path('resources/', ResourceView.as_view(), name='resources'),
     path('resources/categories/<int:category_id>/stats/', views.get_collection_stats, name='collection-stats'),
     

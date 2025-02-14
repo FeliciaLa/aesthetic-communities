@@ -3,7 +3,7 @@ from django.urls import path, include  # Import `include` to reference app-speci
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from main.views import SavedItemsViewSet, LoginView, UserRegistrationView
+from main.views import SavedItemsViewSet, LoginView, UserRegistrationView, health_check
 from django.http import HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -41,10 +41,10 @@ router.register(r'saved', SavedItemsViewSet, basename='saved')
 logger = logging.getLogger(__name__)
 
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
-    path('', include('main.urls')),  # Include main.urls here
+    path('api/', include('main.urls')),  # Change to api/ prefix
     path('api/', include('music.urls')),
     path('api/', include(router.urls)),
-    # Update media serving path to handle the full URL structure
     path('media/community_banners/<path:path>', serve_media_file, name='serve_media'),
 ]
