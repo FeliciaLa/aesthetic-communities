@@ -13,11 +13,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-testing')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [
-    'aesthetic-communities-production.up.railway.app',
-    'aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
-    '*',
-]
+ALLOWED_HOSTS = ['*']  # Allow all hosts
 
 # Application definition
 INSTALLED_APPS = [
@@ -105,14 +101,8 @@ os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    'https://aesthetic-communities.vercel.app',
-    'https://aesthetic-communities-production.up.railway.app',
-    'https://aesthetic-communities-git-master-felicia-lammertings-projects.vercel.app',
-    'https://aesthetic-communities-jopldlo67-felicia-lammertings-projects.vercel.app',
-    'http://localhost:3000'
-]
-
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -276,5 +266,3 @@ else:
     # During collectstatic, use local storage
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
-
-CORS_ALLOW_ALL_ORIGINS = True  # Temporarily for debugging
