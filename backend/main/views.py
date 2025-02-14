@@ -77,6 +77,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
 import json
+import os
 
 User = get_user_model()
 
@@ -86,16 +87,32 @@ logger = logging.getLogger(__name__)
 @permission_classes([AllowAny])
 def health_check(request):
     try:
-        # Simple check - if we can handle the request, we're healthy
-        logger.info("Health check endpoint hit")
+        # Log environment info
+        logger.info("Health check started")
+        logger.info(f"DATABASE_URL exists: {bool(os.getenv('DATABASE_URL'))}")
+        logger.info(f"DJANGO_SETTINGS_MODULE: {os.getenv('DJANGO_SETTINGS_MODULE')}")
+        
+        # Test database connection
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            logger.info("Database connection successful")
+        
         return Response(
-            {'status': 'healthy'},
+            {'status': 'healthy', 'database': 'connected'},
             status=status.HTTP_200_OK
         )
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
+        logger.exception("Full traceback:")
         return Response(
-            {'status': 'unhealthy'},
+            {
+                'status': 'unhealthy',
+                'error': str(e),
+                'database_url_exists': bool(os.getenv('DATABASE_URL')),
+                'settings_module': os.getenv('DJANGO_SETTINGS_MODULE')
+            },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

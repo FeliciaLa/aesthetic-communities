@@ -17,7 +17,6 @@ from .views import (
     GalleryImageDetailView,
     CommunityMembershipView,
     vote_resource,
-    get_resources,
     increment_views,
     increment_category_views,
     QuestionView,
@@ -66,7 +65,6 @@ urlpatterns = [
     path('resources/categories/', ResourceCategoryView.as_view(), name='resource-categories'),
     path('resources/categories/<int:pk>/', ResourceCategoryView.as_view(), name='resource-category-detail'),
     path('resources/', ResourceView.as_view(), name='resources'),
-    path('resources/', get_resources, name='get_resources'),
     path('resources/categories/<int:category_id>/stats/', views.get_collection_stats, name='collection-stats'),
     
     # Forum endpoints
