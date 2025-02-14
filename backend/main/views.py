@@ -99,45 +99,59 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            registration_id = str(uuid.uuid4())
-            email = serializer.validated_data['email']
-            
-            # Store in cache
-            cache.set(
-                f'registration_{registration_id}',
-                serializer.validated_data,
-                timeout=60 * 60 * 24  # 24 hours
-            )
-            
-            activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
-            email_subject = 'Activate Your Account'
-            email_message = f'''
-            Thank you for registering! 
-            Please click the following link to activate your account: 
-            {activation_url}
-            '''
-            
             try:
-                send_mail(
-                    subject=email_subject,
-                    message=email_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
+                print("DEBUG: Starting registration process")
+                registration_id = str(uuid.uuid4())
+                email = serializer.validated_data['email']
                 
+                # Store in cache
+                cache.set(
+                    f'registration_{registration_id}',
+                    serializer.validated_data,
+                    timeout=60 * 60 * 24  # 24 hours
+                )
+                print(f"DEBUG: Stored registration data in cache for {email}")
+                
+                activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
+                print(f"DEBUG: Generated activation URL: {activation_url}")
+                
+                # Print email settings
+                print("DEBUG: Email settings:")
+                print(f"HOST: {settings.EMAIL_HOST}")
+                print(f"PORT: {settings.EMAIL_PORT}")
+                print(f"USER: {settings.EMAIL_HOST_USER}")
+                print(f"TLS: {settings.EMAIL_USE_TLS}")
+                print(f"FROM: {settings.DEFAULT_FROM_EMAIL}")
+                
+                try:
+                    send_mail(
+                        subject='Activate Your Account',
+                        message=f'Click the following link to activate your account: {activation_url}',
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                    print(f"DEBUG: Email sent successfully to {email}")
+                    
+                except Exception as mail_error:
+                    print(f"DEBUG: Email sending failed - {str(mail_error)}")
+                    print(f"DEBUG: Full error - {repr(mail_error)}")
+                    cache.delete(f'registration_{registration_id}')
+                    return Response({
+                        'error': f'Failed to send activation email: {str(mail_error)}'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
                 return Response({
                     'message': 'Registration successful. Please check your email to activate your account.'
                 }, status=status.HTTP_201_CREATED)
                 
             except Exception as e:
-                # Clean up cache if email fails
-                cache.delete(f'registration_{registration_id}')
-                print(f"Email sending failed: {str(e)}")  # For debugging
+                print(f"DEBUG: Registration failed - {str(e)}")
                 return Response({
-                    'error': 'Failed to send activation email'
+                    'error': f'Registration failed: {str(e)}'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
+        print(f"DEBUG: Validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
