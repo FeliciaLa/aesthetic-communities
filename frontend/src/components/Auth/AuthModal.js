@@ -96,10 +96,11 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 password_confirm: confirmPassword
             });
             
-            if (response && response.token) {
-                setTimeout(async () => {
-                    await onLoginSuccess();
-                }, 100);
+            if (response && response.message) {
+                setError(response.message);
+                setTimeout(() => {
+                    onClose();
+                }, 3000);
             }
         } else {
             const response = await authService.login({
