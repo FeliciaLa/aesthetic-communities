@@ -39,13 +39,13 @@ const SuccessMessage = styled.div`
 
 const AccountActivation = () => {
     const [status, setStatus] = useState('activating');
-    const { userId, token } = useParams();
+    const { registration_id } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {
         const activateAccount = async () => {
             try {
-                await api.post(`/auth/activate/${userId}/${token}/`);
+                await api.post(`/auth/activate/${registration_id}/`);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
@@ -53,7 +53,7 @@ const AccountActivation = () => {
             }
         };
         activateAccount();
-    }, [userId, token, navigate]);
+    }, [registration_id, navigate]);
 
     return (
         <Container>
