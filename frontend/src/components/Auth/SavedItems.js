@@ -233,9 +233,16 @@ const SavedItems = () => {
                                             <SavedCollection key={collection.id}>
                                                 <CollectionPreview>
                                                     <img 
-                                                        src={`http://localhost:8000/media/${collection.preview_image}`}
+                                                        src={collection.preview_image.startsWith('http') 
+                                                            ? collection.preview_image 
+                                                            : `${process.env.REACT_APP_API_URL}/media/${collection.preview_image}`
+                                                        }
                                                         alt={collection.name}
                                                         className="collection-preview-image"
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = FALLBACK_IMAGE;
+                                                        }}
                                                     />
                                                 </CollectionPreview>
                                                 <h4>{collection.name}</h4>
