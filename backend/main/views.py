@@ -87,7 +87,14 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
-    return HttpResponse("OK", status=200)
+    try:
+        return Response({'status': 'healthy'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return Response(
+            {'status': 'unhealthy'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]

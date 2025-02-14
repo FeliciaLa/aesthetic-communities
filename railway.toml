@@ -4,10 +4,10 @@ builder = "nixpacks"
 [deploy]
 startCommand = "sh start.sh"
 healthcheckPath = "/health/"
-healthcheckTimeout = 30
+healthcheckTimeout = 60
 restartPolicy = "on-failure"
-healthcheckInterval = "15s"
-healthcheckRetries = 2
+healthcheckInterval = "10s"
+healthcheckRetries = 3
 
 [env]
 PORT = "8000"
@@ -26,7 +26,7 @@ name = "web"
 template = "dockerfile"
 
 [[services.connects]]
-name = "postgres"  # This connects to your Postgres service
+name = "postgres"
 
 [service]
 rootDirectory = "."
