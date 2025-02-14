@@ -185,40 +185,36 @@ const SavedItems = () => {
 
                     {activeTab === 'resources' && (
                         <div className="saved-resources-container">
-                            {/* Resources Section */}
-                            <div className="saved-resources">
-                                <h3>Saved Resources</h3>
-                                <ResourcesGrid>
-                                    {savedResources.length === 0 ? (
-                                        <p className="empty-message">No saved resources yet</p>
-                                    ) : (
-                                        savedResources.map(resource => (
-                                            <SavedResource key={resource.id}>
-                                                <div className="resource-preview">
-                                                    <img 
-                                                        src={previews[resource.id] || '/default-banner.jpg'}
-                                                        alt={resource.title}
-                                                        className="resource-preview-image"
-                                                        onError={(e) => {
-                                                            e.target.src = '/default-banner.jpg';
-                                                        }}
-                                                    />
-                                                </div>
-                                                <h4>{resource.title}</h4>
-                                                <p className="collection-name">{resource.collection_name}</p>
-                                                <a 
-                                                    href={resource.url} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="visit-resource-button"
-                                                >
-                                                    Visit Resource
-                                                </a>
-                                            </SavedResource>
-                                        ))
-                                    )}
-                                </ResourcesGrid>
-                            </div>
+                            <ResourcesGrid>
+                                {savedResources.length === 0 ? (
+                                    <p className="empty-message">No saved resources yet</p>
+                                ) : (
+                                    savedResources.map(resource => (
+                                        <SavedResource key={resource.id}>
+                                            <div className="resource-preview">
+                                                <img 
+                                                    src={previews[resource.id] || '/default-banner.jpg'}
+                                                    alt={resource.title}
+                                                    className="resource-preview-image"
+                                                    onError={(e) => {
+                                                        e.target.src = '/default-banner.jpg';
+                                                    }}
+                                                />
+                                            </div>
+                                            <h4>{resource.title}</h4>
+                                            <p className="collection-name">{resource.collection_name}</p>
+                                            <a 
+                                                href={resource.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="visit-resource-button"
+                                            >
+                                                Visit Resource
+                                            </a>
+                                        </SavedResource>
+                                    ))
+                                )}
+                            </ResourcesGrid>
                         </div>
                     )}
 
