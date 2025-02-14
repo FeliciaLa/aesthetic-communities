@@ -42,7 +42,7 @@ from .serializers import (
     ResourceSerializer,
     ForumPostSerializer,
     ForumCommentSerializer,
-    UserRegisterSerializer,
+    UserRegistrationSerializer,
     QuestionSerializer,
     AnswerSerializer,
     PollSerializer,
