@@ -115,24 +115,50 @@ class RegisterView(APIView):
                 activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
                 print(f"DEBUG: Generated activation URL: {activation_url}")
                 
-                # Print email settings
-                print("DEBUG: Email settings:")
-                print(f"HOST: {settings.EMAIL_HOST}")
-                print(f"PORT: {settings.EMAIL_PORT}")
-                print(f"USER: {settings.EMAIL_HOST_USER}")
-                print(f"TLS: {settings.EMAIL_USE_TLS}")
-                print(f"FROM: {settings.DEFAULT_FROM_EMAIL}")
+                # Create a more formatted email message
+                email_subject = 'Activate Your Almas Account'
+                email_message = f'''
+                Hello!
+
+                Thank you for registering with Almas. To activate your account, please click the link below:
+
+                {activation_url}
+
+                If you did not request this registration, please ignore this email.
+
+                Best regards,
+                The Almas Team
+                '''
                 
                 try:
-                    send_mail(
-                        subject='Activate Your Account',
-                        message=f'Click the following link to activate your account: {activation_url}',
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email],
-                        fail_silently=False,
+                    # Try to establish SMTP connection first
+                    from django.core.mail import get_connection
+                    connection = get_connection(
+                        host=settings.EMAIL_HOST,
+                        port=settings.EMAIL_PORT,
+                        username=settings.EMAIL_HOST_USER,
+                        password=settings.EMAIL_HOST_PASSWORD,
+                        use_tls=settings.EMAIL_USE_TLS,
                     )
-                    print(f"DEBUG: Email sent successfully to {email}")
                     
+                    print("DEBUG: Testing SMTP connection...")
+                    if connection.open():
+                        print("DEBUG: SMTP connection successful")
+                        
+                        # Now try to send the email
+                        send_mail(
+                            subject=email_subject,
+                            message=email_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[email],
+                            fail_silently=False,
+                            connection=connection,
+                        )
+                        print(f"DEBUG: Email sent successfully to {email}")
+                        connection.close()
+                    else:
+                        raise Exception("Could not establish SMTP connection")
+                        
                 except Exception as mail_error:
                     print(f"DEBUG: Email sending failed - {str(mail_error)}")
                     print(f"DEBUG: Full error - {repr(mail_error)}")
