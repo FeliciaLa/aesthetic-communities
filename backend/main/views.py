@@ -79,6 +79,7 @@ from django.conf import settings
 import json
 import os
 from django.http import HttpResponse
+import uuid
 
 User = get_user_model()
 
@@ -98,23 +99,40 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save(is_active=False)  # Create inactive user
-            token = default_token_generator.make_token(user)
-            activation_url = f"{settings.FRONTEND_URL}/activate/{user.id}/{token}"
+            # Instead of creating user, store data temporarily in cache
+            registration_id = str(uuid.uuid4())
+            
+            # Check if email already exists in actual users
+            email = serializer.validated_data['email']
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {'email': ['User with this email already exists.']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Store validated data in cache for 24 hours
+            cache.set(
+                f'registration_{registration_id}',
+                serializer.validated_data,
+                timeout=60 * 60 * 24  # 24 hours
+            )
+            
+            activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
             
             try:
                 send_mail(
                     'Activate Your Account',
                     f'Click the following link to activate your account: {activation_url}',
                     settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
+                    [email],
                     fail_silently=False,
                 )
                 return Response({
                     'message': 'Registration successful. Please check your email to activate your account.'
                 }, status=status.HTTP_201_CREATED)
             except Exception as e:
-                user.delete()  # Delete the user if email sending fails
+                # Clean up cache if email fails
+                cache.delete(f'registration_{registration_id}')
                 return Response({
                     'error': 'Failed to send activation email.'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1692,20 +1710,35 @@ class TrendingCommunitiesView(APIView):
 
 class AccountActivationView(APIView):
     permission_classes = [AllowAny]
-    
-    def post(self, request, user_id, token):
-        try:
-            user = User.objects.get(id=user_id)
-            if default_token_generator.check_token(user, token):
-                user.is_active = True
-                user.save()
-                return Response({'message': 'Account activated successfully'})
+
+    def post(self, request, registration_id):
+        # Get registration data from cache
+        registration_data = cache.get(f'registration_{registration_id}')
+        
+        if not registration_data:
             return Response(
-                {'error': 'Invalid activation link'},
+                {'error': 'Invalid or expired activation link'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        except User.DoesNotExist:
+
+        try:
+            # Create user only after email verification
+            user = User.objects.create_user(
+                username=registration_data['username'],
+                email=registration_data['email'],
+                password=registration_data['password'],
+                is_active=True  # Activate immediately since email is verified
+            )
+            
+            # Clean up cache
+            cache.delete(f'registration_{registration_id}')
+            
+            return Response({
+                'message': 'Account activated successfully'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
             return Response(
-                {'error': 'User not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {'error': 'Failed to activate account'},
+                status=status.HTTP_400_BAD_REQUEST
             )

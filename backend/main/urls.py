@@ -125,8 +125,7 @@ urlpatterns = [
 
     path('communities/trending/', TrendingCommunitiesView.as_view(), name='trending-communities'),
 
-    path('auth/activate/<int:user_id>/<str:token>/', 
-         AccountActivationView.as_view(), name='account-activation'),
+    path('auth/activate/<str:registration_id>/', AccountActivationView.as_view(), name='account-activation'),
 ]
 
 # Add this for debugging
