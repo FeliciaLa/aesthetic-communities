@@ -41,7 +41,7 @@ router.register(r'saved', SavedItemsViewSet, basename='saved')
 logger = logging.getLogger(__name__)
 
 urlpatterns = [
-    path('health/', health_check, name='health_check'),
+    path('/health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('api/', include('music.urls')),
