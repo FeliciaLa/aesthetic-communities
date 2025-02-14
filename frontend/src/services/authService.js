@@ -57,7 +57,15 @@ export const authService = {
                 timestamp: new Date().toISOString()
             });
 
-            const response = await api.post('/auth/register/', credentials);
+            // Rename password_confirm to match backend expectation
+            const formattedCredentials = {
+                username: credentials.username,
+                email: credentials.email,
+                password: credentials.password,
+                password_confirm: credentials.password_confirm // This was the missing field
+            };
+
+            const response = await api.post('/auth/register/', formattedCredentials);
 
             if (response && response.data) {
                 // We're no longer storing token/user data here since user needs to verify email
