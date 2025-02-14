@@ -40,7 +40,8 @@ from .views import (
     PasswordResetView,
     PasswordResetConfirmView,
     TrendingCommunitiesView,
-    AccountActivationView
+    AccountActivationView,
+    health_check
 )
 from . import views
 
@@ -48,6 +49,7 @@ router = DefaultRouter()
 router.register('saved', SavedItemsViewSet, basename='saved')
 
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     # Auth endpoints
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/register/', RegisterView.as_view(), name='register'),

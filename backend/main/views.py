@@ -81,6 +81,19 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    try:
+        # Try to make a simple database query to verify DB connection
+        User.objects.first()
+        return Response({'status': 'healthy'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {'status': 'unhealthy', 'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
