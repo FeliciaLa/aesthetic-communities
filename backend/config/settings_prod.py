@@ -69,26 +69,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database Configuration
-IS_BUILD = any(arg in sys.argv for arg in ['collectstatic', 'migrate', '--noinput'])
-
-if IS_BUILD:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:'
-        }
-    }
-else:
-    # Runtime database configuration
-    if not os.getenv('DATABASE_URL'):
-        raise ValueError("DATABASE_URL must be set in production runtime")
-        
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-        )
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+    )
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
