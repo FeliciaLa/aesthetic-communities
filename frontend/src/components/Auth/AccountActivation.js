@@ -48,30 +48,43 @@ const AccountActivation = () => {
     console.log('Registration ID from params:', registration_id);
 
     useEffect(() => {
+        console.log('=== Debug Info ===');
+        console.log('Current URL:', window.location.href);
+        console.log('API Base URL:', process.env.REACT_APP_API_URL);
+        
         const activateAccount = async () => {
             try {
-                console.log('Attempting to activate with ID:', registration_id);
+                const fullUrl = `${process.env.REACT_APP_API_URL}/auth/activate/${registration_id}/`;
+                console.log('Making request to:', fullUrl);
                 
-                // Add timeout to the request
                 const response = await api.post(
                     `auth/activate/${registration_id}/`, 
                     {}, 
-                    { timeout: 10000 } // 10 second timeout
+                    { 
+                        timeout: 10000,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    }
                 );
                 
                 console.log('Activation response:', response);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
-                console.error('Activation error:', err);
-                if (err.code === 'ECONNABORTED') {
-                    setError('Connection timed out. Please try again.');
-                } else {
-                    setError(err.response?.data?.error || 'Failed to activate account');
-                }
+                console.error('Detailed error:', {
+                    message: err.message,
+                    status: err.response?.status,
+                    data: err.response?.data,
+                    code: err.code,
+                    url: `${process.env.REACT_APP_API_URL}/auth/activate/${registration_id}/`
+                });
+                setError(err.response?.data?.error || 'Failed to activate account');
                 setStatus('error');
             }
         };
+
         activateAccount();
     }, [registration_id, navigate]);
 
