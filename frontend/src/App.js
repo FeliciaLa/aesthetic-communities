@@ -88,16 +88,25 @@ const App = () => {
           )}
 
           <Routes>
-            {/* Test route */}
+            {/* Test route with debug logs */}
             <Route path="/test" element={
-              <div style={{ 
-                padding: '20px',
-                textAlign: 'center',
-                marginTop: '50px'
-              }}>
-                <h1>Test Route</h1>
-                <p>If you can see this, routing is working correctly!</p>
-              </div>
+              (() => {
+                console.log('Test route rendered');
+                return (
+                  <div style={{ 
+                    padding: '20px',
+                    textAlign: 'center',
+                    marginTop: '50px',
+                    backgroundColor: '#f0f0f0',  // Added background color
+                    minHeight: '200px',          // Added minimum height
+                    border: '2px solid #ccc'     // Added border
+                  }}>
+                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                    <p>If you can see this, routing is working correctly!</p>
+                    <p>Current path: {window.location.pathname}</p>
+                  </div>
+                );
+              })()
             } />
             
             {/* Activation routes */}
