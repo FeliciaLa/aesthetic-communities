@@ -88,11 +88,32 @@ const App = () => {
           )}
 
           <Routes>
+            {/* Activation routes first */}
+            <Route path="activate/:registration_id" element={<AccountActivation />} />
             <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
-            <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
-              setInitialAuthMode('register');
-              setShowAuthModal(true);
-            }}/>} />
+            
+            {/* Auth routes */}
+            <Route path="/password-reset" element={<PasswordReset />} />
+            <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+            
+            {/* Protected routes */}
+            <Route
+              path="/create-community"
+              element={
+                <PrivateRoute isLoggedIn={isLoggedIn}>
+                  <CreateCommunity />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/profile" element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <Profile />
+              </PrivateRoute>
+            } />
+            
+            {/* Community routes */}
+            <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
+            <Route path="/communities/:id" element={<CommunityDetail />} />
             <Route 
               path="/communities" 
               element={
@@ -105,23 +126,14 @@ const App = () => {
                 />
               } 
             />
-            <Route
-              path="/create-community"
-              element={
-                <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <CreateCommunity />
-                </PrivateRoute>
-              }
-            />
-            <Route path="/communities/:id" element={<CommunityDetail />} />
-            <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
-            <Route path="/profile" element={
-              <PrivateRoute isLoggedIn={isLoggedIn}>
-                <Profile />
-              </PrivateRoute>
-            } />
-            <Route path="/password-reset" element={<PasswordReset />} />
-            <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+            
+            {/* Home route */}
+            <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+              setInitialAuthMode('register');
+              setShowAuthModal(true);
+            }}/>} />
+            
+            {/* Debug catch-all route */}
             <Route path="*" element={
               <div style={{ padding: '20px' }}>
                 <h2>Debug Info</h2>
