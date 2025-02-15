@@ -10,8 +10,8 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting activation with ID:', registration_id);
-                // Use the correct API endpoint with /api prefix
-                const response = await api.post(`/api/auth/activate/${registration_id}/`, {}, {
+                // Remove the /api prefix since it's in the base URL
+                const response = await api.post(`auth/activate/${registration_id}/`, {}, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
@@ -26,13 +26,13 @@ const AccountActivation = () => {
                             initialMode: 'login',
                             message: response.data.message
                         },
-                        replace: true // Use replace to prevent back navigation
+                        replace: true
                     });
                 } else {
                     throw new Error('Invalid response from server');
                 }
             } catch (error) {
-                console.error('Activation error:', error);
+                console.error('Activation error:', error.response || error);
                 navigate('/', { 
                     state: { 
                         showAuthModal: true,

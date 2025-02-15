@@ -88,7 +88,7 @@ const App = () => {
           )}
 
           <Routes>
-            <Route path="/activate/:registration_id" element={<AccountActivation />} />
+            <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
             <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
               setInitialAuthMode('register');
               setShowAuthModal(true);

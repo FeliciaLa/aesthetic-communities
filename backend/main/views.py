@@ -1741,18 +1741,30 @@ class AccountActivationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, registration_id):
+        print(f"DEBUG: Activation attempt for ID: {registration_id}")
         try:
             # Get registration data from cache
             registration_data = cache.get(f'registration_{registration_id}')
+            print(f"DEBUG: Retrieved cache data: {registration_data}")
             
-            if not registration_data:
+            if not registration_data or not isinstance(registration_data, dict):
+                print(f"DEBUG: Invalid cache data format: {registration_data}")
                 return Response(
                     {'error': 'Invalid or expired activation link. Please register again.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            required_fields = ['username', 'email', 'password']
+            if not all(field in registration_data for field in required_fields):
+                print(f"DEBUG: Missing required fields in cache data: {registration_data}")
+                return Response(
+                    {'error': 'Invalid registration data. Please register again.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # Check if user already exists
             if User.objects.filter(email=registration_data['email']).exists():
+                print(f"DEBUG: User already exists with email {registration_data['email']}")
                 return Response(
                     {'error': 'User with this email already exists'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -1763,19 +1775,21 @@ class AccountActivationView(APIView):
                 username=registration_data['username'],
                 email=registration_data['email'],
                 password=registration_data['password'],
-                is_active=True  # Activate immediately
+                is_active=True
             )
+            print(f"DEBUG: User created successfully: {user.username}")
             
             # Clean up cache after successful creation
             cache.delete(f'registration_{registration_id}')
+            print("DEBUG: Cache cleaned up")
             
             return Response({
                 'message': 'Account activated successfully'
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
-            print(f"Activation error: {str(e)}")  # Add logging
+            print(f"DEBUG: Activation error: {str(e)}")
             return Response(
-                {'error': 'Failed to activate account. Please try again.'},
+                {'error': f'Failed to activate account: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
