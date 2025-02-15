@@ -6,10 +6,15 @@ const AccountActivation = () => {
     const { registration_id } = useParams();
     const navigate = useNavigate();
 
+    console.log('Component rendered with ID:', registration_id); // Debug log
+
     useEffect(() => {
+        console.log('useEffect triggered'); // Debug log
+        
         const activateAccount = async () => {
+            console.log('Attempting activation...'); // Debug log
             try {
-                console.log('Attempting activation with ID:', registration_id);
+                console.log('Making API call to:', `auth/activate/${registration_id}/`); // Debug log
                 const response = await api.post(`auth/activate/${registration_id}/`);
                 console.log('Activation response:', response);
                 
@@ -51,7 +56,8 @@ const AccountActivation = () => {
             height: '100vh',
             gap: '1rem',
             padding: '20px',
-            textAlign: 'center'
+            textAlign: 'center',
+            backgroundColor: '#fff'
         }}>
             <h2>Account Activation</h2>
             <p>Activating your account with ID: {registration_id}</p>
