@@ -127,7 +127,7 @@ const AppContent = () => {
         } />
         <Route path="/password-reset" element={<PasswordReset />} />
         <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
-        <Route path="/activate/:userId/:token" element={<AccountActivation />} />
+        <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
       </Routes>
 
       {showAuthModal && (
