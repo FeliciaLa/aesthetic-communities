@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import api from '../../api';
+import { getApiUrl } from '../../config';
 
 const Container = styled.div`
   display: flex;
@@ -46,10 +47,15 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting to activate with ID:', registration_id);
-                const fullUrl = `/auth/activate/${registration_id}/`;
-                const baseURL = api.defaults.baseURL;
-                console.log('Base URL:', baseURL);
-                console.log('Making request to:', `${baseURL}${fullUrl}`);
+                
+                // Log all the URL parts
+                const apiUrl = getApiUrl();
+                console.log('API URL from config:', apiUrl);
+                console.log('API defaults baseURL:', api.defaults.baseURL);
+                
+                // Make sure we're using the correct URL format
+                const fullUrl = `auth/activate/${registration_id}/`;
+                console.log('Full request URL:', `${api.defaults.baseURL}${fullUrl}`);
                 
                 const response = await api.post(fullUrl);
                 console.log('Activation response:', response);
@@ -62,7 +68,7 @@ const AccountActivation = () => {
                     response: err.response?.data,
                     status: err.response?.status,
                     baseURL: api.defaults.baseURL,
-                    fullUrl: `/auth/activate/${registration_id}/`
+                    fullUrl: `auth/activate/${registration_id}/`
                 });
                 setStatus('error');
             }
