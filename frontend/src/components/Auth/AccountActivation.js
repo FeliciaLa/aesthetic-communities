@@ -10,7 +10,7 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting to activate account...');
-                await api.post(`auth/activate/${registration_id}/`);
+                await api.post(`/api/auth/activate/${registration_id}/`);
                 console.log('Account activated successfully');
                 
                 // Redirect to login with a success message
