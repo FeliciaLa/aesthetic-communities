@@ -70,14 +70,7 @@ const AccountActivation = () => {
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
-                console.error('Activation error:', {
-                    message: err.message,
-                    status: err.response?.status,
-                    data: err.response?.data,
-                    code: err.code,
-                    baseURL: api.defaults.baseURL,
-                    url: `auth/activate/${registration_id}/`
-                });
+                console.error('Activation error:', err);
                 setError(err.response?.data?.error || 'Failed to activate account');
                 setStatus('error');
             }
@@ -87,22 +80,60 @@ const AccountActivation = () => {
     }, [registration_id, navigate]);
 
     return (
-        <Container>
-            <Card>
+        <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh',
+            backgroundColor: '#f5f5f5'
+        }}>
+            <div style={{
+                padding: '2rem',
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                maxWidth: '400px',
+                width: '100%',
+                textAlign: 'center'
+            }}>
                 <h2>Account Activation</h2>
-                {status === 'activating' && <p>Activating your account...</p>}
+                
+                {status === 'activating' && (
+                    <div>
+                        <p>Activating your account...</p>
+                        <p style={{color: '#666'}}>Registration ID: {registration_id}</p>
+                    </div>
+                )}
+                
                 {status === 'success' && (
-                    <SuccessMessage>
-                        Account activated successfully! Redirecting to login...
-                    </SuccessMessage>
+                    <div style={{color: 'green'}}>
+                        <p>✅ Account activated successfully!</p>
+                        <p>Redirecting to login page in 3 seconds...</p>
+                    </div>
                 )}
+                
                 {status === 'error' && (
-                    <ErrorMessage>
-                        {error}
-                    </ErrorMessage>
+                    <div style={{color: 'red'}}>
+                        <p>❌ Activation failed</p>
+                        <p>{error}</p>
+                        <button 
+                            onClick={() => navigate('/login')}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#fa8072',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginTop: '1rem'
+                            }}
+                        >
+                            Go to Login
+                        </button>
+                    </div>
                 )}
-            </Card>
-        </Container>
+            </div>
+        </div>
     );
 };
 
