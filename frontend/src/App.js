@@ -75,17 +75,9 @@ const AppContent = () => {
   }
 
   return (
-    <MusicProvider>
-      {isLoggedIn ? (
-        <NavbarLoggedIn handleLogout={handleLogout} />
-      ) : (
-        <NavbarLoggedOut 
-          setShowAuthModal={setShowAuthModal} 
-          setInitialAuthMode={setInitialAuthMode}
-        />
-      )}
-
+    <>
       <Routes>
+        <Route path="/activate/:registration_id" element={<AccountActivation />} />
         <Route 
           path="/" 
           element={
@@ -127,7 +119,6 @@ const AppContent = () => {
         } />
         <Route path="/password-reset" element={<PasswordReset />} />
         <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
-        <Route path="/activate/:registration_id" element={<AccountActivation />} />
       </Routes>
 
       {showAuthModal && (
@@ -137,17 +128,19 @@ const AppContent = () => {
           onLoginSuccess={handleLoginSuccess}
         />
       )}
-    </MusicProvider>
+    </>
   );
 };
 
 const App = () => {
   return (
-    <Router>
-      <ErrorBoundary>
-        <AppContent />
-      </ErrorBoundary>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <MusicProvider>
+          <AppContent />
+        </MusicProvider>
+      </Router>
+    </ErrorBoundary>
   );
 };
 
