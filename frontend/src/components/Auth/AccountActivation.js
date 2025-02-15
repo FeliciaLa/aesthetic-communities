@@ -42,6 +42,7 @@ const AccountActivation = () => {
     const [status, setStatus] = useState('activating');
     const { registration_id } = useParams();
     const navigate = useNavigate();
+    const [error, setError] = useState('');
 
     console.log('AccountActivation component mounted');
     console.log('Registration ID from params:', registration_id);
@@ -51,28 +52,23 @@ const AccountActivation = () => {
             try {
                 console.log('Attempting to activate with ID:', registration_id);
                 
-                // Log all the URL parts
-                const apiUrl = getApiUrl();
-                console.log('API URL from config:', apiUrl);
-                console.log('API defaults baseURL:', api.defaults.baseURL);
+                // Add timeout to the request
+                const response = await api.post(
+                    `auth/activate/${registration_id}/`, 
+                    {}, 
+                    { timeout: 10000 } // 10 second timeout
+                );
                 
-                // Make sure we're using the correct URL format
-                const fullUrl = `auth/activate/${registration_id}/`;
-                console.log('Full request URL:', `${api.defaults.baseURL}${fullUrl}`);
-                
-                const response = await api.post(fullUrl);
                 console.log('Activation response:', response);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
                 console.error('Activation error:', err);
-                console.error('Full error details:', {
-                    message: err.message,
-                    response: err.response?.data,
-                    status: err.response?.status,
-                    baseURL: api.defaults.baseURL,
-                    fullUrl: `auth/activate/${registration_id}/`
-                });
+                if (err.code === 'ECONNABORTED') {
+                    setError('Connection timed out. Please try again.');
+                } else {
+                    setError(err.response?.data?.error || 'Failed to activate account');
+                }
                 setStatus('error');
             }
         };
@@ -91,7 +87,7 @@ const AccountActivation = () => {
                 )}
                 {status === 'error' && (
                     <ErrorMessage>
-                        Failed to activate account. Invalid or expired activation link.
+                        {error}
                     </ErrorMessage>
                 )}
             </Card>
