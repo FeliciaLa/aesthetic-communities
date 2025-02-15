@@ -76,20 +76,21 @@ const AppContent = () => {
 
   return (
     <>
+      {isLoggedIn ? (
+        <NavbarLoggedIn handleLogout={handleLogout} />
+      ) : (
+        <NavbarLoggedOut 
+          setShowAuthModal={setShowAuthModal} 
+          setInitialAuthMode={setInitialAuthMode}
+        />
+      )}
+
       <Routes>
         <Route path="/activate/:registration_id" element={<AccountActivation />} />
-        <Route 
-          path="/" 
-          element={
-            <ExploreCommunities 
-              isLoggedIn={isLoggedIn}
-              onAuthClick={() => {
-                setInitialAuthMode('register');
-                setShowAuthModal(true);
-              }}
-            />
-          } 
-        />
+        <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+          setInitialAuthMode('register');
+          setShowAuthModal(true);
+        }}/>} />
         <Route 
           path="/communities" 
           element={
@@ -134,13 +135,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <ErrorBoundary>
-      <Router>
+    <Router>
+      <ErrorBoundary>
         <MusicProvider>
           <AppContent />
         </MusicProvider>
-      </Router>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </Router>
   );
 };
 
