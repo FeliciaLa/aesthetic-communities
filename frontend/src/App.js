@@ -123,10 +123,11 @@ const App = () => {
             <Route path="/password-reset" element={<PasswordReset />} />
             <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
             <Route path="*" element={
-              <div>
+              <div style={{ padding: '20px' }}>
                 <h2>Debug Info</h2>
                 <p>Current Path: {window.location.pathname}</p>
-                <p>This is a catch-all route for debugging</p>
+                <p>Expected Path: /auth/activate/[registration_id]</p>
+                <p>This page means the route wasn't matched correctly</p>
               </div>
             } />
           </Routes>
