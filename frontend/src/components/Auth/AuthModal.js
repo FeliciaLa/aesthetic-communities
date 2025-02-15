@@ -96,14 +96,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 password_confirm: confirmPassword
             });
             
-            if (response && response.token) {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('userId', response.user_id.toString());
-                localStorage.setItem('username', response.username);
-                setTimeout(async () => {
-                    await onLoginSuccess();
-                }, 100);
-            }
+            onClose();
+            alert('Please check your email to activate your account');
         } else {
             const response = await authService.login({
                 username,
