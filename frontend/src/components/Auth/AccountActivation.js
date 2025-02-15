@@ -9,37 +9,27 @@ const AccountActivation = () => {
     useEffect(() => {
         const activateAccount = async () => {
             try {
-                console.log('Attempting activation with ID:', registration_id);
-                // Add /api prefix since it's not in the base URL
-                const response = await api.post(`/api/auth/activate/${registration_id}/`, {}, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                console.log('Activation response:', response);
-
-                if (response.data && response.data.message) {
-                    navigate('/', { 
-                        state: { 
-                            showAuthModal: true,
-                            initialMode: 'login',
-                            message: response.data.message
-                        },
-                        replace: true
-                    });
-                } else {
-                    throw new Error('Invalid response from server');
-                }
-            } catch (error) {
-                console.error('Activation error:', error.response || error);
+                console.log('Attempting to activate account...');
+                await api.post(`auth/activate/${registration_id}/`);
+                console.log('Account activated successfully');
+                
+                // Redirect to login with a success message
                 navigate('/', { 
                     state: { 
                         showAuthModal: true,
                         initialMode: 'login',
-                        error: error.response?.data?.error || 'Account activation failed. Please try registering again.'
-                    },
-                    replace: true
+                        message: 'Account activated successfully! Please log in.' 
+                    }
+                });
+            } catch (error) {
+                console.error('Activation failed:', error);
+                // Redirect to login with an error message
+                navigate('/', { 
+                    state: { 
+                        showAuthModal: true,
+                        initialMode: 'login',
+                        error: 'Account activation failed. Please try registering again.' 
+                    }
                 });
             }
         };
@@ -47,16 +37,8 @@ const AccountActivation = () => {
         activateAccount();
     }, [registration_id, navigate]);
 
-    return (
-        <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh' 
-        }}>
-            Activating your account...
-        </div>
-    );
+    // No need for a UI - this component just handles the activation and redirect
+    return null;
 };
 
 export default AccountActivation; 
