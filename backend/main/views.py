@@ -120,7 +120,7 @@ class RegisterView(APIView):
                 print(f"DEBUG: Stored registration data in cache for {email}")
                 
                 # Generate the activation URL
-                activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
+                activation_url = f"{settings.FRONTEND_URL}/auth/activate/{registration_id}"
                 
                 # Send email
                 try:
