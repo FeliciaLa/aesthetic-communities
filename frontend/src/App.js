@@ -88,11 +88,19 @@ const App = () => {
           )}
 
           <Routes>
-            {/* Test route - add this first */}
-            <Route path="/test" element={<div>Test Route Works!</div>} />
+            {/* Test route */}
+            <Route path="/test" element={
+              <div style={{ 
+                padding: '20px',
+                textAlign: 'center',
+                marginTop: '50px'
+              }}>
+                <h1>Test Route</h1>
+                <p>If you can see this, routing is working correctly!</p>
+              </div>
+            } />
             
             {/* Activation routes */}
-            <Route path="activate/:registration_id" element={<AccountActivation />} />
             <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
             
             {/* Auth routes */}
