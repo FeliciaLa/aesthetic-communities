@@ -50,13 +50,10 @@ const AccountActivation = () => {
     useEffect(() => {
         console.log('=== Debug Info ===');
         console.log('Current URL:', window.location.href);
-        console.log('API Base URL:', process.env.REACT_APP_API_URL);
+        console.log('API Base URL:', api.defaults.baseURL);
         
         const activateAccount = async () => {
             try {
-                const fullUrl = `${process.env.REACT_APP_API_URL}/auth/activate/${registration_id}/`;
-                console.log('Making request to:', fullUrl);
-                
                 const response = await api.post(
                     `auth/activate/${registration_id}/`, 
                     {}, 
@@ -73,12 +70,13 @@ const AccountActivation = () => {
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
-                console.error('Detailed error:', {
+                console.error('Activation error:', {
                     message: err.message,
                     status: err.response?.status,
                     data: err.response?.data,
                     code: err.code,
-                    url: `${process.env.REACT_APP_API_URL}/auth/activate/${registration_id}/`
+                    baseURL: api.defaults.baseURL,
+                    url: `auth/activate/${registration_id}/`
                 });
                 setError(err.response?.data?.error || 'Failed to activate account');
                 setStatus('error');
