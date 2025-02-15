@@ -46,12 +46,21 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting to activate with ID:', registration_id);
-                const response = await api.post(`/auth/activate/${registration_id}/`);
+                const fullUrl = `/auth/activate/${registration_id}/`;
+                console.log('Making request to:', fullUrl);
+                
+                const response = await api.post(fullUrl);
                 console.log('Activation response:', response);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
                 console.error('Activation error:', err);
+                console.error('Error details:', {
+                    message: err.message,
+                    response: err.response?.data,
+                    status: err.response?.status,
+                    baseURL: api.defaults.baseURL
+                });
                 setStatus('error');
             }
         };
