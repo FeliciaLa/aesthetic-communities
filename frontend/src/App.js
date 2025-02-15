@@ -88,7 +88,10 @@ const App = () => {
           )}
 
           <Routes>
-            {/* Activation routes first */}
+            {/* Test route - add this first */}
+            <Route path="/test" element={<div>Test Route Works!</div>} />
+            
+            {/* Activation routes */}
             <Route path="activate/:registration_id" element={<AccountActivation />} />
             <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
             
@@ -133,7 +136,7 @@ const App = () => {
               setShowAuthModal(true);
             }}/>} />
             
-            {/* Debug catch-all route - Add more debugging info */}
+            {/* Debug catch-all route */}
             <Route path="*" element={
               <div style={{ padding: '20px' }}>
                 <h2>Debug Info</h2>
