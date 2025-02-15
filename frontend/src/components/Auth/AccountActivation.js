@@ -45,10 +45,13 @@ const AccountActivation = () => {
     useEffect(() => {
         const activateAccount = async () => {
             try {
-                await api.post(`/auth/activate/${registration_id}/`);
+                console.log('Attempting to activate with ID:', registration_id);
+                const response = await api.post(`/api/auth/activate/${registration_id}/`);
+                console.log('Activation response:', response);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
             } catch (err) {
+                console.error('Activation error:', err);
                 setStatus('error');
             }
         };

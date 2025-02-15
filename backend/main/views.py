@@ -112,8 +112,8 @@ class RegisterView(APIView):
                 )
                 print(f"DEBUG: Stored registration data in cache for {email}")
                 
-                # Make sure this matches EXACTLY with your frontend route
-                activation_url = f"{settings.FRONTEND_URL}/auth/activate/{registration_id}"
+                # Generate the activation URL that users will click in their email
+                activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
                 print(f"DEBUG: Generated activation URL: {activation_url}")
                 
                 # Create a more formatted email message
