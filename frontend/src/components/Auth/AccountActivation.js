@@ -46,7 +46,7 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting to activate with ID:', registration_id);
-                const response = await api.post(`/api/auth/activate/${registration_id}/`);
+                const response = await api.post(`/auth/activate/${registration_id}/`);
                 console.log('Activation response:', response);
                 setStatus('success');
                 setTimeout(() => navigate('/login'), 3000);
