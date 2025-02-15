@@ -25,42 +25,16 @@ const AccountActivation = () => {
     const [status, setStatus] = useState('activating');
     const { registration_id } = useParams();
     const navigate = useNavigate();
-    const [error, setError] = useState('');
 
     useEffect(() => {
-        console.log('=== Debug Info ===');
-        console.log('Current URL:', window.location.href);
-        console.log('API Base URL:', api.defaults.baseURL);
-        
         const activateAccount = async () => {
             try {
-                // Use the api instance directly - it already has the base URL configured
-                const response = await api.post(
-                    `auth/activate/${registration_id}/`, 
-                    {}, 
-                    { 
-                        timeout: 10000,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    }
-                );
-                
-                console.log('Activation response:', response);
+                await api.post(`auth/activate/${registration_id}/`);
                 setStatus('success');
-                setTimeout(() => navigate('/login'), 3000);
-            } catch (err) {
-                console.error('Activation error:', {
-                    message: err.message,
-                    status: err.response?.status,
-                    data: err.response?.data,
-                    code: err.code,
-                    baseURL: api.defaults.baseURL,
-                    url: `auth/activate/${registration_id}/`
-                });
-                setError(err.response?.data?.error || 'Failed to activate account');
+                setTimeout(() => navigate('/'), 3000);
+            } catch (error) {
                 setStatus('error');
+                console.error('Activation failed:', error);
             }
         };
 
@@ -72,15 +46,12 @@ const AccountActivation = () => {
             <Card>
                 <h2>Account Activation</h2>
                 {status === 'activating' && <p>Activating your account...</p>}
-                {status === 'success' && (
-                    <SuccessMessage>
-                        Account activated successfully! Redirecting to login...
-                    </SuccessMessage>
-                )}
+                {status === 'success' && <p>Account activated successfully! Redirecting...</p>}
                 {status === 'error' && (
-                    <ErrorMessage>
-                        {error}
-                    </ErrorMessage>
+                    <>
+                        <p>Failed to activate account. Please try again.</p>
+                        <button onClick={() => navigate('/')}>Go Home</button>
+                    </>
                 )}
             </Card>
         </Container>
