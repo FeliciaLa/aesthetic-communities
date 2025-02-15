@@ -9,26 +9,31 @@ const AccountActivation = () => {
     useEffect(() => {
         const activateAccount = async () => {
             try {
-                console.log('Attempting to activate account...');
-                await api.post(`/api/auth/activate/${registration_id}/`);
-                console.log('Account activated successfully');
-                
-                // Redirect to login with a success message
-                navigate('/', { 
-                    state: { 
-                        showAuthModal: true,
-                        initialMode: 'login',
-                        message: 'Account activated successfully! Please log in.' 
+                // Make the request with proper headers
+                const response = await api.post(`auth/activate/${registration_id}/`, {}, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     }
                 });
+
+                if (response.data && response.data.message) {
+                    navigate('/', { 
+                        state: { 
+                            showAuthModal: true,
+                            initialMode: 'login',
+                            message: response.data.message
+                        }
+                    });
+                } else {
+                    throw new Error('Invalid response from server');
+                }
             } catch (error) {
-                console.error('Activation failed:', error);
-                // Redirect to login with an error message
                 navigate('/', { 
                     state: { 
                         showAuthModal: true,
                         initialMode: 'login',
-                        error: 'Account activation failed. Please try registering again.' 
+                        error: error.response?.data?.error || 'Account activation failed. Please try registering again.'
                     }
                 });
             }
@@ -37,8 +42,7 @@ const AccountActivation = () => {
         activateAccount();
     }, [registration_id, navigate]);
 
-    // No need for a UI - this component just handles the activation and redirect
-    return null;
+    return <div>Activating your account...</div>;
 };
 
 export default AccountActivation; 

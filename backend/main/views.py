@@ -104,65 +104,51 @@ class RegisterView(APIView):
                 registration_id = str(uuid.uuid4())
                 email = serializer.validated_data['email']
                 
-                # Store in cache
+                # Store validated data in cache with all required fields
+                cache_data = {
+                    'username': serializer.validated_data['username'],
+                    'email': serializer.validated_data['email'],
+                    'password': serializer.validated_data['password']
+                }
+                
+                # Store in cache with longer timeout
                 cache.set(
                     f'registration_{registration_id}',
-                    serializer.validated_data,
+                    cache_data,
                     timeout=60 * 60 * 24  # 24 hours
                 )
                 print(f"DEBUG: Stored registration data in cache for {email}")
                 
-                # Generate the activation URL that users will click in their email
+                # Generate the activation URL
                 activation_url = f"{settings.FRONTEND_URL}/activate/{registration_id}"
-                print(f"DEBUG: Generated activation URL: {activation_url}")
                 
-                # Create a more formatted email message
-                email_subject = 'Activate Your Almas Account'
-                email_message = f'''
-                Hello!
-
-                Thank you for registering with Almas. To activate your account, please click the link below:
-
-                {activation_url}
-
-                If you did not request this registration, please ignore this email.
-
-                Best regards,
-                The Almas Team
-                '''
-                
+                # Send email
                 try:
-                    # Try to establish SMTP connection first
-                    from django.core.mail import get_connection
-                    connection = get_connection(
-                        host=settings.EMAIL_HOST,
-                        port=settings.EMAIL_PORT,
-                        username=settings.EMAIL_HOST_USER,
-                        password=settings.EMAIL_HOST_PASSWORD,
-                        use_tls=settings.EMAIL_USE_TLS,
-                    )
+                    email_subject = 'Activate Your Almas Account'
+                    email_message = f'''
+                    Hello!
+
+                    Thank you for registering with Almas. To activate your account, please click the link below:
+
+                    {activation_url}
+
+                    If you did not request this registration, please ignore this email.
+
+                    Best regards,
+                    The Almas Team
+                    '''
                     
-                    print("DEBUG: Testing SMTP connection...")
-                    if connection.open():
-                        print("DEBUG: SMTP connection successful")
-                        
-                        # Now try to send the email
-                        send_mail(
-                            subject=email_subject,
-                            message=email_message,
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[email],
-                            fail_silently=False,
-                            connection=connection,
-                        )
-                        print(f"DEBUG: Email sent successfully to {email}")
-                        connection.close()
-                    else:
-                        raise Exception("Could not establish SMTP connection")
-                        
+                    send_mail(
+                        subject=email_subject,
+                        message=email_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                    print(f"DEBUG: Email sent successfully to {email}")
+                    
                 except Exception as mail_error:
                     print(f"DEBUG: Email sending failed - {str(mail_error)}")
-                    print(f"DEBUG: Full error - {repr(mail_error)}")
                     cache.delete(f'registration_{registration_id}')
                     return Response({
                         'error': f'Failed to send activation email: {str(mail_error)}'
@@ -1755,25 +1741,32 @@ class AccountActivationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, registration_id):
-        # Get registration data from cache
-        registration_data = cache.get(f'registration_{registration_id}')
-        
-        if not registration_data:
-            return Response(
-                {'error': 'Invalid or expired activation link'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            # Create user only after email verification
+            # Get registration data from cache
+            registration_data = cache.get(f'registration_{registration_id}')
+            
+            if not registration_data:
+                return Response(
+                    {'error': 'Invalid or expired activation link. Please register again.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Check if user already exists
+            if User.objects.filter(email=registration_data['email']).exists():
+                return Response(
+                    {'error': 'User with this email already exists'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create and activate user
             user = User.objects.create_user(
                 username=registration_data['username'],
                 email=registration_data['email'],
                 password=registration_data['password'],
-                is_active=True  # Activate immediately since email is verified
+                is_active=True  # Activate immediately
             )
             
-            # Clean up cache
+            # Clean up cache after successful creation
             cache.delete(f'registration_{registration_id}')
             
             return Response({
@@ -1781,7 +1774,8 @@ class AccountActivationView(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
+            print(f"Activation error: {str(e)}")  # Add logging
             return Response(
-                {'error': 'Failed to activate account'},
+                {'error': 'Failed to activate account. Please try again.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
