@@ -88,27 +88,6 @@ const App = () => {
           )}
 
           <Routes>
-            {/* Test route with debug logs */}
-            <Route path="/test" element={
-              (() => {
-                console.log('Test route rendered');
-                return (
-                  <div style={{ 
-                    padding: '20px',
-                    textAlign: 'center',
-                    marginTop: '50px',
-                    backgroundColor: '#f0f0f0',  // Added background color
-                    minHeight: '200px',          // Added minimum height
-                    border: '2px solid #ccc'     // Added border
-                  }}>
-                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
-                    <p>If you can see this, routing is working correctly!</p>
-                    <p>Current path: {window.location.pathname}</p>
-                  </div>
-                );
-              })()
-            } />
-            
             {/* Activation routes */}
             <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
             
@@ -152,6 +131,27 @@ const App = () => {
               setInitialAuthMode('register');
               setShowAuthModal(true);
             }}/>} />
+            
+            {/* Move test route here, just before the catch-all */}
+            <Route path="/test" element={
+              (() => {
+                console.log('Test route rendered');
+                return (
+                  <div style={{ 
+                    padding: '20px',
+                    textAlign: 'center',
+                    marginTop: '50px',
+                    backgroundColor: '#f0f0f0',
+                    minHeight: '200px',
+                    border: '2px solid #ccc'
+                  }}>
+                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                    <p>If you can see this, routing is working correctly!</p>
+                    <p>Current path: {window.location.pathname}</p>
+                  </div>
+                );
+              })()
+            } />
             
             {/* Debug catch-all route */}
             <Route path="*" element={
