@@ -43,6 +43,9 @@ const AccountActivation = () => {
     const { registration_id } = useParams();
     const navigate = useNavigate();
 
+    console.log('AccountActivation component mounted');
+    console.log('Registration ID from params:', registration_id);
+
     useEffect(() => {
         const activateAccount = async () => {
             try {
