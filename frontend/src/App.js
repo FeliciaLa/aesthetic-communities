@@ -120,6 +120,13 @@ const AppContent = () => {
         } />
         <Route path="/password-reset" element={<PasswordReset />} />
         <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+        <Route path="*" element={
+          <div>
+            <h2>Debug Info</h2>
+            <p>Current Path: {window.location.pathname}</p>
+            <p>This is a catch-all route for debugging</p>
+          </div>
+        } />
       </Routes>
 
       {showAuthModal && (
