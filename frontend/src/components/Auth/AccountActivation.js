@@ -10,8 +10,8 @@ const AccountActivation = () => {
         const activateAccount = async () => {
             try {
                 console.log('Attempting activation with ID:', registration_id);
-                // Remove the /api prefix since it's in the base URL
-                const response = await api.post(`auth/activate/${registration_id}/`, {}, {
+                // Add /api prefix since it's not in the base URL
+                const response = await api.post(`/api/auth/activate/${registration_id}/`, {}, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
