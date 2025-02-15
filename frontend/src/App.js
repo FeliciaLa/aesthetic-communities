@@ -142,13 +142,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <ErrorBoundary>
-        <MusicProvider>
-          <AppContent />
-        </MusicProvider>
-      </ErrorBoundary>
-    </Router>
+    <ErrorBoundary>
+      <MusicProvider>
+        <AppContent />
+      </MusicProvider>
+    </ErrorBoundary>
   );
 };
 
