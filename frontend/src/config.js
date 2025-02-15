@@ -9,11 +9,11 @@ if (!API_BASE_URL) {
     console.error('API_BASE_URL is not set! Check .env.production file');
 }
 
-// Don't add /api/ here since it's part of the URL patterns
+// Don't add /api/ here since it's already in the URL
 export const getApiUrl = () => {
     if (!API_BASE_URL) {
         console.error('API_BASE_URL is not set');
-        return 'https://aesthetic-communities-production.up.railway.app/api/';
+        return 'https://aesthetic-communities-production.up.railway.app/';
     }
     // Remove any trailing slashes
     const cleanBaseUrl = API_BASE_URL.replace(/\/+$/, '');
