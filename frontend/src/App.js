@@ -18,7 +18,7 @@ import { createContext, useContext } from 'react';
 import api from './api';
 import AccountActivation from './components/Auth/AccountActivation';
 
-const AppContent = () => {
+const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -75,76 +75,70 @@ const AppContent = () => {
   }
 
   return (
-    <>
-      {isLoggedIn ? (
-        <NavbarLoggedIn handleLogout={handleLogout} />
-      ) : (
-        <NavbarLoggedOut 
-          setShowAuthModal={setShowAuthModal} 
-          setInitialAuthMode={setInitialAuthMode}
-        />
-      )}
-
-      <Routes>
-        <Route path="/activate/:registration_id" element={<AccountActivation />} />
-        <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
-          setInitialAuthMode('register');
-          setShowAuthModal(true);
-        }}/>} />
-        <Route 
-          path="/communities" 
-          element={
-            <ExploreCommunities 
-              isLoggedIn={isLoggedIn}
-              onAuthClick={() => {
-                setInitialAuthMode('register');
-                setShowAuthModal(true);
-              }}
-            />
-          } 
-        />
-        <Route
-          path="/create-community"
-          element={
-            <PrivateRoute isLoggedIn={isLoggedIn}>
-              <CreateCommunity />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/communities/:id" element={<CommunityDetail />} />
-        <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
-        <Route path="/profile" element={
-          <PrivateRoute isLoggedIn={isLoggedIn}>
-            <Profile />
-          </PrivateRoute>
-        } />
-        <Route path="/password-reset" element={<PasswordReset />} />
-        <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
-        <Route path="*" element={
-          <div>
-            <h2>Debug Info</h2>
-            <p>Current Path: {window.location.pathname}</p>
-            <p>This is a catch-all route for debugging</p>
-          </div>
-        } />
-      </Routes>
-
-      {showAuthModal && (
-        <AuthModal
-          initialMode={initialAuthMode}
-          onClose={() => setShowAuthModal(false)}
-          onLoginSuccess={handleLoginSuccess}
-        />
-      )}
-    </>
-  );
-};
-
-const App = () => {
-  return (
     <ErrorBoundary>
       <MusicProvider>
-        <AppContent />
+        <>
+          {isLoggedIn ? (
+            <NavbarLoggedIn handleLogout={handleLogout} />
+          ) : (
+            <NavbarLoggedOut 
+              setShowAuthModal={setShowAuthModal} 
+              setInitialAuthMode={setInitialAuthMode}
+            />
+          )}
+
+          <Routes>
+            <Route path="/activate/:registration_id" element={<AccountActivation />} />
+            <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+              setInitialAuthMode('register');
+              setShowAuthModal(true);
+            }}/>} />
+            <Route 
+              path="/communities" 
+              element={
+                <ExploreCommunities 
+                  isLoggedIn={isLoggedIn}
+                  onAuthClick={() => {
+                    setInitialAuthMode('register');
+                    setShowAuthModal(true);
+                  }}
+                />
+              } 
+            />
+            <Route
+              path="/create-community"
+              element={
+                <PrivateRoute isLoggedIn={isLoggedIn}>
+                  <CreateCommunity />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/communities/:id" element={<CommunityDetail />} />
+            <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
+            <Route path="/profile" element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <Profile />
+              </PrivateRoute>
+            } />
+            <Route path="/password-reset" element={<PasswordReset />} />
+            <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+            <Route path="*" element={
+              <div>
+                <h2>Debug Info</h2>
+                <p>Current Path: {window.location.pathname}</p>
+                <p>This is a catch-all route for debugging</p>
+              </div>
+            } />
+          </Routes>
+
+          {showAuthModal && (
+            <AuthModal
+              initialMode={initialAuthMode}
+              onClose={() => setShowAuthModal(false)}
+              onLoginSuccess={handleLoginSuccess}
+            />
+          )}
+        </>
       </MusicProvider>
     </ErrorBoundary>
   );
