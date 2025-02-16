@@ -147,5 +147,19 @@ export const authService = {
         } catch (error) {
             return false;
         }
-    }
+    },
+
+    deleteProfile: async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await api.delete('/auth/profile/', {
+                headers: {
+                    'Authorization': `Token ${token}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 }; 

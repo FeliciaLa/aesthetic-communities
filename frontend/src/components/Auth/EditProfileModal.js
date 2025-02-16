@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import api from '../../api';
 import { API_BASE_URL } from '../../config';
+import { useNavigate } from 'react-router-dom';
+import { Modal, ModalContent } from '../../components/Modal';
+import { authService } from '../../services/authService';
 
 const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +12,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   });
   const [previewImage, setPreviewImage] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -49,11 +53,26 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
     }
   };
 
+  const handleDeleteProfile = async () => {
+    if (window.confirm('Are you sure you want to delete your profile? This cannot be undone.')) {
+      try {
+        await authService.deleteProfile();
+        localStorage.clear();
+        navigate('/', { 
+          state: { message: 'Your profile has been successfully deleted.' }
+        });
+      } catch (error) {
+        console.error('Error deleting profile:', error);
+        setError('Failed to delete profile. Please try again.');
+      }
+    }
+  };
+
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <Modal show={show} onClose={onClose}>
+      <ModalContent>
         <h2>Edit Profile</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -83,13 +102,46 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
 
           {error && <div className="error-message">{error}</div>}
 
-          <div className="button-group">
-            <button type="button" onClick={onClose}>Cancel</button>
-            <button type="submit">Save Changes</button>
+          <div className="modal-footer">
+            <button onClick={onClose} className="cancel-button">
+              Cancel
+            </button>
+            <button onClick={handleSubmit} className="save-button">
+              Save Changes
+            </button>
+            <button 
+              onClick={handleDeleteProfile}
+              className="delete-button"
+            >
+              Delete Profile
+            </button>
           </div>
         </form>
-      </div>
-    </div>
+      </ModalContent>
+
+      <style jsx>{`
+        .delete-button {
+          background: #ff4444;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.2s ease;
+          margin-left: auto;  /* This will push it to the right */
+        }
+
+        .delete-button:hover {
+          background: #cc0000;
+        }
+
+        .modal-footer {
+          display: flex;
+          gap: 10px;
+          margin-top: 20px;
+        }
+      `}</style>
+    </Modal>
   );
 };
 
