@@ -31,9 +31,8 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
     bio: profile?.bio || '',
     avatar: null
   });
+  const [error, setError] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -129,16 +128,13 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="modal-footer">
-            <button onClick={onClose} className="cancel-button">
+            <button type="button" onClick={onClose}>
               Cancel
             </button>
-            <button onClick={handleSubmit} className="save-button">
+            <button type="submit">
               Save Changes
             </button>
-            <button 
-              onClick={handleDeleteProfile}
-              className="delete-button"
-            >
+            <button type="button" onClick={handleDeleteProfile} className="delete-button">
               Delete Profile
             </button>
           </div>
