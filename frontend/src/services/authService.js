@@ -157,7 +157,6 @@ const authService = {
                     'Authorization': `Token ${token}`
                 }
             });
-            // 204 means success for DELETE operations
             return response.status === 204;
         } catch (error) {
             throw error;
