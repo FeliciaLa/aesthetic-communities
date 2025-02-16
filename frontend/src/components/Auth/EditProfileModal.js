@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import api from '../../api';
 import { API_BASE_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
-import authService from '../../services/authService'; 
+import { authService } from '../../services/authService';
 
 const ModalOverlay = styled.div`
   position: fixed;
