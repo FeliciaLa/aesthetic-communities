@@ -4,7 +4,11 @@
   "framework": "create-react-app",
   "rewrites": [
     {
-      "source": "/activate/:path*",
+      "source": "/auth/activate/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/test",
       "destination": "/index.html"
     },
     {
