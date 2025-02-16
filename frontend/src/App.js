@@ -17,6 +17,7 @@ import { authService } from './services/authService';
 import { createContext, useContext } from 'react';
 import api from './api';
 import AccountActivation from './components/Auth/AccountActivation';
+import AccountDeleted from './components/Auth/AccountDeleted';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -158,6 +159,9 @@ const App = () => {
                   setInitialAuthMode('register');
                   setShowAuthModal(true);
                 }}/>} />
+
+                {/* Account deleted route */}
+                <Route path="/account-deleted" element={<AccountDeleted />} />
               </>
             )}
             

@@ -79,20 +79,14 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
       try {
         const response = await authService.deleteProfile();
         if (response) {
-          // First clear auth data
+          // Clear auth data
           authService.logout();
-          // Navigate with state message
-          navigate('/', { 
-            state: { message: 'Your profile has been successfully deleted' }
-          });
-          // Force reload after small delay
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
+          // Redirect to the account deleted page
+          window.location.replace('/account-deleted');
         }
       } catch (error) {
+        alert(error.response?.data?.error || 'Failed to delete profile. Please try again.');
         console.error('Error deleting profile:', error);
-        setError('Failed to delete profile. Please try again.');
       }
     }
   };
