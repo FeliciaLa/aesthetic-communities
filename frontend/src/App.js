@@ -70,10 +70,6 @@ const App = () => {
     navigate('/');
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <ErrorBoundary>
       <MusicProvider>
@@ -112,33 +108,39 @@ const App = () => {
             <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
             
             {/* Protected routes */}
-            <Route path="/profile" element={
-              <PrivateRoute isLoggedIn={isLoggedIn}>
-                <Profile />
-              </PrivateRoute>
-            } />
-            
-            {/* Community routes */}
-            <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
-            <Route path="/communities/:id" element={<CommunityDetail />} />
-            <Route 
-              path="/communities" 
-              element={
-                <ExploreCommunities 
-                  isLoggedIn={isLoggedIn}
-                  onAuthClick={() => {
-                    setInitialAuthMode('register');
-                    setShowAuthModal(true);
-                  }}
+            {isLoading ? (
+              <Route path="*" element={<div>Loading...</div>} />
+            ) : (
+              <>
+                <Route path="/profile" element={
+                  <PrivateRoute isLoggedIn={isLoggedIn}>
+                    <Profile />
+                  </PrivateRoute>
+                } />
+                
+                {/* Community routes */}
+                <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
+                <Route path="/communities/:id" element={<CommunityDetail />} />
+                <Route 
+                  path="/communities" 
+                  element={
+                    <ExploreCommunities 
+                      isLoggedIn={isLoggedIn}
+                      onAuthClick={() => {
+                        setInitialAuthMode('register');
+                        setShowAuthModal(true);
+                      }}
+                    />
+                  } 
                 />
-              } 
-            />
-            
-            {/* Home route */}
-            <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
-              setInitialAuthMode('register');
-              setShowAuthModal(true);
-            }}/>} />
+                
+                {/* Home route */}
+                <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+                  setInitialAuthMode('register');
+                  setShowAuthModal(true);
+                }}/>} />
+              </>
+            )}
             
             {/* Debug catch-all route */}
             <Route path="*" element={
