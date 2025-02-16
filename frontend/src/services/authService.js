@@ -157,10 +157,8 @@ export const authService = {
                     'Authorization': `Token ${token}`
                 }
             });
-            if (response.status === 204) {
-                return true;
-            }
-            throw new Error('Failed to delete profile');
+            // 204 means success for DELETE operations
+            return response.status === 204;
         } catch (error) {
             throw error;
         }
