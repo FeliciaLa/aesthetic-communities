@@ -1647,6 +1647,21 @@ class ProfileUpdateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    def delete(self, request):
+        try:
+            user = request.user
+            user.delete()  # This will cascade delete the profile as well
+            return Response(
+                {'message': 'Profile deleted successfully'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            logger.error(f"Error deleting profile: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 class PasswordResetView(APIView):
     permission_classes = [AllowAny]
     

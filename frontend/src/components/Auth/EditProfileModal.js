@@ -140,8 +140,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
         </form>
       </ModalContent>
 
-      <style jsx>{`
-        .delete-button {
+      <style jsx>{`        .delete-button {
           background: #ff4444;
           color: white;
           border: none;
