@@ -165,12 +165,11 @@ const App = () => {
               </>
             )}
             
-            {/* Debug catch-all route */}
+            {/* Generic 404 route - should be last */}
             <Route path="*" element={
               <div style={{ padding: '20px' }}>
                 <h2>Page Not Found</h2>
-                <p>Current Path: {window.location.pathname}</p>
-                <p>The requested page could not be found.</p>
+                <p>The requested page {window.location.pathname} could not be found.</p>
               </div>
             } />
           </Routes>

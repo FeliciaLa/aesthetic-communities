@@ -13,6 +13,8 @@ const PasswordResetConfirm = () => {
   const { userId, token } = useParams();
   const navigate = useNavigate();
 
+  console.log('PasswordResetConfirm rendered with:', { userId, token }); // Debug log
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -38,40 +40,28 @@ const PasswordResetConfirm = () => {
   return (
     <Container>
       <Card>
-        <h2>Reset Your Password</h2>
-        
+        <h2>Reset Password</h2>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
         {success ? (
-          <SuccessMessage>
-            Password reset successful! Redirecting to login...
-          </SuccessMessage>
+          <SuccessMessage>Password reset successful! Redirecting...</SuccessMessage>
         ) : (
           <Form onSubmit={handleSubmit}>
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-            
-            <InputGroup>
-              <Label>New Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength="8"
-              />
-            </InputGroup>
-
-            <InputGroup>
-              <Label>Confirm Password</Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength="8"
-              />
-            </InputGroup>
-
+            <Input
+              type="password"
+              placeholder="New Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Confirm New Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Resetting...' : 'Reset Password'}
+              {isSubmitting ? "Resetting..." : "Reset Password"}
             </Button>
           </Form>
         )}
@@ -80,14 +70,13 @@ const PasswordResetConfirm = () => {
   );
 };
 
-// Add styled components
+// Styled components
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 2rem;
-  background: #f5f5f5;
+  min-height: 80vh;
+  padding: 20px;
 `;
 
 const Card = styled.div`
@@ -105,64 +94,32 @@ const Form = styled.form`
   gap: 1rem;
 `;
 
-const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-  color: #333;
-`;
-
 const Input = styled.input`
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
-  
-  &:focus {
-    outline: none;
-    border-color: #0066cc;
-  }
 `;
 
 const Button = styled.button`
-  padding: 0.75rem;
-  background: #0066cc;
+  padding: 0.5rem;
+  background: #fa8072;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 1rem;
   cursor: pointer;
-  
-  &:hover {
-    background: #0052a3;
-  }
-  
   &:disabled {
-    background: #ccc;
-    cursor: not-allowed;
+    opacity: 0.7;
   }
-`;
-
-const SuccessMessage = styled.div`
-  color: #28a745;
-  padding: 1rem;
-  background: #d4edda;
-  border-radius: 4px;
-  margin: 1rem 0;
-  text-align: center;
 `;
 
 const ErrorMessage = styled.div`
-  color: #dc3545;
-  padding: 1rem;
-  background: #f8d7da;
-  border-radius: 4px;
-  margin: 1rem 0;
-  text-align: center;
+  color: red;
+  margin-bottom: 1rem;
+`;
+
+const SuccessMessage = styled.div`
+  color: green;
+  margin-bottom: 1rem;
 `;
 
 export default PasswordResetConfirm; 

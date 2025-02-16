@@ -131,7 +131,7 @@ export const authService = {
     resetPassword: async (userId, token, password) => {
         try {
             const response = await api.post(
-                `/reset-password/${userId}/${token}/`,
+                `/password-reset-confirm/${userId}/${token}/`,
                 { password }
             );
             return response.data;
