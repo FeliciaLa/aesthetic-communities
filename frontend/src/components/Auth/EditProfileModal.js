@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import api from '../../api';
 import { API_BASE_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
-import { Modal, ModalContent } from '../Modal';
+import { Modal, ModalContent } from '../../components/Modal';
 import { authService } from '../../services/authService';
 
 const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
