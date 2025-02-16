@@ -29,7 +29,7 @@ const PasswordResetConfirm = () => {
         { password }
       );
       setSuccess(true);
-      setTimeout(() => navigate('/'), 3000); // Redirect after 3 seconds
+      setTimeout(() => navigate('/'), 3000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to reset password');
     } finally {
