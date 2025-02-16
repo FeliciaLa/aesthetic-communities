@@ -33,6 +33,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   });
   const [error, setError] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -80,9 +81,14 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
         if (response) {
           // First clear auth data
           authService.logout();
-          // Then show message and redirect
-          const redirectUrl = '/?message=' + encodeURIComponent('Your profile has been successfully deleted');
-          window.location.href = redirectUrl;
+          // Navigate with state message
+          navigate('/', { 
+            state: { message: 'Your profile has been successfully deleted' }
+          });
+          // Force reload after small delay
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         }
       } catch (error) {
         console.error('Error deleting profile:', error);

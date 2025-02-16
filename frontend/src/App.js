@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import NavbarLoggedIn from "./components/Navigation/NavbarLoggedIn";
 import NavbarLoggedOut from "./components/Navigation/NavbarLoggedOut";
 import Profile from "./components/Auth/Profile";
@@ -24,6 +24,7 @@ const App = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -34,6 +35,14 @@ const App = () => {
       window.history.replaceState({}, '', '/');
     }
   }, []);
+
+  useEffect(() => {
+    if (location.state?.message) {
+      alert(location.state.message);
+      // Clean up the message from state
+      window.history.replaceState({}, '');
+    }
+  }, [location]);
 
   const validateAuth = async () => {
     setIsLoading(true);
