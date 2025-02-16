@@ -50,9 +50,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Don't intercept delete profile errors
         if (error.response?.status === 401 && 
             !error.config.url.includes('login') && 
-            !error.config.url.includes('register')) {
+            !error.config.url.includes('register') &&
+            !error.config.url.includes('profile/update')) {
             authService.logout();
             window.location.href = '/';
         }

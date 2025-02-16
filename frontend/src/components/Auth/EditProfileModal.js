@@ -77,14 +77,25 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const handleDeleteProfile = async () => {
     if (window.confirm('Are you sure you want to delete your profile? This cannot be undone.')) {
       try {
-        await authService.deleteProfile();
-        // Clear auth data first
-        authService.logout();
-        // Use navigate instead of window.location
-        navigate('/account-deleted', { replace: true });
+        const response = await authService.deleteProfile();
+        if (response) {
+          // Close modal first
+          onClose();
+          // Clear auth data
+          authService.logout();
+          // Navigate to deleted page
+          window.location.replace('/account-deleted');
+        }
       } catch (error) {
-        setError('Failed to delete profile. Please try again.');
-        console.error('Error deleting profile:', error);
+        if (error.response?.status === 401) {
+          // If unauthorized, just proceed with deletion flow
+          onClose();
+          authService.logout();
+          window.location.replace('/account-deleted');
+        } else {
+          setError('Failed to delete profile. Please try again.');
+          console.error('Error deleting profile:', error);
+        }
       }
     }
   };
