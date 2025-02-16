@@ -50,14 +50,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Check the full URL for debugging
-        console.log('API Error URL:', error.config.url);
-        
-        // Don't intercept profile-related errors
+        // Don't intercept delete profile errors
         if (error.response?.status === 401 && 
             !error.config.url.includes('login') && 
             !error.config.url.includes('register') &&
-            !error.config.url.includes('profile')) {  // Changed this line to catch all profile endpoints
+            !error.config.url.includes('profile/update') &&
+            !error.config.url.includes('profile/delete')) {
             authService.logout();
             window.location.href = '/';
         }
