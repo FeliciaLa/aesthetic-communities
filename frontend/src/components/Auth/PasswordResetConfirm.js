@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import styled from 'styled-components';
+import authService from '../../services/authService';
 
 const PasswordResetConfirm = () => {
   const [password, setPassword] = useState('');
@@ -24,10 +25,7 @@ const PasswordResetConfirm = () => {
     }
 
     try {
-      await api.post(
-        `/reset-password/${userId}/${token}/`,
-        { password }
-      );
+      await authService.resetPassword(userId, token, password);
       setSuccess(true);
       setTimeout(() => navigate('/'), 3000);
     } catch (err) {
