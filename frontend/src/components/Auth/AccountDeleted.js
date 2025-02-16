@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { authService } from '../../services/authService';
+import authService from '../../services/authService';
 
 const Container = styled.div`
   display: flex;

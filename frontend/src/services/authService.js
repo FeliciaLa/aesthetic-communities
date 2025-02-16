@@ -1,7 +1,7 @@
 import api from '../api';
 import { API_BASE_URL } from '../config';
 
-export const authService = {
+const authService = {
     login: async (credentials) => {
         try {
             console.log('Login attempt:', {
@@ -163,4 +163,6 @@ export const authService = {
             throw error;
         }
     },
-}; 
+};
+
+export default authService; 
