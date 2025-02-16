@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import authService from '../../services/authService';
 
 const Container = styled.div`
   display: flex;
@@ -22,6 +23,9 @@ const RedirectMessage = styled.p`
 
 const AccountDeleted = () => {
   useEffect(() => {
+    // Clear auth data on mount
+    authService.logout();
+    
     // Redirect to home after 3 seconds
     const timer = setTimeout(() => {
       window.location.replace('/');
