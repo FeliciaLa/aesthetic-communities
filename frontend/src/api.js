@@ -54,7 +54,8 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && 
             !error.config.url.includes('login') && 
             !error.config.url.includes('register') &&
-            !error.config.url.includes('profile/update')) {
+            !error.config.url.includes('profile/update') &&
+            !error.config.url.includes('profile/delete')) {
             authService.logout();
             window.location.href = '/';
         }
