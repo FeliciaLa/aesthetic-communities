@@ -25,6 +25,16 @@ const App = () => {
   const [initialAuthMode, setInitialAuthMode] = useState('login');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get('message');
+    if (message) {
+      alert(message); // or use your preferred notification system
+      // Clean up URL after showing message
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
   const validateAuth = async () => {
     setIsLoading(true);
     try {

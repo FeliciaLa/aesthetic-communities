@@ -80,8 +80,11 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
         await authService.deleteProfile();
         // Clear all auth data immediately after successful deletion
         localStorage.clear();
-        // Navigate before any other API calls can happen
-        window.location.href = '/';  // Using window.location.href for a full page refresh
+        // Add success message to URL
+        const params = new URLSearchParams();
+        params.append('message', 'Your profile has been successfully deleted');
+        // Navigate with message
+        window.location.href = `/?${params.toString()}`;
       } catch (error) {
         console.error('Error deleting profile:', error);
         setError('Failed to delete profile. Please try again.');
