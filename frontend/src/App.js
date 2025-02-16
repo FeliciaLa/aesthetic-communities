@@ -88,6 +88,22 @@ const App = () => {
           )}
 
           <Routes>
+            {/* Test route - place it before the loading check */}
+            <Route path="/test" element={
+              <div style={{ 
+                padding: '20px',
+                textAlign: 'center',
+                marginTop: '50px',
+                backgroundColor: '#f0f0f0',
+                minHeight: '200px',
+                border: '2px solid #ccc'
+              }}>
+                <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                <p>If you can see this, routing is working correctly!</p>
+                <p>Current path: {window.location.pathname}</p>
+              </div>
+            } />
+            
             {/* Activation routes */}
             <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
             
@@ -96,14 +112,6 @@ const App = () => {
             <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
             
             {/* Protected routes */}
-            <Route
-              path="/create-community"
-              element={
-                <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <CreateCommunity />
-                </PrivateRoute>
-              }
-            />
             <Route path="/profile" element={
               <PrivateRoute isLoggedIn={isLoggedIn}>
                 <Profile />
@@ -131,27 +139,6 @@ const App = () => {
               setInitialAuthMode('register');
               setShowAuthModal(true);
             }}/>} />
-            
-            {/* Move test route here, just before the catch-all */}
-            <Route path="/test" element={
-              (() => {
-                console.log('Test route rendered');
-                return (
-                  <div style={{ 
-                    padding: '20px',
-                    textAlign: 'center',
-                    marginTop: '50px',
-                    backgroundColor: '#f0f0f0',
-                    minHeight: '200px',
-                    border: '2px solid #ccc'
-                  }}>
-                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
-                    <p>If you can see this, routing is working correctly!</p>
-                    <p>Current path: {window.location.pathname}</p>
-                  </div>
-                );
-              })()
-            } />
             
             {/* Debug catch-all route */}
             <Route path="*" element={
