@@ -76,16 +76,14 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const handleDeleteProfile = async () => {
     if (window.confirm('Are you sure you want to delete your profile? This cannot be undone.')) {
       try {
-        await authService.deleteProfile();
-        // Show success message first
-        alert('Your profile has been successfully deleted');
-        // Clear all auth data
-        localStorage.clear();
-        // Add small delay before redirect
-        setTimeout(() => {
-          window.location.href = '/';
-          window.location.reload();
-        }, 100);
+        const response = await authService.deleteProfile();
+        if (response) {
+          // First clear auth data
+          authService.logout();
+          // Then show message and redirect
+          const redirectUrl = '/?message=' + encodeURIComponent('Your profile has been successfully deleted');
+          window.location.href = redirectUrl;
+        }
       } catch (error) {
         console.error('Error deleting profile:', error);
         setError('Failed to delete profile. Please try again.');
