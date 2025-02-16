@@ -82,8 +82,10 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
         localStorage.clear();
         // Show alert message
         alert('Your profile has been successfully deleted');
-        // Force a full page refresh to the home page
-        window.location.href = '/';
+        // Force a complete page reload and redirect to home
+        setTimeout(() => {
+          window.location.replace('/');
+        }, 500);
       } catch (error) {
         console.error('Error deleting profile:', error);
         setError('Failed to delete profile. Please try again.');
