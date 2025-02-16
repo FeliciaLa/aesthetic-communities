@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import api from '../../api';
 import { API_BASE_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
-import { Modal, ModalContent } from '../../components/Modal';
 import { authService } from '../../services/authService';
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+`;
 
 const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -71,8 +92,8 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
   if (!show) return null;
 
   return (
-    <Modal show={show} onClose={onClose}>
-      <ModalContent>
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={e => e.stopPropagation()}>
         <h2>Edit Profile</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -141,7 +162,7 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
           margin-top: 20px;
         }
       `}</style>
-    </Modal>
+    </ModalOverlay>
   );
 };
 
