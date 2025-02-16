@@ -1650,7 +1650,8 @@ class ProfileUpdateView(APIView):
     def delete(self, request):
         try:
             user = request.user
-            user.delete()  # This will cascade delete the profile as well
+            # Delete the user (this will cascade delete the profile)
+            user.delete()
             return Response(
                 {'message': 'Profile deleted successfully'},
                 status=status.HTTP_204_NO_CONTENT

@@ -152,7 +152,7 @@ export const authService = {
     deleteProfile: async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await api.delete('/auth/profile/', {
+            const response = await api.delete('/profile/update/', {
                 headers: {
                     'Authorization': `Token ${token}`
                 }
