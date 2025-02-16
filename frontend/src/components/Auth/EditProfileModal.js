@@ -79,17 +79,21 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
       try {
         const response = await authService.deleteProfile();
         if (response) {
-          // First close the modal to prevent state updates
+          // First close the modal
           onClose();
-          // Then redirect (this will trigger the logout on mount)
-          window.location.href = '/account-deleted';
+          // Small delay to ensure modal is closed
+          setTimeout(() => {
+            window.location.replace('/account-deleted');
+          }, 100);
         }
       } catch (error) {
         // Check if the error is because account was actually deleted
         if (error.response?.status === 401 || error.code === "ERR_NETWORK") {
-          // Account was deleted successfully, just redirect
+          // Account was deleted successfully
           onClose();
-          window.location.href = '/account-deleted';
+          setTimeout(() => {
+            window.location.replace('/account-deleted');
+          }, 100);
         } else {
           setError('Failed to delete profile. Please try again.');
           console.error('Error deleting profile:', error);
