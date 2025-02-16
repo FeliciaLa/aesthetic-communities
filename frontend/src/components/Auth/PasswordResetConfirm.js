@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import styled from 'styled-components';
-import authService from '../../services/authService';
+import { authService } from '../../services/authService';
 
 const PasswordResetConfirm = () => {
   const [password, setPassword] = useState('');
