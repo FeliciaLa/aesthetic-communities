@@ -84,34 +84,34 @@ const App = () => {
           )}
 
           <Routes>
-            {/* Test route - place it before the loading check */}
-            <Route path="/test" element={
-              <div style={{ 
-                padding: '20px',
-                textAlign: 'center',
-                marginTop: '50px',
-                backgroundColor: '#f0f0f0',
-                minHeight: '200px',
-                border: '2px solid #ccc'
-              }}>
-                <h1 style={{ color: '#fa8072' }}>Test Route</h1>
-                <p>If you can see this, routing is working correctly!</p>
-                <p>Current path: {window.location.pathname}</p>
-              </div>
-            } />
-            
-            {/* Activation routes */}
-            <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
-            
-            {/* Auth routes */}
-            <Route path="/password-reset" element={<PasswordReset />} />
-            <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
-            
-            {/* Protected routes */}
             {isLoading ? (
               <Route path="*" element={<div>Loading...</div>} />
             ) : (
               <>
+                {/* Test route */}
+                <Route path="/test" element={
+                  <div style={{ 
+                    padding: '20px',
+                    textAlign: 'center',
+                    marginTop: '50px',
+                    backgroundColor: '#f0f0f0',
+                    minHeight: '200px',
+                    border: '2px solid #ccc'
+                  }}>
+                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                    <p>If you can see this, routing is working correctly!</p>
+                    <p>Current path: {window.location.pathname}</p>
+                  </div>
+                } />
+
+                {/* Activation routes */}
+                <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
+                
+                {/* Auth routes */}
+                <Route path="/password-reset" element={<PasswordReset />} />
+                <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+                
+                {/* Protected routes */}
                 <Route path="/profile" element={
                   <PrivateRoute isLoggedIn={isLoggedIn}>
                     <Profile />
