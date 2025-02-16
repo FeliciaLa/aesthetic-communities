@@ -168,20 +168,9 @@ const App = () => {
             {/* Debug catch-all route */}
             <Route path="*" element={
               <div style={{ padding: '20px' }}>
-                <h2>Debug Info</h2>
+                <h2>Page Not Found</h2>
                 <p>Current Path: {window.location.pathname}</p>
-                <p>Current Search: {window.location.search}</p>
-                <p>Current Hash: {window.location.hash}</p>
-                <p>Expected Path Format: /auth/activate/[registration_id]</p>
-                <p>This page means the route wasn't matched correctly</p>
-                <p>All Routes should include:</p>
-                <pre>
-                  {JSON.stringify({
-                    activationRoute: "/auth/activate/:registration_id",
-                    currentPath: window.location.pathname,
-                    params: window.location.pathname.split('/')
-                  }, null, 2)}
-                </pre>
+                <p>The requested page could not be found.</p>
               </div>
             } />
           </Routes>
