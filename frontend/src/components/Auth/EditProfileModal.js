@@ -82,9 +82,11 @@ const EditProfileModal = ({ show, onClose, profile, onSuccess }) => {
         alert('Your profile has been successfully deleted');
         // Clear all auth data
         localStorage.clear();
-        // Force a complete page reload
-        window.location.href = '/';
-        window.location.reload(true);
+        // Add small delay before redirect
+        setTimeout(() => {
+          window.location.href = '/';
+          window.location.reload();
+        }, 100);
       } catch (error) {
         console.error('Error deleting profile:', error);
         setError('Failed to delete profile. Please try again.');

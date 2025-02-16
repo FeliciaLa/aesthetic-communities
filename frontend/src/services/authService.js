@@ -152,12 +152,15 @@ export const authService = {
     deleteProfile: async () => {
         const token = localStorage.getItem('token');
         try {
-            await api.delete('/profile/update/', {
+            const response = await api.delete('/profile/update/', {
                 headers: {
                     'Authorization': `Token ${token}`
                 }
             });
-            return true; // Don't try to return response.data for 204 responses
+            if (response.status === 204) {
+                return true;
+            }
+            throw new Error('Failed to delete profile');
         } catch (error) {
             throw error;
         }
