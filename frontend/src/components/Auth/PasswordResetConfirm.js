@@ -25,7 +25,7 @@ const PasswordResetConfirm = () => {
 
     try {
       await api.post(
-        `/password-reset-confirm/${userId}/${token}/`,
+        `/reset-password/${userId}/${token}/`,
         { password }
       );
       setSuccess(true);

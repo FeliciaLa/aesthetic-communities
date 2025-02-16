@@ -129,7 +129,7 @@ const App = () => {
                 
                 {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
-                <Route path="/password-reset-confirm/:userId/:token" element={<PasswordResetConfirm />} />
+                <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
                 
                 {/* Protected routes */}
                 <Route path="/profile" element={
