@@ -233,278 +233,55 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     if (error) return <div className="error-message">{error}</div>;
 
     return (
-        <div style={{ padding: '0 0 2rem 0' }}>
-            <div className="recommended-products">
-                <div className="products-header">
-                    <h3>Recommended Products</h3>
-                    <div className="header-buttons">
-                        {isCreator && (
-                            <button 
-                                className="add-product-button"
-                                onClick={() => setShowAddProduct(true)}
-                            >
-                                +
-                            </button>
-                        )}
+        <div className="recommended-products">
+            <div className="products-header">
+                <h3>Recommended Products</h3>
+                <div className="header-buttons">
+                    {isCreator && (
                         <button 
-                            className="all-button"
-                            onClick={handleAllClick}
+                            className="add-product-button"
+                            onClick={() => setShowAddProduct(true)}
                         >
-                            All
+                            +
                         </button>
-                    </div>
+                    )}
+                    <button 
+                        className="all-button"
+                        onClick={handleAllClick}
+                    >
+                        All
+                    </button>
                 </div>
-
-                {loading ? (
-                    <div className="loading-spinner" />
-                ) : error ? (
-                    <div className="error-message">{error}</div>
-                ) : products.length === 0 ? (
-                    <div className="product-placeholder">
-                        <div className="placeholder-content">
-                            <i className="far fa-box"></i>
-                            <p>No products added yet</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="products-container">
-                        <div className="products-scroll">
-                            {products.map(product => (
-                                <ProductCard key={product.id} product={product} />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {showAddProduct && (
-                    <AddProductModal
-                        catalogues={catalogues}
-                        onSubmit={handleAddProduct}
-                        onClose={() => setShowAddProduct(false)}
-                    />
-                )}
             </div>
 
-            <style jsx>{`
-                .recommended-products {
-                    background: white;
-                    border-radius: 12px;
-                    padding: 1.5rem;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    width: 100%;
-                    margin: -1rem 0 0 0;
-                    box-sizing: border-box;
-                    border: 1px solid #e0e0e0;
-                }
+            {loading ? (
+                <div className="loading-spinner" />
+            ) : error ? (
+                <div className="error-message">{error}</div>
+            ) : products.length === 0 ? (
+                <div className="product-placeholder">
+                    <div className="placeholder-content">
+                        <i className="far fa-box"></i>
+                        <p>No products added yet</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="products-container">
+                    <div className="products-scroll">
+                        {products.map(product => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                </div>
+            )}
 
-                .products-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 0.1rem;
-                }
-
-                .products-header h3 {
-                    font-size: 1.75rem;
-                    font-weight: 600;
-                    color: #333;
-                    margin: 0;
-                    font-family: inherit;
-                }
-
-                .add-product-button {
-                    padding: 0.5rem 1rem;
-                    background: #0061ff;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-
-                .products-container {
-                    position: relative;
-                    width: 100%;
-                    margin: 0;
-                    overflow: hidden;
-                }
-
-                .products-scroll {
-                    display: flex;
-                    gap: 20px;
-                    overflow-x: auto;
-                    padding: 10px 0;
-                    -webkit-overflow-scrolling: touch;
-                    scrollbar-width: thin;
-                    scrollbar-color: #fa8072 #f1f1f1;
-                }
-
-                .products-scroll::-webkit-scrollbar {
-                    height: 6px;
-                }
-
-                .products-scroll::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 3px;
-                }
-
-                .products-scroll::-webkit-scrollbar-thumb {
-                    background: #fa8072;
-                    border-radius: 3px;
-                }
-
-                .product-card {
-                    flex: 0 0 300px;
-                    border: 1px solid #eee;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    background: white;
-                    position: relative;
-                    cursor: pointer;
-                    transition: transform 0.2s, box-shadow 0.2s;
-                }
-
-                .product-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                }
-
-                .product-image-container {
-                    position: relative;
-                    width: 100%;
-                    height: 200px;
-                    overflow: hidden;
-                }
-
-                .product-image {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-
-                .product-image-placeholder {
-                    color: #999;
-                    font-size: 0.9rem;
-                }
-
-                .placeholder-content {
-                    text-align: center;
-                    color: #999;
-                }
-
-                .placeholder-content i {
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
-                }
-
-                .placeholder-content p {
-                    margin: 0;
-                    font-size: 1rem;
-                }
-
-                .product-info {
-                    margin-top: 1rem;
-                }
-
-                .product-card h3 {
-                    margin: 0;
-                    font-size: 1.1rem;
-                    color: #333;
-                }
-
-                .catalogue-tag {
-                    display: inline-block;
-                    background: #f0f0f0;
-                    padding: 0.25rem 0.5rem;
-                    border-radius: 4px;
-                    font-size: 0.8rem;
-                    color: #666;
-                    width: fit-content;
-                }
-
-                .product-comment {
-                    color: #666;
-                    font-size: 0.9rem;
-                    margin: 0;
-                }
-
-                .view-product-button {
-                    display: inline-block;
-                    padding: 8px 16px;
-                    background: #fa8072;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    margin-top: 1rem;
-                    transition: background 0.2s ease;
-                }
-
-                .view-product-button:hover {
-                    background: #ff9288;
-                }
-
-                .error-message {
-                    color: #dc3545;
-                    background: #f8d7da;
-                    padding: 1rem;
-                    border-radius: 4px;
-                    margin-bottom: 1rem;
-                }
-
-                .product-actions {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    opacity: 0;
-                    transition: opacity 0.2s ease;
-                }
-
-                .product-image:hover .product-actions {
-                    opacity: 1;
-                }
-
-                .save-button {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    background: white;
-                    border: 1px solid #fa8072;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 20px;
-                    color: #fa8072;
-                    transition: all 0.2s;
-                }
-
-                .save-button:hover {
-                    background: #ff9288;
-                    color: white;
-                    border-color: #ff9288;
-                }
-
-                .save-button.saved {
-                    color: #ffd700;
-                    border-color: #ffd700;
-                }
-
-                .loading-spinner {
-                    width: 40px;
-                    height: 40px;
-                    border: 3px solid #f3f3f3;
-                    border-top: 3px solid #0061ff;
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;
-                }
-
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `}</style>
+            {showAddProduct && (
+                <AddProductModal
+                    catalogues={catalogues}
+                    onSubmit={handleAddProduct}
+                    onClose={() => setShowAddProduct(false)}
+                />
+            )}
         </div>
     );
 };
