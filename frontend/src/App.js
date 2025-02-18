@@ -20,6 +20,12 @@ import AccountActivation from './components/Auth/AccountActivation';
 import AccountDeleted from './components/Auth/AccountDeleted';
 
 const App = () => {
+  console.log('Available Routes:', {
+    passwordReset: '/reset-password/:userId/:token',
+    activation: '/auth/activate/:registration_id',
+    currentPath: window.location.pathname
+  });
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -126,7 +132,7 @@ const App = () => {
 
                 {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
-                <Route path="/reset-password/:userId([0-9]+)/:token" element={<PasswordResetConfirm />} />
+                <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
 
                 {/* Activation routes */}
                 <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
