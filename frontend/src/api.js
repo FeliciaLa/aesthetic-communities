@@ -50,11 +50,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Don't intercept delete profile errors
-        if (error.response?.status === 401 && 
-            !error.config.url.includes('login') && 
-            !error.config.url.includes('register') &&
-            !error.config.url.includes('profile')) {
+        // Only redirect for protected routes
+        const protectedRoutes = [
+            '/auth/profile',
+            '/membership',
+            '/saved',
+            'post',
+            'put',
+            'delete'
+        ];
+
+        const isProtectedRoute = protectedRoutes.some(route => 
+            error.config.url.includes(route) || 
+            ['post', 'put', 'delete'].includes(error.config.method)
+        );
+
+        if (error.response?.status === 401 && isProtectedRoute) {
             authService.logout();
             window.location.href = '/';
         }
