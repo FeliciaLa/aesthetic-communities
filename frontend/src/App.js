@@ -117,6 +117,7 @@ const App = () => {
           )}
 
           <Routes>
+            {console.log('🎯 ROUTES RENDERING', window.location.pathname)}
             {isLoading ? (
               <Route path="*" element={<div>Loading...</div>} />
             ) : (
@@ -139,10 +140,26 @@ const App = () => {
 
                 {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
-                <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
+                <Route 
+                  path="/reset-password/:userId/:token" 
+                  element={
+                    <>
+                      {console.log('⚡ PASSWORD RESET ROUTE MATCHED')}
+                      <PasswordResetConfirm />
+                    </>
+                  } 
+                />
 
                 {/* Activation routes */}
-                <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
+                <Route 
+                  path="/auth/activate/:registration_id" 
+                  element={
+                    <>
+                      {console.log('🔑 ACTIVATION ROUTE MATCHED')}
+                      <AccountActivation />
+                    </>
+                  } 
+                />
                 
                 {/* Protected routes */}
                 <Route path="/profile" element={
