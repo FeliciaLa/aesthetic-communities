@@ -23,8 +23,24 @@ const api = axios.create({
 // Update the request interceptor to preserve the URL
 api.interceptors.request.use(
     (config) => {
+        // Only add auth token for protected routes or non-GET requests
+        const protectedRoutes = [
+            '/auth/profile/',
+            '/membership/',
+            '/saved/',
+            '/gallery/',
+            '/products/save/',
+            '/create-community/',
+            '/edit-community/'
+        ];
+
+        const isProtectedRoute = protectedRoutes.some(route => 
+            config.url.includes(route) || 
+            ['post', 'put', 'delete'].includes(config.method?.toLowerCase())
+        );
+
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && isProtectedRoute) {
             config.headers.Authorization = `Token ${token}`;
         }
         
