@@ -116,32 +116,37 @@ const AnnouncementsDashboard = ({ communityId }) => {
           <div className="loading">Loading...</div>
         ) : (
           <>
-            {isLoggedIn && isCreator && (
+            {isCreator && (
               <form onSubmit={handleSubmit} className="announcement-form">
                 <textarea
                   value={newAnnouncement}
                   onChange={(e) => setNewAnnouncement(e.target.value)}
-                  placeholder="Write an announcement..."
+                  placeholder="Write a new announcement..."
+                  className="announcement-input"
                 />
-                <button type="submit">Post Announcement</button>
+                <button type="submit" className="post-announcement-btn">
+                  Post Announcement
+                </button>
               </form>
             )}
             
-            <div className="announcements-scroll-container">
-              <div className="announcements-list">
-                {Array.isArray(announcements) && announcements.length > 0 ? (
-                  announcements.map((announcement) => (
-                    <div key={announcement.id} className="announcement">
-                      <p>{announcement.content}</p>
-                      <span className="timestamp">
-                        {new Date(announcement.created_at).toLocaleDateString()}
-                      </span>
+            <div className="announcements-list">
+              {Array.isArray(announcements) && announcements.length > 0 ? (
+                announcements.map((announcement) => (
+                  <div key={announcement.id || Math.random()} className="announcement-card">
+                    <div className="announcement-content">
+                      {announcement.content || 'No content'}
                     </div>
-                  ))
-                ) : (
-                  <p className="no-announcements">No announcements yet.</p>
-                )}
-              </div>
+                    {announcement.created_at && (
+                      <div className="announcement-date">
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="no-announcements">No announcements yet.</p>
+              )}
             </div>
           </>
         )}
@@ -149,8 +154,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
 
       <style jsx>{`
         .announcements-dashboard {
-          width: 100%;
-          box-sizing: border-box;
+          padding: 20px;
         }
 
         .announcements-container {
@@ -159,46 +163,17 @@ const AnnouncementsDashboard = ({ communityId }) => {
           padding: 24px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           border: 1px solid #eee;
-          width: 100%;
-          box-sizing: border-box;
-          margin: 0;
-        }
-
-        .announcements-scroll-container {
-          height: 300px;
-          overflow-y: auto;
-          margin-top: 16px;
-          padding-right: 8px;
-          
-          /* Scrollbar styling */
-          scrollbar-width: thin;
-          scrollbar-color: #fa8072 #f0f0f0;
-        }
-
-        .announcements-scroll-container::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .announcements-scroll-container::-webkit-scrollbar-track {
-          background: #f0f0f0;
-          border-radius: 3px;
-        }
-
-        .announcements-scroll-container::-webkit-scrollbar-thumb {
-          background-color: #fa8072;
-          border-radius: 3px;
         }
 
         h2 {
           font-size: 1.75rem;
           color: #2c3e50;
-          margin: 0 0 24px 0;
-          padding: 0;
+          margin-bottom: 24px;
+          font-weight: 600;
         }
 
         .announcement-form {
           margin-bottom: 32px;
-          width: 100%;
         }
 
         .announcement-input {
@@ -210,7 +185,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
           margin-bottom: 16px;
           font-size: 15px;
           resize: vertical;
-          box-sizing: border-box;
+          transition: border-color 0.2s ease;
         }
 
         .announcement-input:focus {

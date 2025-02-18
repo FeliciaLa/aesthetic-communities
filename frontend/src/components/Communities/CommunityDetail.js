@@ -225,32 +225,18 @@ const CommunityDetail = () => {
             <div className="community-banner">
                 <div className="community-header">
                     <div className="title-section">
-                        <div className="header-content">
-                            <div className="title-row">
-                                <h1>{community?.name}</h1>
-                                {isCreator && (
-                                    <button 
-                                        onClick={() => setShowEditModal(true)}
-                                        style={{
-                                            background: 'rgba(255, 255, 255, 0.2)',
-                                            border: '1px solid rgba(255, 255, 255, 0.6)',
-                                            color: 'white',
-                                            padding: '6px 16px',
-                                            borderRadius: '20px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem',
-                                            backdropFilter: 'blur(5px)',
-                                            transition: 'all 0.2s ease',
-                                            marginLeft: '1rem'
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                )}
-                            </div>
-                            <p className="description">{community?.description}</p>
-                            <p className="creator-info">Created by {community?.created_by}</p>
+                        <div className="title-wrapper">
+                            <h1>{community?.name}</h1>
+                            {isCreator && (
+                                <button 
+                                    className="edit-button"
+                                    onClick={() => setShowEditModal(true)}
+                                >
+                                    Edit
+                                </button>
+                            )}
                         </div>
+                        <p>{community?.description}</p>
                     </div>
                 </div>
                 <div className="banner-overlay"></div>
@@ -675,6 +661,29 @@ const CommunityDetail = () => {
                     color: rgba(255, 255, 255, 0.8);
                     font-size: 0.9rem;
                     margin: 0;
+                }
+
+                .title-wrapper {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+
+                .edit-button {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.6);
+                    color: white;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    transition: all 0.2s ease;
+                    backdrop-filter: blur(5px);
+                }
+
+                .edit-button:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    border-color: white;
                 }
             `}</style>
         </div>
