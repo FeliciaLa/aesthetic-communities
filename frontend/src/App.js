@@ -193,6 +193,7 @@ const App = () => {
                 } />
                 
                 {/* Community routes */}
+                <Route path="/create-community" element={<CreateCommunity />} />
                 <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
                 <Route path="/communities/:id" element={<CommunityDetail />} />
                 <Route 
