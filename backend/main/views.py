@@ -1712,16 +1712,16 @@ class PasswordResetView(APIView):
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
     
-    def post(self, request, user_id, token):
+    def post(self, request, userId, token):
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=userId)
             if default_token_generator.check_token(user, token):
                 password = request.data.get('password')
                 user.set_password(password)
                 user.save()
                 return Response({'message': 'Password reset successful'})
             return Response(
-                {'error': 'Invalid token'},
+                {'error': 'Invalid or expired token'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except User.DoesNotExist:
