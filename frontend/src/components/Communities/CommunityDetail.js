@@ -32,6 +32,7 @@ const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
     const [isCreator, setIsCreator] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const [showEditModal, setShowEditModal] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -55,15 +56,12 @@ const CommunityDetail = () => {
             try {
                 const token = localStorage.getItem('token');
                 const username = localStorage.getItem('username');
+                const isLoggedIn = !!token;
                 
-                if (!token) {
-                    setError('Authentication required to view this community');
-                    setLoading(false);
-                    return;
-                }
-
-                const headers = {
+                const headers = isLoggedIn ? {
                     'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                } : {
                     'Content-Type': 'application/json'
                 };
 
@@ -80,10 +78,7 @@ const CommunityDetail = () => {
                     headers: headers
                 });
 
-                const response = await api.get(`/communities/${id}/`, {
-                    headers: headers,
-                    withCredentials: true
-                });
+                const response = await api.get(`/communities/${id}/`, { headers });
 
                 // Enhanced error logging
                 console.log('Response details:', {

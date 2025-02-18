@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
 
-const JoinCommunityButton = ({ communityId }) => {
+const JoinCommunityButton = ({ communityId, isLoggedIn }) => {
     const [isMember, setIsMember] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -45,7 +45,7 @@ const JoinCommunityButton = ({ communityId }) => {
         checkMembershipStatus();
     }, [communityId]);
 
-    if (loading) return null;
+    if (loading || !isLoggedIn) return null;
 
     return (
         <button 
