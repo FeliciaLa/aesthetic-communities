@@ -20,6 +20,12 @@ const PasswordResetConfirm = () => {
     setError('');
     setIsSubmitting(true);
 
+    console.log('Form submitted with:', {
+      userId,
+      token,
+      passwordLength: password.length
+    });
+
     if (password !== confirmPassword) {
       setError("Passwords don't match");
       setIsSubmitting(false);
