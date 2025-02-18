@@ -22,13 +22,13 @@ api.interceptors.request.use(
     (config) => {
         // Define public routes that don't need auth
         const publicRoutes = [
-            '/communities/',
-            '/announcements/'
+            '/communities',
+            '/announcements'
         ];
 
         // Check if the current request is for a public route
         const isPublicRoute = publicRoutes.some(route => 
-            config.url.includes(route) && 
+            config.url.startsWith(route) && 
             config.method.toLowerCase() === 'get'
         );
 
