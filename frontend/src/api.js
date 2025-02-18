@@ -20,40 +20,28 @@ const api = axios.create({
     timeout: 15000
 });
 
-// Update the request interceptor to preserve the URL
+// Request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Only add auth token for protected routes or non-GET requests
-        const protectedRoutes = [
-            '/auth/profile/',
-            '/membership/',
-            '/saved/',
-            '/gallery/',
-            '/products/save/',
-            '/create-community/',
-            '/edit-community/'
+        const publicRoutes = [
+            '/communities/',
+            '/announcements/'
         ];
 
-        const isProtectedRoute = protectedRoutes.some(route => 
-            config.url.includes(route) || 
-            ['post', 'put', 'delete'].includes(config.method?.toLowerCase())
+        const isPublicGetRequest = publicRoutes.some(route => 
+            config.url.includes(route) && 
+            config.method.toLowerCase() === 'get'
         );
 
         const token = localStorage.getItem('token');
-        if (token && isProtectedRoute) {
+        
+        // Only add auth headers for non-public routes
+        if (token && !isPublicGetRequest) {
             config.headers.Authorization = `Token ${token}`;
         }
-        
-        // Ensure URL is not being transformed
-        if (config.url.includes('spotify-playlist')) {
-            console.log('Spotify request details:', {
-                originalUrl: config.url,
-                baseURL: config.baseURL,
-                fullUrl: `${config.baseURL}${config.url}`,
-                method: config.method,
-                headers: config.headers
-            });
-        }
+
+        // Always include Content-Type
+        config.headers['Content-Type'] = 'application/json';
         
         return config;
     },

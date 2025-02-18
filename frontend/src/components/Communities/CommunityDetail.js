@@ -54,35 +54,14 @@ const CommunityDetail = () => {
             }
 
             try {
-                const token = localStorage.getItem('token');
-                const username = localStorage.getItem('username');
-                const isLoggedIn = !!token;
-                
-                // Set headers without authentication for public routes
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                // Only add auth header if logged in
-                if (token) {
-                    headers['Authorization'] = `Token ${token}`;
-                }
-
-                console.log('Making request to:', {
-                    fullUrl: `${api.defaults.baseURL}/communities/${id}/`,
-                    token: token ? 'present' : 'missing',
-                    headers: headers
-                });
-
-                const response = await api.get(`/communities/${id}/`, { headers });
+                const response = await api.get(`/communities/${id}/`);
                 const communityData = response.data;
                 setCommunity(communityData);
 
-                // Only check creator status if logged in
-                if (isLoggedIn && username) {
+                // Only check creator status if user is logged in
+                const username = localStorage.getItem('username');
+                if (username) {
                     setIsCreator(communityData.created_by === username);
-                } else {
-                    setIsCreator(false);
                 }
 
                 setLoading(false);
