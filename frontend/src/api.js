@@ -50,20 +50,24 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Only redirect for protected routes
+        // Define protected routes that require authentication
         const protectedRoutes = [
-            '/auth/profile',
-            '/membership/',  // Add trailing slash
-            '/saved/',      // Add trailing slash
-            '/gallery/',    // Add gallery endpoints
-            '/products/save/', // Add product save endpoints
+            '/auth/profile/',
+            '/membership/',
+            '/saved/',
+            '/gallery/',
+            '/products/save/',
+            '/create-community/',
+            '/edit-community/'
         ];
 
+        // Check if the current route is protected
         const isProtectedRoute = protectedRoutes.some(route => 
             error.config.url.includes(route) || 
             ['post', 'put', 'delete'].includes(error.config.method?.toLowerCase())
         );
 
+        // Only redirect for 401 errors on protected routes
         if (error.response?.status === 401 && isProtectedRoute) {
             authService.logout();
             window.location.href = '/';

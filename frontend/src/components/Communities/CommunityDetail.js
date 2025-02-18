@@ -58,20 +58,16 @@ const CommunityDetail = () => {
                 const username = localStorage.getItem('username');
                 const isLoggedIn = !!token;
                 
-                const headers = isLoggedIn ? {
-                    'Authorization': `Token ${token}`,
-                    'Content-Type': 'application/json'
-                } : {
+                // Set headers without authentication for public routes
+                const headers = {
                     'Content-Type': 'application/json'
                 };
+                
+                // Only add auth header if logged in
+                if (token) {
+                    headers['Authorization'] = `Token ${token}`;
+                }
 
-                // Debug authorization
-                console.log('Auth check:', {
-                    hasToken: !!token,
-                    headers: headers
-                });
-
-                // Add this before the API call
                 console.log('Making request to:', {
                     fullUrl: `${api.defaults.baseURL}/communities/${id}/`,
                     token: token ? 'present' : 'missing',
@@ -79,37 +75,20 @@ const CommunityDetail = () => {
                 });
 
                 const response = await api.get(`/communities/${id}/`, { headers });
-
-                // Enhanced error logging
-                console.log('Response details:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: response.headers,
-                    data: response.data,
-                    baseURL: api.defaults.baseURL,
-                    fullPath: response.config.url
-                });
-
                 const communityData = response.data;
                 setCommunity(communityData);
 
-                if (communityData.created_by === username) {
-                    setIsCreator(true);
-                    console.log('Setting isCreator to true - User is creator', {
-                        username,
-                        created_by: communityData.created_by
-                    });
+                // Only check creator status if logged in
+                if (isLoggedIn && username) {
+                    setIsCreator(communityData.created_by === username);
                 } else {
                     setIsCreator(false);
-                    console.log('Setting isCreator to false - User is not creator', {
-                        username,
-                        created_by: communityData.created_by
-                    });
                 }
+
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching community:', error);
                 setError('Failed to load community');
-            } finally {
                 setLoading(false);
             }
         };
