@@ -19,6 +19,29 @@ import api from './api';
 import AccountActivation from './components/Auth/AccountActivation';
 import AccountDeleted from './components/Auth/AccountDeleted';
 
+const DebugRoute = () => {
+  const location = useLocation();
+  return (
+    <div style={{ 
+      position: 'fixed', 
+      bottom: 0, 
+      right: 0, 
+      background: '#f0f0f0', 
+      padding: '10px',
+      border: '1px solid #ccc',
+      zIndex: 9999
+    }}>
+      <h4>Route Debug</h4>
+      <p>Current Path: {location.pathname}</p>
+      <p>Available Routes:</p>
+      <ul>
+        <li>/reset-password/:userId/:token</li>
+        <li>/auth/activate/:registration_id</li>
+      </ul>
+    </div>
+  );
+};
+
 const App = () => {
   console.log('🔍 APP MOUNTED');
   console.log('🛣️ ROUTES DEBUG:', {
@@ -118,6 +141,7 @@ const App = () => {
 
           <Routes>
             {console.log('🎯 ROUTES RENDERING', window.location.pathname)}
+            {!isLoading && <Route path="*" element={<DebugRoute />} />}
             {isLoading ? (
               <Route path="*" element={<div>Loading...</div>} />
             ) : (
