@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from "react-router-dom";
 import NavbarLoggedIn from "./components/Navigation/NavbarLoggedIn";
 import NavbarLoggedOut from "./components/Navigation/NavbarLoggedOut";
 import Profile from "./components/Auth/Profile";
@@ -163,11 +163,12 @@ const App = () => {
                 {/* Account deleted route */}
                 <Route path="/account-deleted" element={<AccountDeleted />} />
 
-                {/* Generic 404 route - should be last */}
+                {/* Test catch route - add this temporarily before the 404 route */}
                 <Route path="*" element={
                   <div style={{ padding: '20px' }}>
-                    <h2>Page Not Found</h2>
-                    <p>The requested page {window.location.pathname} could not be found.</p>
+                    <h2>Route Debug</h2>
+                    <p>Current Path: {window.location.pathname}</p>
+                    <p>Params: {JSON.stringify(useParams())}</p>
                   </div>
                 } />
               </>
