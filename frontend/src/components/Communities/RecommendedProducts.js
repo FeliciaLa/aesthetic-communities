@@ -255,13 +255,25 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     </div>
                 </div>
 
-                <div className="products-container">
-                    <div className="products-scroll">
-                        {products.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                {loading ? (
+                    <div className="loading-spinner" />
+                ) : error ? (
+                    <div className="error-message">{error}</div>
+                ) : products.length === 0 ? (
+                    <div className="product-placeholder">
+                        <div className="placeholder-content">
+                            <p>No products added yet</p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="products-container">
+                        <div className="products-scroll">
+                            {products.map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {showAddProduct && (
                     <AddProductModal
