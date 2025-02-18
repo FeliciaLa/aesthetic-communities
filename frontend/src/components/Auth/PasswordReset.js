@@ -35,13 +35,22 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
-  padding: 0.75rem;
-  background: #0066cc;
+  padding: 0.5rem;
+  background: #fa8072;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 1rem;
   cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+
+  &:hover {
+    background: #ff9288;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+  }
 `;
 
 const ErrorMessage = styled.div`
