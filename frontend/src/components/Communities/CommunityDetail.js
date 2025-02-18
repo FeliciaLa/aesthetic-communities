@@ -256,7 +256,7 @@ const CommunityDetail = () => {
                 <div className="banner-overlay"></div>
                 <div className="banner-content">
                     <div className="banner-actions">
-                        {!isCreator && <JoinCommunityButton communityId={id} />}
+                        {!isCreator && <JoinCommunityButton communityId={id} isLoggedIn={isLoggedIn} />}
                     </div>
                 </div>
             </div>

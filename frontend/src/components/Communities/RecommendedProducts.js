@@ -21,15 +21,19 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const fetchProducts = async () => {
         try {
             const token = localStorage.getItem('token');
+            const headers = token ? {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+            } : {
+                'Content-Type': 'application/json'
+            };
+            
             const response = await api.get(
                 `/communities/${communityId}/products/`,
-                {
-                    headers: { 'Authorization': `Token ${token}` }
-                }
+                { headers }
             );
             setProducts(response.data);
             
-            // Extract unique catalogue names
             const uniqueCatalogues = [...new Set(response.data.map(product => product.catalogue_name))];
             setCatalogues(uniqueCatalogues);
             

@@ -9,32 +9,21 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const fetchAnnouncements = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      const headers = token ? {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json'
+      } : {
+        'Content-Type': 'application/json'
+      };
       
-      // Log both URL versions
-      console.log('Announcements URL construction:', {
-        endpoint: `/communities/${communityId}/announcements/`,
-        baseURL: api.defaults.baseURL,
-        token: token ? 'present' : 'missing'
-      });
-
-      const response = await api.get(`/communities/${communityId}/announcements/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api.get(`/communities/${communityId}/announcements/`, { headers });
       
-      console.log('Announcements Response:', {
-        status: response.status,
-        url: response.config.url,
-        fullUrl: `${api.defaults.baseURL}${response.config.url}`
-      });
-
       if (Array.isArray(response.data)) {
         setAnnouncements(response.data);
         setError(null);
@@ -43,12 +32,7 @@ const AnnouncementsDashboard = ({ communityId }) => {
         setError('Invalid data format received');
       }
     } catch (error) {
-      console.error('Fetch error:', {
-        message: error.message,
-        config: error.config,
-        url: error.config?.url,
-        baseUrl: error.config?.baseURL
-      });
+      console.error('Fetch error:', error);
       setError('Failed to load announcements');
     } finally {
       setLoading(false);
@@ -66,12 +50,14 @@ const AnnouncementsDashboard = ({ communityId }) => {
   const fetchCommunityData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await api.get(`/communities/${communityId}/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const headers = token ? {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json'
+      } : {
+        'Content-Type': 'application/json'
+      };
+      
+      const response = await api.get(`/communities/${communityId}/`, { headers });
       
       const communityData = {
         ...response.data,
@@ -130,17 +116,14 @@ const AnnouncementsDashboard = ({ communityId }) => {
           <div className="loading">Loading...</div>
         ) : (
           <>
-            {isCreator && (
+            {isLoggedIn && isCreator && (
               <form onSubmit={handleSubmit} className="announcement-form">
                 <textarea
                   value={newAnnouncement}
                   onChange={(e) => setNewAnnouncement(e.target.value)}
-                  placeholder="Write a new announcement..."
-                  className="announcement-input"
+                  placeholder="Write an announcement..."
                 />
-                <button type="submit" className="post-announcement-btn">
-                  Post Announcement
-                </button>
+                <button type="submit">Post Announcement</button>
               </form>
             )}
             
@@ -148,15 +131,11 @@ const AnnouncementsDashboard = ({ communityId }) => {
               <div className="announcements-list">
                 {Array.isArray(announcements) && announcements.length > 0 ? (
                   announcements.map((announcement) => (
-                    <div key={announcement.id || Math.random()} className="announcement-card">
-                      <div className="announcement-content">
-                        {announcement.content || 'No content'}
-                      </div>
-                      {announcement.created_at && (
-                        <div className="announcement-date">
-                          {new Date(announcement.created_at).toLocaleDateString()}
-                        </div>
-                      )}
+                    <div key={announcement.id} className="announcement">
+                      <p>{announcement.content}</p>
+                      <span className="timestamp">
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   ))
                 ) : (

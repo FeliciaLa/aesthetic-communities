@@ -6,6 +6,11 @@ const JoinCommunityButton = ({ communityId, isLoggedIn }) => {
     const [loading, setLoading] = useState(true);
 
     const checkMembershipStatus = async () => {
+        if (!isLoggedIn) {
+            setLoading(false);
+            return;
+        }
+        
         try {
             const token = localStorage.getItem('token');
             const response = await api.get(`/communities/${communityId}/membership/`, {
