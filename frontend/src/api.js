@@ -53,16 +53,15 @@ api.interceptors.response.use(
         // Only redirect for protected routes
         const protectedRoutes = [
             '/auth/profile',
-            '/membership',
-            '/saved',
-            'post',
-            'put',
-            'delete'
+            '/membership/',  // Add trailing slash
+            '/saved/',      // Add trailing slash
+            '/gallery/',    // Add gallery endpoints
+            '/products/save/', // Add product save endpoints
         ];
 
         const isProtectedRoute = protectedRoutes.some(route => 
             error.config.url.includes(route) || 
-            ['post', 'put', 'delete'].includes(error.config.method)
+            ['post', 'put', 'delete'].includes(error.config.method?.toLowerCase())
         );
 
         if (error.response?.status === 401 && isProtectedRoute) {

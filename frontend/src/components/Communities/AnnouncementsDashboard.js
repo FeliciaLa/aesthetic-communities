@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import { getFullImageUrl } from '../../utils/imageUtils';
 
-const AnnouncementsDashboard = ({ communityId }) => {
+const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [community, setCommunity] = useState(null);
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const fetchAnnouncements = async () => {
     try {

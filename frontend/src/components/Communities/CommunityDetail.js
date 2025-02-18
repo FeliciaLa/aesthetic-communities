@@ -212,12 +212,12 @@ const CommunityDetail = () => {
             <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                 <ErrorBoundary fallback={<div>Failed to load announcements</div>}>
                     <div className="sidebar-item">
-                        <AnnouncementsDashboard communityId={id} />
+                        <AnnouncementsDashboard communityId={id} isLoggedIn={isLoggedIn} />
                     </div>
                 </ErrorBoundary>
                 <div className="sidebar-item">
                     <ErrorBoundary fallback={<div>Failed to load Spotify player</div>}>
-                        <SpotifyPlayer communityId={id} isCreator={isCreator} />
+                        <SpotifyPlayer communityId={id} isCreator={isCreator} isLoggedIn={isLoggedIn} />
                     </ErrorBoundary>
                 </div>
             </div>
@@ -288,17 +288,20 @@ const CommunityDetail = () => {
                                 <MediaGallery 
                                     communityId={id} 
                                     isCreator={isCreator}
+                                    isLoggedIn={isLoggedIn}
                                     onTabChange={setActiveTab}
                                 />
                             </ErrorBoundary>
                             <Resources 
                                 communityId={id} 
                                 isCreator={isCreator}
+                                isLoggedIn={isLoggedIn}
                                 onTabChange={setActiveTab}
                             />
                             <RecommendedProducts 
                                 communityId={id} 
-                                isCreator={isCreator} 
+                                isCreator={isCreator}
+                                isLoggedIn={isLoggedIn} 
                                 onTabChange={setActiveTab}
                             />
                         </div>
