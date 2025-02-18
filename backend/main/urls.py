@@ -120,7 +120,7 @@ urlpatterns = [
     path('profile/update/', ProfileUpdateView.as_view(), name='profile-update'),
 
     path('password-reset/', PasswordResetView.as_view(), name='password-reset'),
-    path('reset-password/<int:user_id>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('reset-password/<int:userId>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     path('communities/trending/', TrendingCommunitiesView.as_view(), name='trending-communities'),
 
