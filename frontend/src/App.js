@@ -124,12 +124,12 @@ const App = () => {
                   </div>
                 } />
 
-                {/* Activation routes */}
-                <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
-                
                 {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
                 <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
+
+                {/* Activation routes */}
+                <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
                 
                 {/* Protected routes */}
                 <Route path="/profile" element={
