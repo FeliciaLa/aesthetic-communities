@@ -262,6 +262,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 ) : products.length === 0 ? (
                     <div className="product-placeholder">
                         <div className="placeholder-content">
+                            <i className="far fa-box"></i>
                             <p>No products added yet</p>
                         </div>
                     </div>
