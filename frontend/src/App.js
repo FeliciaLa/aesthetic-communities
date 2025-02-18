@@ -126,7 +126,7 @@ const App = () => {
 
                 {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
-                <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
+                <Route path="/reset-password/:userId([0-9]+)/:token" element={<PasswordResetConfirm />} />
 
                 {/* Activation routes */}
                 <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
@@ -163,12 +163,17 @@ const App = () => {
                 {/* Account deleted route */}
                 <Route path="/account-deleted" element={<AccountDeleted />} />
 
-                {/* Test catch route - add this temporarily before the 404 route */}
+                {/* Generic 404 route - should be last */}
                 <Route path="*" element={
                   <div style={{ padding: '20px' }}>
-                    <h2>Route Debug</h2>
-                    <p>Current Path: {window.location.pathname}</p>
-                    <p>Params: {JSON.stringify(useParams())}</p>
+                    {console.log('404 Route Rendered:', {
+                      currentPath: window.location.pathname,
+                      expectedPath: '/reset-password/:userId/:token',
+                      params: useParams()
+                    })}
+                    <h2>Page Not Found</h2>
+                    <p>The requested page {window.location.pathname} could not be found.</p>
+                    <p>Expected path format: /reset-password/:userId/:token</p>
                   </div>
                 } />
               </>
