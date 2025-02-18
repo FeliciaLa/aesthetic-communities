@@ -11,7 +11,7 @@ console.log('API URL Construction:', {
 });
 
 const api = axios.create({
-    baseURL: baseURL,  // This will not have a trailing slash
+    baseURL: baseURL,
     withCredentials: true,
     headers: {
         'Accept': 'application/json',
@@ -23,26 +23,10 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        const publicRoutes = [
-            '/communities/',
-            '/announcements/'
-        ];
-
-        const isPublicGetRequest = publicRoutes.some(route => 
-            config.url.includes(route) && 
-            config.method.toLowerCase() === 'get'
-        );
-
         const token = localStorage.getItem('token');
-        
-        // Only add auth headers for non-public routes
-        if (token && !isPublicGetRequest) {
+        if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-
-        // Always include Content-Type
-        config.headers['Content-Type'] = 'application/json';
-        
         return config;
     },
     (error) => {
@@ -50,29 +34,16 @@ api.interceptors.request.use(
     }
 );
 
-// Add response interceptor
+// Response interceptor
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Define protected routes that require authentication
-        const protectedRoutes = [
-            '/auth/profile/',
-            '/membership/',
-            '/saved/',
-            '/gallery/',
-            '/products/save/',
-            '/create-community/',
-            '/edit-community/'
-        ];
+        // Only redirect for auth profile and actions that modify data
+        const protectedActions = ['post', 'put', 'delete', 'patch'];
+        const isProtectedAction = protectedActions.includes(error.config.method?.toLowerCase());
+        const isAuthProfile = error.config.url.includes('/auth/profile');
 
-        // Check if the current route is protected
-        const isProtectedRoute = protectedRoutes.some(route => 
-            error.config.url.includes(route) || 
-            ['post', 'put', 'delete'].includes(error.config.method?.toLowerCase())
-        );
-
-        // Only redirect for 401 errors on protected routes
-        if (error.response?.status === 401 && isProtectedRoute) {
+        if (error.response?.status === 401 && (isProtectedAction || isAuthProfile)) {
             authService.logout();
             window.location.href = '/';
         }

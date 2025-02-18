@@ -54,11 +54,14 @@ const CommunityDetail = () => {
             }
 
             try {
+                console.log('Fetching community data for ID:', id);
                 const response = await api.get(`/communities/${id}/`);
+                console.log('Community data received:', response.data);
+                
                 const communityData = response.data;
                 setCommunity(communityData);
 
-                // Only check creator status if user is logged in
+                // Check creator status for logged-in users
                 const username = localStorage.getItem('username');
                 if (username) {
                     setIsCreator(communityData.created_by === username);
@@ -66,7 +69,7 @@ const CommunityDetail = () => {
 
                 setLoading(false);
             } catch (error) {
-                console.error('Error fetching community:', error);
+                console.error('Error fetching community:', error.response || error);
                 setError('Failed to load community');
                 setLoading(false);
             }
