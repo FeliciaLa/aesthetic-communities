@@ -20,7 +20,8 @@ import AccountActivation from './components/Auth/AccountActivation';
 import AccountDeleted from './components/Auth/AccountDeleted';
 
 const App = () => {
-  console.log('Available Routes:', {
+  console.log('🔍 APP MOUNTED');
+  console.log('🛣️ ROUTES DEBUG:', {
     passwordReset: '/reset-password/:userId/:token',
     activation: '/auth/activate/:registration_id',
     currentPath: window.location.pathname
@@ -34,6 +35,12 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
+    console.log('🔄 APP UPDATED:', {
+      path: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash
+    });
+
     const params = new URLSearchParams(window.location.search);
     const message = params.get('message');
     if (message) {
