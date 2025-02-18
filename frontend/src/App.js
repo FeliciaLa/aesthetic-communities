@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import NavbarLoggedIn from "./components/Navigation/NavbarLoggedIn";
 import NavbarLoggedOut from "./components/Navigation/NavbarLoggedOut";
 import Profile from "./components/Auth/Profile";
@@ -162,20 +162,7 @@ const App = () => {
 
                 {/* Account deleted route */}
                 <Route path="/account-deleted" element={<AccountDeleted />} />
-
-                {/* Generic 404 route - should be last */}
-                <Route path="*" element={
-                  <div style={{ padding: '20px' }}>
-                    {console.log('404 Route Rendered:', {
-                      currentPath: window.location.pathname,
-                      expectedPath: '/reset-password/:userId/:token',
-                      params: useParams()
-                    })}
-                    <h2>Page Not Found</h2>
-                    <p>The requested page {window.location.pathname} could not be found.</p>
-                    <p>Expected path format: /reset-password/:userId/:token</p>
-                  </div>
-                } />
+                
               </>
             )}
           </Routes>
