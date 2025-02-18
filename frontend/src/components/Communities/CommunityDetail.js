@@ -13,6 +13,7 @@ import RecommendedProducts from './RecommendedProducts';
 import GalleryView from './GalleryView';
 import { getFullImageUrl } from '../../utils/imageUtils';
 import { ErrorBoundary } from 'react-error-boundary';
+import styled from 'styled-components';
 
 const CommunityDetail = () => {
     const { id } = useParams();
@@ -190,6 +191,15 @@ const CommunityDetail = () => {
         }
     };
 
+    const ProductPlaceholder = styled.div`
+        background: #f5f5f5;
+        padding: 2rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        text-align: center;
+        border: 2px dashed #ddd;
+    `;
+
     return (
         <div className="community-detail">
             <button 
@@ -351,6 +361,20 @@ const CommunityDetail = () => {
                     </div>
                 </div>
             )}
+
+            <Section>
+                <SectionHeader>
+                    <h2>Recommended Products</h2>
+                    <div>
+                        <Button onClick={() => {}}>+</Button>
+                        <Button>All</Button>
+                    </div>
+                </SectionHeader>
+                <ProductPlaceholder>
+                    <p>No products added yet</p>
+                    <small>Products coming soon!</small>
+                </ProductPlaceholder>
+            </Section>
 
             <style jsx>{`
                 .community-detail {
