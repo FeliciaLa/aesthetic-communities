@@ -108,27 +108,66 @@ const App = () => {
               <Route path="*" element={<div>Loading...</div>} />
             ) : (
               <>
-                {/* Auth routes */}
+                {/* Test route */}
+                <Route path="/test" element={
+                  <div style={{ 
+                    padding: '20px',
+                    textAlign: 'center',
+                    marginTop: '50px',
+                    backgroundColor: '#f0f0f0',
+                    minHeight: '200px',
+                    border: '2px solid #ccc'
+                  }}>
+                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                    <p>If you can see this, routing is working correctly!</p>
+                    <p>Current path: {window.location.pathname}</p>
+                  </div>
+                } />
+
+                {/* Activation routes */}
                 <Route path="/auth/activate/:registration_id" element={<AccountActivation />} />
+                
+                {/* Auth routes */}
                 <Route path="/password-reset" element={<PasswordReset />} />
                 <Route path="/reset-password/:userId/:token" element={<PasswordResetConfirm />} />
                 
-                {/* Other specific routes */}
+                {/* Protected routes */}
                 <Route path="/profile" element={
                   <PrivateRoute isLoggedIn={isLoggedIn}>
                     <Profile />
                   </PrivateRoute>
                 } />
+                
+                {/* Community routes */}
+                <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
                 <Route path="/communities/:id" element={<CommunityDetail />} />
+                <Route 
+                  path="/communities" 
+                  element={
+                    <ExploreCommunities 
+                      isLoggedIn={isLoggedIn}
+                      onAuthClick={() => {
+                        setInitialAuthMode('register');
+                        setShowAuthModal(true);
+                      }}
+                    />
+                  } 
+                />
                 
                 {/* Home route */}
-                <Route path="/" element={<ExploreCommunities />} />
-                
-                {/* 404 route - must be last */}
+                <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+                  setInitialAuthMode('register');
+                  setShowAuthModal(true);
+                }}/>} />
+
+                {/* Account deleted route */}
+                <Route path="/account-deleted" element={<AccountDeleted />} />
+
+                {/* Generic 404 route - should be last */}
                 <Route path="*" element={
-                  <div style={{ padding: '20px', textAlign: 'center' }}>
+                  <div style={{ padding: '20px' }}>
                     <h2>Page Not Found</h2>
-                    <p>The page {window.location.pathname} could not be found.</p>
+                    <p>The requested page {window.location.pathname} could not be found.</p>
                   </div>
                 } />
               </>
