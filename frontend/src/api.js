@@ -11,16 +11,13 @@ console.log('API URL Construction:', {
 });
 
 const api = axios.create({
-    baseURL: baseURL,
-    withCredentials: true,
+    baseURL: process.env.REACT_APP_API_BASE_URL || 'https://aesthetic-communities-production.up.railway.app/api',
     headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
-    },
-    timeout: 15000
+    }
 });
 
-// Request interceptor
+// Request interceptor - simplified to just add token if present
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -29,23 +26,32 @@ api.interceptors.request.use(
         }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor - only handle auth errors for protected routes
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Only redirect for auth profile and actions that modify data
-        const protectedActions = ['post', 'put', 'delete', 'patch'];
-        const isProtectedAction = protectedActions.includes(error.config.method?.toLowerCase());
-        const isAuthProfile = error.config.url.includes('/auth/profile');
+        if (error.response?.status === 401) {
+            const protectedRoutes = [
+                '/auth/profile/',
+                '/membership/',
+                '/saved/',
+                '/gallery/',
+                '/products/save/',
+                '/create-community/',
+                '/edit-community/'
+            ];
+            
+            const isProtectedRoute = protectedRoutes.some(route => 
+                error.config.url.includes(route)
+            );
 
-        if (error.response?.status === 401 && (isProtectedAction || isAuthProfile)) {
-            authService.logout();
-            window.location.href = '/';
+            if (isProtectedRoute) {
+                authService.logout();
+                window.location.href = '/';
+            }
         }
         return Promise.reject(error);
     }
