@@ -324,51 +324,36 @@ class CommunityUpdateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-class GalleryImageView(APIView):
-    permission_classes = [IsAuthenticated]
+class GalleryView(APIView):
+    permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, community_id):
         try:
-            community = get_object_or_404(Community, id=community_id)
-            images = GalleryImage.objects.filter(community=community)
-            serializer = GalleryImageSerializer(images, many=True)
+            gallery_items = GalleryImage.objects.filter(community_id=community_id)
+            serializer = GalleryImageSerializer(gallery_items, many=True)
             return Response(serializer.data)
         except Exception as e:
-            print(f"Error in get: {str(e)}")
-            return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, community_id):
-        try:
-            community = get_object_or_404(Community, id=community_id)
-            
-            # Check if user is the creator
-            if request.user != community.created_by:
-                return Response(
-                    {'error': 'Only the community creator can upload images'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            
-            # Create a new GalleryImage instance
-            gallery_image = GalleryImage(
-                community=community,
-                uploaded_by=request.user,
-                image=request.data.get('image')
-            )
-            gallery_image.save()
-            
-            serializer = GalleryImageSerializer(gallery_image)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            print(f"Error in post: {str(e)}")
+        # Require authentication for posting
+        if not request.user.is_authenticated:
             return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'Authentication required to add gallery items'}, 
+                status=status.HTTP_401_UNAUTHORIZED
             )
+
+        try:
+            data = request.data.copy()
+            data['community'] = community_id
+            serializer = GalleryImageSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class GalleryImageDetailView(APIView):
     permission_classes = [IsAuthenticated]
