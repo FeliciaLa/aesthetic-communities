@@ -250,45 +250,40 @@ class CommunityListView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class CommunityView(APIView):
+class CommunityDetailView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, community_id):
+    def get(self, request, pk):
         try:
-            community = get_object_or_404(Community, id=community_id)
-            
-            # Record view if user is authenticated
-            if request.user.is_authenticated:
-                CommunityView.objects.create(
-                    community=community,
-                    user=request.user
-                )
-            
+            community = get_object_or_404(Community, id=pk)
             serializer = CommunitySerializer(community, context={'request': request})
             return Response(serializer.data)
+        except Community.DoesNotExist:
+            return Response(
+                {'error': 'Community not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def post(self, request, community_id):
+    def put(self, request, pk):
         if not request.user.is_authenticated:
             return Response(
-                {'error': 'Authentication required to update community'}, 
+                {'error': 'Authentication required'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
-            
+
         try:
-            community = get_object_or_404(Community, id=community_id)
-            
-            # Only allow creator to update
+            community = get_object_or_404(Community, id=pk)
             if request.user != community.created_by:
                 return Response(
                     {'error': 'Only creator can update community'}, 
                     status=status.HTTP_403_FORBIDDEN
                 )
-                
+            
             serializer = CommunitySerializer(
                 community, 
                 data=request.data, 
@@ -298,7 +293,10 @@ class CommunityView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             return Response(
                 {'error': str(e)}, 
