@@ -251,7 +251,7 @@ class CommunityListView(APIView):
             )
 
 class CommunityDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, pk):
         try:
@@ -263,6 +263,27 @@ class CommunityDetailView(APIView):
                 {'error': 'Community not found'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+    def put(self, request, pk):
+        # Keep authentication for editing
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            
+        community = get_object_or_404(Community, id=pk)
+        if community.created_by != request.user:
+            return Response(
+                {'error': 'Only creator can edit community'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = CommunitySerializer(community, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CommunityUpdateView(APIView):
     permission_classes = [IsAuthenticated]
