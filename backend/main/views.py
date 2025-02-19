@@ -598,106 +598,64 @@ class UserProfileView(APIView):
         return Response(data)
 
 class ForumPostView(APIView):
-    permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, community_id):
         try:
-            print("Getting posts for community:", community_id)
-            community = get_object_or_404(Community, id=community_id)
-            posts = ForumPost.objects.filter(community=community).prefetch_related(
-                'reactions',
-                'comments',
-                'comments__created_by',
-                'created_by'
-            ).order_by('-created_at')
-            
-            serializer = ForumPostSerializer(
-                posts,
-                many=True,
-                context={'request': request}
-            )
+            posts = ForumPost.objects.filter(community_id=community_id)
+            serializer = ForumPostSerializer(posts, many=True)
             return Response(serializer.data)
         except Exception as e:
-            print(f"Error in ForumPostView.get: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, community_id):
-        try:
-            print("Request DATA:", request.data)
-            print("Request FILES:", request.FILES)
-            
-            community = get_object_or_404(Community, id=community_id)
-            
-            # Create mutable copy of request.data
-            data = request.data.copy()
-            
-            # Add community ID to the data
-            data['community'] = community_id
-            
-            # Ensure content is present
-            if 'content' not in data:
-                data['content'] = ''
-            
-            # Handle media file
-            if 'media' in request.FILES:
-                file = request.FILES['media']
-                data['media'] = file
-                
-                # Set media type based on file content type
-                if file.content_type.startswith('image/'):
-                    data['media_type'] = 'image'
-                elif file.content_type.startswith('video/'):
-                    data['media_type'] = 'video'
-                else:
-                    data['media_type'] = 'none'
-            else:
-                data['media_type'] = 'none'
-            
-            print("Processed data:", data)
-            
-            serializer = ForumPostSerializer(
-                data=data,
-                context={'request': request}
-            )
-            
-            if serializer.is_valid():
-                post = serializer.save(
-                    created_by=request.user,
-                    community=community
-                )
-                return Response(
-                    ForumPostSerializer(post, context={'request': request}).data,
-                    status=status.HTTP_201_CREATED
-                )
-            
-            print("Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-        except Exception as e:
-            print(f"Error in ForumPostView.post: {str(e)}")
+        # Check authentication for posting
+        if not request.user.is_authenticated:
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'Authentication required to create posts'}, 
+                status=status.HTTP_401_UNAUTHORIZED
             )
+
+        try:
+            data = request.data.copy()
+            data['community'] = community_id
+            serializer = ForumPostSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ForumCommentView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, post_id):
+        try:
+            comments = ForumComment.objects.filter(post_id=post_id)
+            serializer = ForumCommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, post_id):
-        post = get_object_or_404(ForumPost, id=post_id)
-        data = {
-            'content': request.data.get('content'),
-            'post': post_id
-        }
-        serializer = ForumCommentSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save(created_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Check authentication for posting comments
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to post comments'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            post = get_object_or_404(ForumPost, id=post_id)
+            serializer = ForumCommentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(post=post, created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ResourceCategoryViewSet(viewsets.ModelViewSet):
     queryset = ResourceCategory.objects.all()
