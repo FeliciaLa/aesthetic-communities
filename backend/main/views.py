@@ -32,8 +32,7 @@ from .models import (
     SavedCollection,
     CommunityView,
     Profile,
-    CustomUser,
-    FeedItem
+    CustomUser
 )
 from .serializers import (
     CommunitySerializer, 
@@ -53,8 +52,7 @@ from .serializers import (
     SavedProductSerializer,
     SavedCollectionSerializer,
     SavedResourceSerializer,
-    UserLoginSerializer,
-    FeedItemSerializer
+    UserLoginSerializer
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -590,7 +588,6 @@ class ForumPostView(APIView):
             serializer = ForumPostSerializer(posts, many=True, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
-            print(f"Error fetching posts: {str(e)}")
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -602,16 +599,20 @@ class ForumPostView(APIView):
                 {'error': 'Authentication required to create posts'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
+
         try:
             data = request.data.copy()
             data['community'] = community_id
-            serializer = ForumPostSerializer(data=data, context={'request': request})
+            serializer = ForumPostSerializer(data=data)
             if serializer.is_valid():
                 serializer.save(created_by=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class ForumCommentView(APIView):
     permission_classes = [AllowAny]
@@ -1784,43 +1785,5 @@ class AccountActivationView(APIView):
             print(f"DEBUG: Activation error: {str(e)}")
             return Response(
                 {'error': f'Failed to activate account: {str(e)}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-class FeedItemView(APIView):
-    permission_classes = [AllowAny]  # Changed from IsAuthenticated
-    parser_classes = [MultiPartParser, FormParser]
-
-    def get(self, request, community_id):
-        try:
-            feed_items = FeedItem.objects.filter(community_id=community_id).order_by('-created_at')
-            serializer = FeedItemSerializer(feed_items, many=True, context={'request': request})
-            return Response(serializer.data)
-        except Exception as e:
-            print(f"Error fetching feed items: {str(e)}")
-            return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    def post(self, request, community_id):
-        if not request.user.is_authenticated:
-            return Response(
-                {'error': 'Authentication required to create feed items'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-            
-        try:
-            data = request.data.copy()
-            data['community'] = community_id
-            serializer = FeedItemSerializer(data=data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save(created_by=request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(f"Error creating feed item: {str(e)}")
-            return Response(
-                {'error': str(e)}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
