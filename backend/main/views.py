@@ -588,6 +588,7 @@ class ForumPostView(APIView):
             serializer = ForumPostSerializer(posts, many=True, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
+            print(f"Error fetching posts: {str(e)}")
             return Response(
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -603,15 +604,16 @@ class ForumPostView(APIView):
         try:
             data = request.data.copy()
             data['community'] = community_id
-            serializer = ForumPostSerializer(data=data)
+            serializer = ForumPostSerializer(data=data, context={'request': request})
             if serializer.is_valid():
                 serializer.save(created_by=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(f"Error creating post: {str(e)}")
             return Response(
                 {'error': str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class ForumCommentView(APIView):
@@ -918,9 +920,26 @@ def increment_category_views(request, category_id):
         return Response({'error': str(e)}, status=400)
 
 class PostReactionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, post_id):
+        try:
+            reactions = Reaction.objects.filter(post_id=post_id)
+            return Response({
+                'reactions': reactions.values('reaction_type').annotate(count=Count('id'))
+            })
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, post_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to react to posts'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
             post = get_object_or_404(ForumPost, id=post_id)
             reaction_type = request.data.get('reaction_type')
@@ -1001,9 +1020,25 @@ class QuestionView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AnswerView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, question_id):
+        try:
+            answers = Answer.objects.filter(question_id=question_id)
+            serializer = AnswerSerializer(answers, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, question_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to post answers'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
             question = get_object_or_404(Question, id=question_id)
             data = request.data.copy()
