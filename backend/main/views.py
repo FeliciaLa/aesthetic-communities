@@ -413,80 +413,41 @@ class GalleryImageDetailView(APIView):
             )
 
 class ResourceCategoryView(APIView):
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [AllowAny]
 
     def get(self, request, pk=None):
         try:
-            print("GET request received")
-            print("Query params:", request.query_params)
-            print("Community ID:", request.query_params.get('community_id'))
-            
             if pk:
-                category = ResourceCategory.objects.get(pk=pk)
+                category = get_object_or_404(ResourceCategory, id=pk)
                 serializer = ResourceCategorySerializer(category)
-                return Response(serializer.data)
             else:
-                community_id = request.query_params.get('community_id')
-                if not community_id:
-                    return Response(
-                        {"error": "community_id is required"}, 
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                
-                print(f"Fetching collections for community_id: {community_id}")
-                collections = ResourceCategory.objects.filter(community_id=community_id)
-                print(f"Found {collections.count()} collections")
-                
-                serializer = ResourceCategorySerializer(collections, many=True)
-                return Response(serializer.data)
-                
+                categories = ResourceCategory.objects.all()
+                serializer = ResourceCategorySerializer(categories, many=True)
+            return Response(serializer.data)
         except Exception as e:
-            print(f"Error in get: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
             return Response(
                 {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     def post(self, request):
+        # Require authentication for adding categories
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to add categories'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         try:
-            print("POST request received")
-            print("Request data:", request.data)
-            
-            data = request.data.copy()
-            data['created_by'] = request.user.id
-            
-            preview_image = request.FILES.get('preview_image')
-            if 'preview_image' in data:
-                del data['preview_image']
-            
-            print("Data being sent to serializer:", data)
-            serializer = ResourceCategorySerializer(data=data)
-            
+            serializer = ResourceCategorySerializer(data=request.data)
             if serializer.is_valid():
-                instance = serializer.save(created_by=request.user)
-                
-                if preview_image:
-                    instance.preview_image = preview_image
-                    instance.save()
-                
-                return Response(
-                    ResourceCategorySerializer(instance).data, 
-                    status=status.HTTP_201_CREATED
-                )
-            
-            print("Validation errors:", serializer.errors)
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
         except Exception as e:
-            print(f"Error in post: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
             return Response(
                 {'error': str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     def patch(self, request, pk):
@@ -544,44 +505,47 @@ class ResourceCategoryView(APIView):
             )
 
 class ResourceView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        category_id = request.query_params.get('category_id')
-        if not category_id:
+        try:
+            category_id = request.query_params.get('category')
+            community_id = request.query_params.get('community')
+            
+            resources = Resource.objects.all()
+            
+            if category_id:
+                resources = resources.filter(category_id=category_id)
+            if community_id:
+                resources = resources.filter(community_id=community_id)
+                
+            serializer = ResourceSerializer(resources, many=True)
+            return Response(serializer.data)
+        except Exception as e:
             return Response(
-                {'error': 'category_id is required'}, 
+                {'error': str(e)}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        resources = Resource.objects.filter(category_id=category_id)
-        resources_data = []
-
-        for resource in resources:
-            # Get vote counts
-            upvotes = Vote.objects.filter(resource=resource, vote_type='up').count()
-            downvotes = Vote.objects.filter(resource=resource, vote_type='down').count()
-            total_votes = upvotes - downvotes
-
-            # Get user's vote if exists
-            user_vote = Vote.objects.filter(resource=resource, user=request.user).first()
-            
-            # Get base resource data
-            resource_data = ResourceSerializer(resource).data
-            # Add vote information
-            resource_data['votes'] = total_votes
-            resource_data['user_vote'] = user_vote.vote_type if user_vote else None
-            
-            resources_data.append(resource_data)
-
-        return Response(resources_data)
 
     def post(self, request):
-        serializer = ResourceSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(created_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Require authentication for adding resources
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to add resources'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            serializer = ResourceSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
