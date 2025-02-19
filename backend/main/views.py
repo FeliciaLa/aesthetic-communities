@@ -584,11 +584,15 @@ class ForumPostView(APIView):
 
     def get(self, request, community_id):
         try:
-            posts = ForumPost.objects.filter(community_id=community_id)
-            serializer = ForumPostSerializer(posts, many=True)
+            posts = ForumPost.objects.filter(community_id=community_id).order_by('-created_at')
+            serializer = ForumPostSerializer(posts, many=True, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"Error fetching posts: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, community_id):
         if not request.user.is_authenticated:
@@ -596,11 +600,10 @@ class ForumPostView(APIView):
                 {'error': 'Authentication required to create posts'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
         try:
             data = request.data.copy()
             data['community'] = community_id
-            serializer = ForumPostSerializer(data=data)
+            serializer = ForumPostSerializer(data=data, context={'request': request})
             if serializer.is_valid():
                 serializer.save(created_by=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -613,20 +616,22 @@ class ForumCommentView(APIView):
 
     def get(self, request, post_id):
         try:
-            comments = ForumComment.objects.filter(post_id=post_id)
-            serializer = ForumCommentSerializer(comments, many=True)
+            comments = ForumComment.objects.filter(post_id=post_id).order_by('created_at')
+            serializer = ForumCommentSerializer(comments, many=True, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"Error fetching comments: {str(e)}")
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, post_id):
-        # Check authentication for posting comments
         if not request.user.is_authenticated:
             return Response(
                 {'error': 'Authentication required to post comments'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
         try:
             post = get_object_or_404(ForumPost, id=post_id)
             serializer = ForumCommentSerializer(data=request.data)
