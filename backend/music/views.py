@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from django.core.exceptions import ValidationError
 from .models import CommunitySpotifyPlaylist
 from .serializers import SpotifyPlaylistSerializer
+from rest_framework.permissions import AllowAny
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,16 @@ class CommunitySpotifyPlaylistViewSet(viewsets.ModelViewSet):
     Allows one playlist per community.
     """
     serializer_class = SpotifyPlaylistSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Allow public access to GET methods, require authentication for others
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         """Filter playlists by community ID"""
