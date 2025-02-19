@@ -54,33 +54,20 @@ const CommunityDetail = () => {
             }
 
             try {
-                console.log('Fetching community data for ID:', id);
-                
-                // Make the request without any auth headers for public routes
+                // Simple GET request without any headers
                 const response = await api.get(`/communities/${id}/`);
-                console.log('Community data received:', response.data);
-                
-                if (!response.data) {
-                    throw new Error('No data received from server');
-                }
-
                 setCommunity(response.data);
 
-                // Check creator status if user is logged in
+                // Only check creator status if logged in
                 const username = localStorage.getItem('username');
-                const token = localStorage.getItem('token');
-                if (username && token) {
+                if (username) {
                     setIsCreator(response.data.created_by === username);
-                    setIsLoggedIn(true);
-                } else {
-                    setIsCreator(false);
-                    setIsLoggedIn(false);
                 }
 
                 setLoading(false);
             } catch (error) {
-                console.error('Error fetching community:', error.response || error);
-                setError(error.response?.data?.detail || 'Failed to load community');
+                console.error('Error fetching community:', error);
+                setError('Failed to load community');
                 setLoading(false);
             }
         };
