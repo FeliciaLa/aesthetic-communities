@@ -3,10 +3,8 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: process.env.REACT_APP_API_BASE_URL || 'https://aesthetic-communities-production.up.railway.app/api',
     headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    withCredentials: true
+        'Content-Type': 'application/json'
+    }
 });
 
 // Simple request interceptor for auth
