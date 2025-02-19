@@ -1225,33 +1225,34 @@ class AnnouncementView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def recommended_products(request, community_id):
     if request.method == 'GET':
-        catalogue = request.GET.get('catalogue', '')
         products = RecommendedProduct.objects.filter(community_id=community_id)
-        if catalogue and catalogue != 'all':
-            products = products.filter(catalogue_name=catalogue)
         serializer = RecommendedProductSerializer(products, many=True)
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        print("Received data:", request.data)  # Add this line to debug
-        data = {
-            'title': request.data.get('title'),
-            'url': request.data.get('url'),
-            'comment': request.data.get('comment'),
-            'catalogue_name': request.data.get('catalogue_name'),
-            'community': community_id,
-            'created_by': request.user.id
-        }
-        print("Processed data:", data)  # Add this line to debug
-        serializer = RecommendedProductSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print("Validation errors:", serializer.errors)  # Add this line to debug
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Require authentication for adding products
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to add products'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            data = request.data.copy()
+            data['community'] = community_id
+            serializer = RecommendedProductSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(created_by=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
