@@ -304,42 +304,49 @@ class CommunityDetailView(APIView):
             )
 
 class CommunityUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, community_id):
+        try:
+            community = get_object_or_404(Community, id=community_id)
+            serializer = CommunitySerializer(community, context={'request': request})
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def post(self, request, community_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to update community'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
-            # Get the community
             community = get_object_or_404(Community, id=community_id)
-            
-            # Debug prints
-            print(f"Request user: {request.user}")
-            print(f"Community creator: {community.created_by}")
-            print(f"Is creator: {community.created_by == request.user}")
             
             # Check if user is the creator
             if request.user != community.created_by:
                 return Response(
-                    {'error': 'Only the creator can update the community'},
+                    {'error': 'Only creator can update community'}, 
                     status=status.HTTP_403_FORBIDDEN
                 )
             
-            # Update fields
-            if 'name' in request.data:
-                community.name = request.data['name']
-            if 'description' in request.data:
-                community.description = request.data['description']
-            
-            community.save()
-            
-            # Return updated community data
-            serializer = CommunitySerializer(community)
-            return Response(serializer.data)
-            
+            serializer = CommunitySerializer(
+                community, 
+                data=request.data, 
+                partial=True,
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(f"Error in update: {str(e)}")  # Debug print
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                {'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class GalleryImageView(APIView):
