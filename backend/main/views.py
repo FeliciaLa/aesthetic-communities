@@ -591,7 +591,6 @@ class ForumPostView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, community_id):
-        # Check authentication for posting
         if not request.user.is_authenticated:
             return Response(
                 {'error': 'Authentication required to create posts'}, 
@@ -953,7 +952,7 @@ class PostReactionView(APIView):
             )
 
 class QuestionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, community_id):
         questions = Question.objects.filter(community_id=community_id)
@@ -966,6 +965,11 @@ class QuestionView(APIView):
         return Response(serializer.data)
 
     def post(self, request, community_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to post questions'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
             # Only include necessary fields
             data = {
@@ -1093,7 +1097,7 @@ class QuestionVoteView(APIView):
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class PollView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, community_id):
         polls = Poll.objects.filter(community_id=community_id)
@@ -1101,6 +1105,11 @@ class PollView(APIView):
         return Response(serializer.data)
 
     def post(self, request, community_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to create polls'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         try:
             with transaction.atomic():
                 # Create poll
