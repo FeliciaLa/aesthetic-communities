@@ -10,21 +10,14 @@ console.log('Music Service Configuration:', {
 export const musicService = {
     async getSpotifyPlaylist(communityId) {
         try {
-            const token = localStorage.getItem('token');
             const endpoint = `/communities/${communityId}/spotify-playlist/`;
             
             console.log('Making Spotify request:', {
                 endpoint,
-                baseURL: api.defaults.baseURL,
-                token: token ? 'Present' : 'Missing'
+                baseURL: api.defaults.baseURL
             });
 
-            const response = await api.get(endpoint, {
-                headers: {
-                    'Authorization': `Token ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await api.get(endpoint);
             
             console.log('Spotify response:', response);
             return Array.isArray(response.data) ? response.data[0] : response.data;
@@ -66,6 +59,25 @@ export const musicService = {
                 spotify_playlist_url: spotifyUrl,
                 community: communityId 
             },
+            {
+                headers: {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    },
+
+    async addSpotifyPlaylist(communityId, playlistUrl) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required');
+        }
+
+        const response = await api.post(
+            `/communities/${communityId}/spotify-playlist/`,
+            { spotify_playlist_url: playlistUrl },
             {
                 headers: {
                     'Authorization': `Token ${token}`,
