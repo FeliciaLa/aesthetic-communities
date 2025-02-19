@@ -421,7 +421,12 @@ class ResourceCategoryView(APIView):
                 category = get_object_or_404(ResourceCategory, id=pk)
                 serializer = ResourceCategorySerializer(category)
             else:
-                categories = ResourceCategory.objects.all()
+                # Get community_id from query params
+                community_id = request.query_params.get('community_id')
+                if community_id:
+                    categories = ResourceCategory.objects.filter(community_id=community_id)
+                else:
+                    categories = ResourceCategory.objects.all()
                 serializer = ResourceCategorySerializer(categories, many=True)
             return Response(serializer.data)
         except Exception as e:
@@ -431,17 +436,16 @@ class ResourceCategoryView(APIView):
             )
 
     def post(self, request):
-        # Require authentication for adding categories
         if not request.user.is_authenticated:
             return Response(
-                {'error': 'Authentication required to add categories'}, 
+                {'error': 'Authentication required to create categories'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
         try:
             serializer = ResourceCategorySerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(created_by=request.user)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
