@@ -325,7 +325,7 @@ class CommunityUpdateView(APIView):
             )
 
 class GalleryImageView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, community_id):
@@ -342,6 +342,13 @@ class GalleryImageView(APIView):
             )
 
     def post(self, request, community_id):
+        # Check authentication for posting
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to upload images'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         try:
             community = get_object_or_404(Community, id=community_id)
             
