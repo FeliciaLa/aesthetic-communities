@@ -190,7 +190,7 @@ const CommunityDetail = () => {
                                     className="edit-button"
                                     onClick={() => setShowEditModal(true)}
                                 >
-                                    Edit Community
+                                    Edit
                                 </button>
                             )}
                         </div>
@@ -198,12 +198,6 @@ const CommunityDetail = () => {
                         <p className="creator-info">
                             Created by {community?.creator_name}
                         </p>
-                    </div>
-                </div>
-                <div className="banner-overlay"></div>
-                <div className="banner-content">
-                    <div className="banner-actions">
-                        {!isCreator && <JoinCommunityButton communityId={id} isLoggedIn={isLoggedIn} />}
                     </div>
                 </div>
             </div>
@@ -323,54 +317,75 @@ const CommunityDetail = () => {
                 .community-banner {
                     position: relative;
                     width: 100%;
-                    min-height: 200px;
-                    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+                    min-height: 300px;
+                    background-image: url(${community?.banner_image || '/default-banner.jpg'});
+                    background-size: cover;
+                    background-position: center;
+                    color: white;
                     padding: 2rem;
-                    box-sizing: border-box;
+                    display: flex;
+                    align-items: flex-end;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    background-blend-mode: overlay;
                 }
 
-                .banner-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
-                }
-
-                .banner-content {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    padding: 2rem;
-                    z-index: 1;
+                .community-header {
+                    position: relative;
+                    z-index: 2;
+                    width: 100%;
                     max-width: 1200px;
                     margin: 0 auto;
-                    width: 100%;
-                    color: white;
-                    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
                 }
 
-                .banner-content h1 {
+                .title-section {
+                    max-width: 800px;
+                }
+
+                .title-wrapper {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                }
+
+                h1 {
                     margin: 0;
-                    font-size: 3.5rem;
+                    font-size: 2.5rem;
                     font-weight: bold;
+                    color: white;
                     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
                 }
 
                 .description {
-                    margin: 16px 0;
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
+                    margin: 0 0 1rem 0;
                     max-width: 600px;
+                    line-height: 1.5;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
                 }
 
                 .creator-info {
                     font-size: 0.9rem;
                     opacity: 0.8;
-                    margin-top: 8px;
+                    margin: 0;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                }
+
+                .edit-button {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.6);
+                    color: white;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    transition: all 0.2s ease;
+                    backdrop-filter: blur(5px);
+                }
+
+                .edit-button:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    border-color: white;
                 }
 
                 .community-tabs {
@@ -572,73 +587,6 @@ const CommunityDetail = () => {
                     width: 90%;
                     max-height: 90vh;
                     overflow-y: auto;
-                }
-
-                .community-header {
-                    position: relative;
-                    z-index: 10;
-                    width: 100%;
-                    padding: 2rem;
-                }
-
-                .title-section {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-
-                .header-content {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 1rem;
-                }
-
-                .title-row {
-                    display: flex;
-                    align-items: center;
-                    width: 100%;
-                }
-
-                .title-row h1 {
-                    margin: 0;
-                    color: white;
-                    font-size: 2.5rem;
-                }
-
-                .description {
-                    color: white;
-                    font-size: 1.1rem;
-                    margin: 0;
-                    max-width: 800px;
-                }
-
-                .creator-info {
-                    color: rgba(255, 255, 255, 0.8);
-                    font-size: 0.9rem;
-                    margin: 0;
-                }
-
-                .title-wrapper {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-
-                .edit-button {
-                    background: rgba(255, 255, 255, 0.2);
-                    border: 1px solid rgba(255, 255, 255, 0.6);
-                    color: white;
-                    padding: 6px 16px;
-                    border-radius: 20px;
-                    cursor: pointer;
-                    font-size: 0.9rem;
-                    transition: all 0.2s ease;
-                    backdrop-filter: blur(5px);
-                }
-
-                .edit-button:hover {
-                    background: rgba(255, 255, 255, 0.3);
-                    border-color: white;
                 }
             `}</style>
         </div>
