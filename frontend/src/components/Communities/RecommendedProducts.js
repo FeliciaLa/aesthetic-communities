@@ -208,13 +208,13 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     `;
 
     const StyledProductCard = styled.div`
-        flex: 0 0 220px;
+        flex: 0 0 180px;
         border: 1px solid #ddd;
         border-radius: 8px;
         overflow: hidden;
         transition: transform 0.3s ease;
         background: white;
-        height: 280px;
+        height: 240px;
         display: flex;
         flex-direction: column;
 
@@ -226,7 +226,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         .product-image-container {
             position: relative;
             width: 100%;
-            height: 140px;
+            height: 120px;
             overflow: hidden;
         }
 
@@ -269,23 +269,24 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
 
         h3 {
             margin: 0;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-weight: 500;
             line-height: 1.2;
+            height: 2.4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .product-category {
-            color: #666;
             font-size: 0.8rem;
+            color: #666;
             margin: 4px 0;
         }
 
@@ -302,7 +303,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         .view-product {
             margin-top: auto;
             padding: 6px 12px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-align: center;
             background: #fa8072;
             color: white;
