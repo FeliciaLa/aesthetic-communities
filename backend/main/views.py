@@ -1231,12 +1231,14 @@ class PollVoteView(APIView):
             )
 
 class AnnouncementView(APIView):
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request, community_id):
         try:
             print(f"Fetching announcements for community {community_id}")
-            print(f"Request user: {request.user}")
             announcements = Announcement.objects.filter(community_id=community_id)
             print(f"Found {announcements.count()} announcements")
             serializer = AnnouncementSerializer(announcements, many=True)
