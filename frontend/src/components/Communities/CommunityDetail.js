@@ -358,6 +358,7 @@ const CommunityDetail = () => {
 
                 .title-section {
                     max-width: 800px;
+                    text-align: left;
                 }
 
                 .title-wrapper {
@@ -369,23 +370,23 @@ const CommunityDetail = () => {
 
                 h1 {
                     margin: 0;
-                    font-size: 2.5rem;
+                    font-size: 3rem;
                     font-weight: bold;
                     color: white;
                     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
                 }
 
                 .description {
-                    font-size: 1.1rem;
-                    margin: 0 0 1rem 0;
+                    font-size: 1.25rem;
+                    margin: 1rem 0;
                     max-width: 600px;
                     line-height: 1.5;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
                 }
 
                 .creator-info {
-                    font-size: 0.9rem;
-                    opacity: 0.8;
+                    font-size: 1rem;
+                    opacity: 0.9;
                     margin: 0;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
                 }
