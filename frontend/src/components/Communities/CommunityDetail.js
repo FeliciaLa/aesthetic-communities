@@ -183,24 +183,22 @@ const CommunityDetail = () => {
             <div className="community-banner">
                 <div className="community-header">
                     <div className="title-section">
-                        <div className="title-wrapper">
-                            <h1>{community?.name}</h1>
-                            {isCreator && (
-                                <button 
-                                    className="edit-button"
-                                    onClick={() => {
-                                        console.log('Edit button clicked');
-                                        setShowEditModal(true);
-                                    }}
-                                >
-                                    ⋮
-                                </button>
-                            )}
-                        </div>
+                        <h1>{community?.name}</h1>
                         <p className="description">{community?.description}</p>
                         <p className="creator-info">
                             Created by <span className="creator-name">{community?.created_by || 'Unknown'}</span>
                         </p>
+                        {isCreator && (
+                            <button 
+                                className="edit-button"
+                                onClick={() => {
+                                    console.log('Edit button clicked');
+                                    setShowEditModal(true);
+                                }}
+                            >
+                                Edit
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -387,13 +385,13 @@ const CommunityDetail = () => {
                     background: none;
                     border: none;
                     color: white;
-                    font-size: 2.5rem;
-                    padding-left: 1rem;
+                    font-size: 1rem;
+                    padding: 0;
+                    margin-top: 0.5rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     display: flex;
                     align-items: center;
-                    line-height: 1;
                 }
 
                 .edit-button:hover {
