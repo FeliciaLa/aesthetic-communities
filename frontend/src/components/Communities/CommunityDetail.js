@@ -353,8 +353,7 @@ const CommunityDetail = () => {
                     z-index: 2;
                     width: 100%;
                     max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 0 2rem;
+                    padding: 0;
                     text-align: left;
                     align-self: flex-start;
                 }
@@ -364,6 +363,7 @@ const CommunityDetail = () => {
                     text-align: left;
                     margin-left: 0;
                     padding-left: 0;
+                    margin-bottom: 1rem;
                 }
 
                 .title-wrapper {
