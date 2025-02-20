@@ -1849,3 +1849,35 @@ class AccountActivationView(APIView):
                 {'error': f'Failed to activate account: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_community(request, community_id):
+    try:
+        community = get_object_or_404(Community, id=community_id)
+        
+        # Check if user is the creator
+        if request.user != community.created_by:
+            return Response(
+                {'error': 'Only the creator can delete the community'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Delete the banner image if it exists
+        if community.banner_image:
+            try:
+                default_storage.delete(community.banner_image.path)
+            except Exception:
+                pass  # If file doesn't exist, continue
+        
+        # Delete the community
+        community.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+            
+    except Exception as e:
+        print(f"Error in delete_community: {str(e)}")
+        return Response(
+            {'error': 'Failed to delete community'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

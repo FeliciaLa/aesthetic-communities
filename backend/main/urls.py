@@ -39,7 +39,8 @@ from .views import (
     PasswordResetConfirmView,
     TrendingCommunitiesView,
     AccountActivationView,
-    health_check
+    health_check,
+    delete_community
 )
 from . import views
 
@@ -125,6 +126,8 @@ urlpatterns = [
     path('communities/trending/', TrendingCommunitiesView.as_view(), name='trending-communities'),
 
     path('auth/activate/<str:registration_id>/', AccountActivationView.as_view(), name='account-activation'),
+
+    path('communities/<int:community_id>/', delete_community, name='delete_community'),
 ]
 
 # Add this for debugging
