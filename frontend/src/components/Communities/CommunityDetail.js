@@ -188,7 +188,21 @@ const CommunityDetail = () => {
                             {isCreator && (
                                 <button 
                                     className="edit-button"
-                                    onClick={() => setShowEditModal(true)}
+                                    onClick={() => {
+                                        console.log('Edit button clicked');
+                                        setShowEditModal(true);
+                                    }}
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.2)',
+                                        border: '1px solid rgba(255, 255, 255, 0.6)',
+                                        color: 'white',
+                                        padding: '6px 16px',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        transition: 'all 0.2s ease',
+                                        backdropFilter: 'blur(5px)',
+                                    }}
                                 >
                                     Edit
                                 </button>
