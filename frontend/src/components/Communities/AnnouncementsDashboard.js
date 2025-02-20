@@ -153,26 +153,29 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
 
       <style jsx>{`
         .announcements-dashboard {
-          padding: 20px;
+          padding: 0;
+          width: 100%;
         }
 
         .announcements-container {
           background: white;
           border-radius: 12px;
-          padding: 24px;
+          padding: 20px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           border: 1px solid #eee;
+          width: 100%;
         }
 
         h2 {
           font-size: 1.75rem;
           color: #2c3e50;
-          margin-bottom: 24px;
+          margin: 0 0 20px 0;
           font-weight: 600;
         }
 
         .announcement-form {
-          margin-bottom: 32px;
+          margin-bottom: 20px;
+          width: 100%;
         }
 
         .announcement-input {
@@ -184,12 +187,7 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
           margin-bottom: 16px;
           font-size: 15px;
           resize: vertical;
-          transition: border-color 0.2s ease;
-        }
-
-        .announcement-input:focus {
-          outline: none;
-          border-color: #fa8072;
+          box-sizing: border-box;
         }
 
         .post-announcement-btn {
