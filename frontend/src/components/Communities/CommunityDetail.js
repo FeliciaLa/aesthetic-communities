@@ -140,6 +140,15 @@ const CreatorInfo = styled.div`
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
+const ActionBar = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: -24px;  // To remove gap between action bar and tabs
+`;
+
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -298,12 +307,15 @@ const CommunityDetail = () => {
                     <Title>{community.name}</Title>
                     <Description>{community.description}</Description>
                     <span>Created by {community.creator_username}</span>
-                    <JoinCommunityButton 
-                        communityId={id} 
-                        isLoggedIn={isLoggedIn} 
-                    />
                 </BannerContent>
             </CommunityBanner>
+
+            <ActionBar>
+                <JoinCommunityButton 
+                    communityId={id} 
+                    isLoggedIn={isLoggedIn} 
+                />
+            </ActionBar>
 
             <div className="community-tabs">
                 <button 
