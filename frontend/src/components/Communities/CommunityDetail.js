@@ -185,20 +185,22 @@ const CommunityDetail = () => {
                     <div className="title-section">
                         <h1>{community?.name}</h1>
                         <p className="description">{community?.description}</p>
-                        <p className="creator-info">
-                            Created by <span className="creator-name">{community?.created_by || 'Unknown'}</span>
-                        </p>
-                        {isCreator && (
-                            <button 
-                                className="edit-button"
-                                onClick={() => {
-                                    console.log('Edit button clicked');
-                                    setShowEditModal(true);
-                                }}
-                            >
-                                Edit
-                            </button>
-                        )}
+                        <div className="creator-section">
+                            <p className="creator-info">
+                                Created by <span className="creator-name">{community?.created_by || 'Unknown'}</span>
+                            </p>
+                            {isCreator && (
+                                <button 
+                                    className="edit-button"
+                                    onClick={() => {
+                                        console.log('Edit button clicked');
+                                        setShowEditModal(true);
+                                    }}
+                                >
+                                    Edit
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -381,17 +383,22 @@ const CommunityDetail = () => {
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
                 }
 
+                .creator-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
                 .edit-button {
                     background: none;
-                    border: none;
+                    border: 1px solid white;
                     color: white;
                     font-size: 0.9rem;
                     padding: 0.5rem 1rem;
-                    margin-top: 0.75rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    border: 1px solid white;
                     border-radius: 4px;
+                    width: fit-content;
                 }
 
                 .edit-button:hover {
