@@ -190,11 +190,14 @@ const CommunityDetail = () => {
                                     className="edit-button"
                                     onClick={() => setShowEditModal(true)}
                                 >
-                                    Edit
+                                    Edit Community
                                 </button>
                             )}
                         </div>
-                        <p>{community?.description}</p>
+                        <p className="description">{community?.description}</p>
+                        <p className="creator-info">
+                            Created by {community?.creator_name}
+                        </p>
                     </div>
                 </div>
                 <div className="banner-overlay"></div>
@@ -319,20 +322,11 @@ const CommunityDetail = () => {
 
                 .community-banner {
                     position: relative;
-                    width: 100vw;
-                    height: 300px;
-                    margin: 0;
-                    margin-left: calc(-50vw + 50%);
-                    left: 0;
-                    right: 0;
-                    background-image: url(${community?.banner_image || '/default-banner.jpg'});
-                    background-size: cover;
-                    background-position: center;
-                    color: white;
-                    display: flex;
-                    align-items: flex-end;
-                    padding: 40px 24px;
-                    transform: translateX(0);
+                    width: 100%;
+                    min-height: 200px;
+                    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+                    padding: 2rem;
+                    box-sizing: border-box;
                 }
 
                 .banner-overlay {
