@@ -402,6 +402,7 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
 
   const fetchCommunities = async () => {
     try {
+      setLoading(true);
       const response = await api.get(`/communities/?view=${activeView}`);
       
       const transformedCommunities = response.data.map(community => ({
@@ -467,6 +468,10 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
     return () => clearInterval(interval);
   }, [searchPlaceholders.length]);
 
+  useEffect(() => {
+    fetchCommunities();
+  }, [activeView]);
+
   const handleAuthClick = () => {
     onAuthClick();
   };
@@ -478,35 +483,12 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
   const getFilteredCommunities = () => {
     let filtered = [...communities];
     
-    // Apply search filter
+    // Only apply search filter
     if (searchTerm) {
-      filtered = filtered.filter(community =>
-        community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        community.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply view filter
-    switch (activeView) {
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        break;
-      case 'oldest':
-        filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        break;
-      case 'biggest':
-        filtered.sort((a, b) => b.member_count - a.member_count);
-        break;
-      case 'smallest':
-        filtered.sort((a, b) => a.member_count - b.member_count);
-        break;
-      case 'trending':
-        // Add your trending logic here if needed
-        break;
-      case 'alphabetical':
-      default:
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
+        filtered = filtered.filter(community =>
+            community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            community.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     }
     
     return filtered;
