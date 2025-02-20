@@ -16,20 +16,10 @@ const REACTIONS = [
 ];
 
 const SignInPrompt = styled.div`
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin: 20px 0;
-  border: 1px solid #e0e0e0;
-
   h2 {
     font-size: 1.5rem;
     color: #333;
-    margin-bottom: 0.5rem;
-    text-align: left;
-    padding-left: 8px;
+    margin-bottom: 12px;
   }
 
   p {
