@@ -340,7 +340,7 @@ const CommunityDetail = () => {
                     background-size: cover;
                     background-position: center;
                     color: white;
-                    padding: 2rem;
+                    padding: 3rem 2rem;
                     display: flex;
                     align-items: flex-end;
                     justify-content: flex-start;
@@ -353,17 +353,16 @@ const CommunityDetail = () => {
                     z-index: 2;
                     width: 100%;
                     max-width: 1200px;
+                    margin: 0;
                     padding: 0;
                     text-align: left;
-                    align-self: flex-start;
                 }
 
                 .title-section {
                     max-width: 800px;
                     text-align: left;
-                    margin-left: 0;
-                    padding-left: 0;
-                    margin-bottom: 1rem;
+                    margin: 0;
+                    padding: 0;
                 }
 
                 .title-wrapper {
