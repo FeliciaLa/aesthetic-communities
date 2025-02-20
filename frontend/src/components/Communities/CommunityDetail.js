@@ -357,7 +357,7 @@ const CommunityDetail = () => {
                 .title-wrapper {
                     display: inline-flex;
                     align-items: center;
-                    gap: 0;
+                    gap: 0.4rem;
                     margin-bottom: 1rem;
                 }
 
@@ -390,7 +390,6 @@ const CommunityDetail = () => {
                     color: white;
                     font-size: 2.5rem;
                     padding: 0;
-                    margin-left: 0.1rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     display: inline-flex;
