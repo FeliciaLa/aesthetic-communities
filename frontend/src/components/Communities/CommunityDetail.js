@@ -140,6 +140,13 @@ const CreatorInfo = styled.div`
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
+const CreatorText = styled.span`
+    font-size: 1rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+`;
+
 const ActionBar = styled.div`
     display: flex;
     justify-content: center;
@@ -304,9 +311,9 @@ const CommunityDetail = () => {
 
             <CommunityBanner bannerImage={community?.banner_image}>
                 <BannerContent>
-                    <Title>{community.name}</Title>
-                    <Description>{community.description}</Description>
-                    <span>Created by {community.creator_username}</span>
+                    <Title>{community?.name}</Title>
+                    <Description>{community?.description}</Description>
+                    <CreatorText>Created by {community?.creator_username || community?.created_by}</CreatorText>
                 </BannerContent>
             </CommunityBanner>
 
