@@ -17,7 +17,8 @@ const REACTIONS = [
 
 const SignInPrompt = styled.div`
   h2 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
     color: #333;
     margin-bottom: 12px;
   }
