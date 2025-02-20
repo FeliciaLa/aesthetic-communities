@@ -61,7 +61,8 @@ const JoinCommunityButton = ({ communityId, isLoggedIn }) => {
 
             <style jsx>{`
                 .membership-button {
-                    padding: 8px 16px;
+                    padding: 8px 32px;
+                    min-width: 180px;
                     border-radius: 20px;
                     font-weight: 500;
                     cursor: pointer;
@@ -69,23 +70,23 @@ const JoinCommunityButton = ({ communityId, isLoggedIn }) => {
                 }
 
                 .join {
-                    background: #0061ff;
+                    background: #fa8072; /* Base coral */
                     color: white;
                     border: none;
                 }
 
                 .join:hover {
-                    background: #0056b3;
+                    background: #ff9288; /* Lighter coral */
                 }
 
                 .leave {
                     background: white;
-                    color: #dc3545;
-                    border: 1px solid #dc3545;
+                    color: #fa8072; /* Base coral */
+                    border: 1px solid #fa8072; /* Base coral */
                 }
 
                 .leave:hover {
-                    background: #dc3545;
+                    background: #fa8072; /* Base coral */
                     color: white;
                 }
             `}</style>

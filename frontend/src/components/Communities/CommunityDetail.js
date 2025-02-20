@@ -142,11 +142,11 @@ const CreatorInfo = styled.div`
 
 const ActionBar = styled.div`
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     padding: 1rem 2rem;
     background: white;
     border-bottom: 1px solid #eaeaea;
-    margin-bottom: -24px;  // To remove gap between action bar and tabs
+    margin-bottom: -24px;
 `;
 
 const CommunityDetail = () => {
