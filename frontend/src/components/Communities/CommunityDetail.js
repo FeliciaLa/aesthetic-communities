@@ -192,19 +192,8 @@ const CommunityDetail = () => {
                                         console.log('Edit button clicked');
                                         setShowEditModal(true);
                                     }}
-                                    style={{
-                                        background: 'rgba(255, 255, 255, 0.2)',
-                                        border: '1px solid rgba(255, 255, 255, 0.6)',
-                                        color: 'white',
-                                        padding: '6px 16px',
-                                        borderRadius: '20px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.9rem',
-                                        transition: 'all 0.2s ease',
-                                        backdropFilter: 'blur(5px)',
-                                    }}
                                 >
-                                    Edit
+                                    ⋮
                                 </button>
                             )}
                         </div>
@@ -368,7 +357,7 @@ const CommunityDetail = () => {
                 .title-wrapper {
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
+                    gap: 0.5rem;
                     margin-bottom: 1rem;
                 }
 
@@ -396,20 +385,22 @@ const CommunityDetail = () => {
                 }
 
                 .edit-button {
-                    background: rgba(255, 255, 255, 0.2);
-                    border: 1px solid rgba(255, 255, 255, 0.6);
+                    background: none;
+                    border: none;
                     color: white;
-                    padding: 6px 16px;
-                    border-radius: 20px;
+                    font-size: 1.5rem;
+                    padding: 0 0.5rem;
                     cursor: pointer;
-                    font-size: 0.9rem;
                     transition: all 0.2s ease;
-                    backdrop-filter: blur(5px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 2rem;
+                    margin-top: 0.5rem;
                 }
 
                 .edit-button:hover {
-                    background: rgba(255, 255, 255, 0.3);
-                    border-color: white;
+                    transform: scale(1.1);
                 }
 
                 .community-tabs {
