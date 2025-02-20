@@ -157,12 +157,14 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
           max-width: 100%;
           margin: 0;
           padding: 0;
+          margin-top: -8px;
         }
 
         .announcements-container {
           background: white;
           border-radius: 8px;
-          padding: 16px;
+          padding: 12px;
+          padding-top: 8px;
           width: 100%;
           box-sizing: border-box;
         }
@@ -170,7 +172,7 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
         h2 {
           font-size: 1.5rem;
           color: #2c3e50;
-          margin: 0 0 16px 0;
+          margin: 0 0 12px 0;
           padding: 0;
         }
 
