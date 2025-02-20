@@ -26,9 +26,8 @@ const SignInPrompt = styled.div`
 
   h2 {
     font-size: 1.5rem;
-    font-weight: 600;
     color: #333;
-    margin-bottom: 12px;
+    margin-bottom: 0.5rem;
     text-align: left;
     padding-left: 8px;
   }
