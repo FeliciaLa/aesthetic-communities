@@ -22,16 +22,21 @@ const SignInPrompt = styled.div`
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: 20px 0;
+  border: 1px solid #e0e0e0;
 
   h2 {
-    font-size: 24px;
-    margin-bottom: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
     color: #333;
+    margin-bottom: 12px;
+    text-align: left;
+    padding-left: 8px;
   }
 
   p {
     color: #666;
     margin-bottom: 20px;
+    text-align: center;
   }
 
   .auth-buttons {
