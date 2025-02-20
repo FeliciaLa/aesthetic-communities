@@ -357,7 +357,7 @@ const CommunityDetail = () => {
                 .title-wrapper {
                     display: inline-flex;
                     align-items: center;
-                    gap: 0.75rem;
+                    gap: 1 rem;
                     margin-bottom: 1rem;
                 }
 
