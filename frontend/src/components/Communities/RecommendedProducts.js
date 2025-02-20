@@ -12,6 +12,9 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [savedProducts, setSavedProducts] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [offset, setOffset] = useState(0);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
 
     const FALLBACK_IMAGE = '/default-product.png';
 
@@ -185,22 +188,48 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         gap: 20px;
         overflow-x: auto;
         padding: 10px 0;
+        transform: translateX(${props => props.offset}px);
+        transition: transform 0.3s ease;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: #fa8072 #f1f1f1;
-
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        
         &::-webkit-scrollbar {
-            height: 6px;
+            display: none;
+        }
+    `;
+
+    const CarouselButton = styled.button`
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        &:hover {
+            background: #f8f8f8;
         }
 
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
+        &.prev {
+            left: 10px;
         }
 
-        &::-webkit-scrollbar-thumb {
-            background: #fa8072;
-            border-radius: 3px;
+        &.next {
+            right: 10px;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     `;
 
@@ -211,7 +240,9 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         overflow: hidden;
         transition: transform 0.3s ease;
         background: white;
-        height: 300px;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
 
         &:hover {
             transform: translateY(-4px);
@@ -221,7 +252,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         .product-image-container {
             position: relative;
             width: 100%;
-            height: 150px;
+            height: 140px;
+            overflow: hidden;
         }
 
         .product-image {
@@ -259,35 +291,50 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         }
 
         .product-info {
-            padding: 15px;
-            flex-grow: 1;
+            padding: 12px;
+            flex: 1;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
 
         h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.1rem;
-            color: #333;
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .price {
-            display: block;
-            color: #fa8072;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .product-category {
+            color: #666;
+            font-size: 0.8rem;
+            margin: 4px 0;
+        }
+
+        .product-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 4px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .view-product {
-            display: inline-block;
-            padding: 8px 16px;
+            margin-top: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            text-align: center;
             background: #fa8072;
             color: white;
             text-decoration: none;
             border-radius: 4px;
-            margin-top: auto;
-            align-self: flex-start;
-            transition: background 0.3s ease;
+            transition: background 0.2s;
 
             &:hover {
                 background: #ff9288;
@@ -300,6 +347,21 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         if (onTabChange) {
             onTabChange('products');
         }
+    };
+
+    const handlePrevClick = () => {
+        const newOffset = offset + 240;
+        setOffset(Math.min(newOffset, 0));
+        setCanScrollRight(true);
+        setCanScrollLeft(newOffset < 0);
+    };
+
+    const handleNextClick = () => {
+        const newOffset = offset - 240;
+        const maxOffset = -(products.length * 240 - window.innerWidth + 40);
+        setOffset(Math.max(newOffset, maxOffset));
+        setCanScrollLeft(true);
+        setCanScrollRight(newOffset > maxOffset);
     };
 
     if (loading) return <div>Loading...</div>;
@@ -339,17 +401,23 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     </div>
                 </div>
             ) : (
-                <div className="products-container">
-                    <div className="products-scroll">
-                        <ProductsContainer>
-                            <ProductsScroll>
-                                {products.map(product => (
-                                    <ProductCard key={product.id} product={product} />
-                                ))}
-                            </ProductsScroll>
-                        </ProductsContainer>
-                    </div>
-                </div>
+                <ProductsContainer>
+                    {canScrollLeft && (
+                        <CarouselButton className="prev" onClick={handlePrevClick}>
+                            ←
+                        </CarouselButton>
+                    )}
+                    <ProductsScroll offset={offset}>
+                        {products.map(product => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </ProductsScroll>
+                    {canScrollRight && (
+                        <CarouselButton className="next" onClick={handleNextClick}>
+                            →
+                        </CarouselButton>
+                    )}
+                </ProductsContainer>
             )}
 
             {showAddProduct && (
