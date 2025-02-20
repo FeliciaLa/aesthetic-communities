@@ -90,6 +90,32 @@ const CommunityHeader = styled.div`
     margin-bottom: 1rem;
 `;
 
+const CommunityHeaderSection = styled.div`
+    padding: 2rem;
+    color: white;
+    position: relative;
+    z-index: 1;
+`;
+
+const HeaderContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+`;
+
+const CreatorInfo = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+`;
+
+const ActionButtons = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+`;
+
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -245,21 +271,21 @@ const CommunityDetail = () => {
 
             <div className="community-banner">
                 <div className="community-header">
-                    <CommunityHeader>
-                        <h1>{community?.name}</h1>
-                        <JoinCommunityButton 
-                            communityId={id} 
-                            isLoggedIn={isLoggedIn} 
-                        />
-                    </CommunityHeader>
-                    <div className="title-section">
-                        <p className="description">{community?.description}</p>
-                        <div className="creator-section">
-                            <p className="creator-info">
-                                Created by <span className="creator-name">{community?.created_by || 'Unknown'}</span>
-                            </p>
-                        </div>
-                    </div>
+                    <CommunityHeaderSection>
+                        <HeaderContent>
+                            <h1>{community.name}</h1>
+                            <p>{community.description}</p>
+                            <CreatorInfo>
+                                <span>Created by {community.creator_username}</span>
+                                <ActionButtons>
+                                    <JoinCommunityButton 
+                                        communityId={id} 
+                                        isLoggedIn={isLoggedIn} 
+                                    />
+                                </ActionButtons>
+                            </CreatorInfo>
+                        </HeaderContent>
+                    </CommunityHeaderSection>
                 </div>
             </div>
 
