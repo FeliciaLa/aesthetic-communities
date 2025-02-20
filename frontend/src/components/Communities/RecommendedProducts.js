@@ -188,48 +188,22 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         gap: 20px;
         overflow-x: auto;
         padding: 10px 0;
-        transform: translateX(${props => props.offset}px);
-        transition: transform 0.3s ease;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        
+        scrollbar-width: thin;
+        scrollbar-color: #fa8072 #f1f1f1;
+
         &::-webkit-scrollbar {
-            display: none;
-        }
-    `;
-
-    const CarouselButton = styled.button`
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 2;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-        &:hover {
-            background: #f8f8f8;
+            height: 6px;
         }
 
-        &.prev {
-            left: 10px;
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
         }
 
-        &.next {
-            right: 10px;
-        }
-
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        &::-webkit-scrollbar-thumb {
+            background: #fa8072;
+            border-radius: 3px;
         }
     `;
 
@@ -402,21 +376,11 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 </div>
             ) : (
                 <ProductsContainer>
-                    {canScrollLeft && (
-                        <CarouselButton className="prev" onClick={handlePrevClick}>
-                            ←
-                        </CarouselButton>
-                    )}
-                    <ProductsScroll offset={offset}>
+                    <ProductsScroll>
                         {products.map(product => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </ProductsScroll>
-                    {canScrollRight && (
-                        <CarouselButton className="next" onClick={handleNextClick}>
-                            →
-                        </CarouselButton>
-                    )}
                 </ProductsContainer>
             )}
 
