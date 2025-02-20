@@ -321,22 +321,21 @@ const CommunityDetail = () => {
 
             <style jsx>{`
                 .community-detail {
-                    max-width: 100%;
+                    width: 100vw;
                     margin: 0;
                     padding: 0;
                     padding-right: ${isSidebarOpen ? '300px' : '0'};
                     transition: padding-right 0.3s ease;
                     overflow-x: hidden;
                     position: relative;
-                    width: 100%;
+                    margin-left: calc((-100vw + 100%) / 2);
+                    margin-right: calc((-100vw + 100%) / 2);
                 }
 
                 .community-banner {
                     position: relative;
-                    width: 100vw;
+                    width: 100%;
                     min-height: 300px;
-                    margin-left: calc(-50vw + 50%);
-                    margin-right: calc(-50vw + 50%);
                     background-image: url(${community?.banner_image || '/default-banner.jpg'});
                     background-size: cover;
                     background-position: center;
@@ -346,7 +345,6 @@ const CommunityDetail = () => {
                     align-items: flex-end;
                     background-color: rgba(0, 0, 0, 0.5);
                     background-blend-mode: overlay;
-                    left: 0;
                 }
 
                 .community-header {
@@ -580,14 +578,6 @@ const CommunityDetail = () => {
                     margin: 0;
                     padding: 0;
                     overflow-x: hidden;
-                    width: 100%;
-                }
-
-                :global(#root) {
-                    margin: 0;
-                    padding: 0;
-                    overflow-x: hidden;
-                    width: 100%;
                 }
 
                 .modal-overlay {
