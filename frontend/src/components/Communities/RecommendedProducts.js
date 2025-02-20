@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import './RecommendedProducts.css';
 import AddProductModal from './AddProductModal';
+import styled from 'styled-components';
 
 const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     const [products, setProducts] = useState([]);
@@ -96,135 +97,70 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         fetchSavedProducts();
     }, []);
 
-    const ProductCard = ({ product }) => {
-        const [imageUrl, setImageUrl] = useState(null);
-        const [loading, setLoading] = useState(true);
+    const ProductCard = styled.div`
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        background: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
 
-        useEffect(() => {
-            const fetchPreview = async () => {
-                if (!product.url) {
-                    setLoading(false);
-                    return;
-                }
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
 
-                try {
-                    // Special handling for known domains
-                    if (product.url.includes('youtube.com') || product.url.includes('youtu.be')) {
-                        const videoId = product.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
-                        if (videoId) {
-                            setImageUrl(`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
-                            setLoading(false);
-                            return;
-                        }
-                    }
+        img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
 
-                    // Try multiple approaches to get the image
-                    const token = localStorage.getItem('token');
-                    let attempts = [
-                        // First attempt: Direct preview API
-                        async () => {
-                            const response = await api.get(
-                                `/preview/?url=${encodeURIComponent(product.url)}`,
-                                {
-                                    headers: { 'Authorization': `Token ${token}` }
-                                }
-                            );
-                            return response.data.image;
-                        },
-                        // Second attempt: Try metadata API
-                        async () => {
-                            const response = await api.post(
-                                `/products/fetch-metadata/`,
-                                { url: product.url },
-                                {
-                                    headers: {
-                                        'Authorization': `Token ${token}`,
-                                        'Content-Type': 'application/json'
-                                    }
-                                }
-                            );
-                            return response.data.image_url;
-                        }
-                    ];
+        .product-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-                    for (let attempt of attempts) {
-                        try {
-                            const image = await attempt();
-                            if (image) {
-                                setImageUrl(image);
-                                setLoading(false);
-                                return;
-                            }
-                        } catch (err) {
-                            console.log('Attempt failed, trying next method...');
-                        }
-                    }
+        h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
 
-                    // If all attempts fail, set default image
-                    setImageUrl(FALLBACK_IMAGE);
+        .price {
+            display: block;
+            color: #fa8072;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-                } catch (err) {
-                    console.error('Error fetching image:', err);
-                    setImageUrl(FALLBACK_IMAGE);
-                } finally {
-                    setLoading(false);
-                }
-            };
+        .view-product {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #fa8072;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: auto;
+            align-self: flex-start;
+            transition: background 0.3s ease;
 
-            fetchPreview();
-        }, [product.url]);
+            &:hover {
+                background: #ff9288;
+            }
+        }
+    `;
 
-        return (
-            <div className="product-card">
-                <div className="product-image-container">
-                    {loading ? (
-                        <div className="product-image-placeholder">
-                            <div className="loading-spinner"></div>
-                        </div>
-                    ) : imageUrl ? (
-                        <img 
-                            src={imageUrl} 
-                            alt={product.title} 
-                            className="product-image"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = FALLBACK_IMAGE;
-                            }}
-                        />
-                    ) : (
-                        <div className="product-image-placeholder">
-                            No image available
-                        </div>
-                    )}
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleSaveProduct(product.id);
-                        }}
-                        className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
-                        title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
-                    >
-                        {savedProducts.has(product.id) ? '★' : '☆'}
-                    </button>
-                </div>
-                <div className="product-info">
-                    <h3>{product.title}</h3>
-                    <p className="product-category">{product.catalogue_name}</p>
-                    {product.comment && (
-                        <p className="product-description">{product.comment}</p>
-                    )}
-                    <a 
-                        href={product.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="view-product-button"
-                    >
-                        View Product
-                    </a>
-                </div>
-            </div>
-        );
-    };
+    const ProductsGrid = styled.div`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    `;
 
     const handleAllClick = () => {
         setActiveCatalogue('all');
@@ -272,9 +208,48 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             ) : (
                 <div className="products-container">
                     <div className="products-scroll">
-                        {products.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                        <ProductsGrid>
+                            {products.map(product => (
+                                <ProductCard key={product.id}>
+                                    <div className="product-image-container">
+                                        <img 
+                                            src={product.url} 
+                                            alt={product.title} 
+                                            className="product-image"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = FALLBACK_IMAGE;
+                                            }}
+                                        />
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSaveProduct(product.id);
+                                            }}
+                                            className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                                            title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
+                                        >
+                                            {savedProducts.has(product.id) ? '★' : '☆'}
+                                        </button>
+                                    </div>
+                                    <div className="product-info">
+                                        <h3>{product.title}</h3>
+                                        <p className="product-category">{product.catalogue_name}</p>
+                                        {product.comment && (
+                                            <p className="product-description">{product.comment}</p>
+                                        )}
+                                        <a 
+                                            href={product.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="view-product-button"
+                                        >
+                                            View Product
+                                        </a>
+                                    </div>
+                                </ProductCard>
+                            ))}
+                        </ProductsGrid>
                     </div>
                 </div>
             )}
