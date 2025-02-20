@@ -153,87 +153,73 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
 
       <style jsx>{`
         .announcements-dashboard {
-          padding: 0;
           width: 100%;
+          max-width: 100%;
+          margin: 0;
+          padding: 0;
         }
 
         .announcements-container {
           background: white;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          border: 1px solid #eee;
+          border-radius: 8px;
+          padding: 16px;
           width: 100%;
+          box-sizing: border-box;
         }
 
         h2 {
-          font-size: 1.75rem;
+          font-size: 1.5rem;
           color: #2c3e50;
-          margin: 0 0 20px 0;
-          font-weight: 600;
+          margin: 0 0 16px 0;
+          padding: 0;
         }
 
         .announcement-form {
-          margin-bottom: 20px;
+          margin-bottom: 16px;
           width: 100%;
         }
 
         .announcement-input {
           width: 100%;
-          min-height: 100px;
-          padding: 16px;
+          min-height: 80px;
+          padding: 12px;
           border: 1px solid #ddd;
-          border-radius: 8px;
-          margin-bottom: 16px;
-          font-size: 15px;
+          border-radius: 6px;
+          margin-bottom: 12px;
+          font-size: 14px;
           resize: vertical;
           box-sizing: border-box;
         }
 
         .post-announcement-btn {
-          background: #fa8072;
+          background: #ff6b6b;
           color: white;
           border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
+          padding: 8px 16px;
+          border-radius: 4px;
           cursor: pointer;
-          font-size: 15px;
-          transition: all 0.2s ease;
-        }
-
-        .post-announcement-btn:hover {
-          background: #ff9288;
-          transform: translateY(-1px);
+          font-size: 14px;
         }
 
         .announcements-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
+          max-height: 300px;
+          overflow-y: auto;
         }
 
         .announcement-card {
-          background: #f8f9fa;
-          border-radius: 8px;
-          padding: 20px;
-          border: 1px solid #eee;
-          transition: transform 0.2s ease;
-        }
-
-        .announcement-card:hover {
-          transform: translateY(-2px);
+          padding: 12px;
+          border-bottom: 1px solid #eee;
         }
 
         .announcement-content {
-          color: #334155;
-          line-height: 1.6;
-          font-size: 15px;
-          margin-bottom: 12px;
+          font-size: 14px;
+          line-height: 1.4;
+          margin-bottom: 8px;
         }
 
         .announcement-date {
-          color: #94a3b8;
-          font-size: 13px;
+          font-size: 12px;
+          color: #666;
         }
 
         .no-announcements {
