@@ -184,20 +184,18 @@ const CommunityDetail = () => {
                 <div className="community-header">
                     <div className="title-section">
                         <div className="title-wrapper">
-                            <div className="title-with-menu">
-                                <h1>{community?.name}</h1>
-                                {isCreator && (
-                                    <button 
-                                        className="edit-button"
-                                        onClick={() => {
-                                            console.log('Edit button clicked');
-                                            setShowEditModal(true);
-                                        }}
-                                    >
-                                        ⋮
-                                    </button>
-                                )}
-                            </div>
+                            <h1>{community?.name}</h1>
+                            {isCreator && (
+                                <button 
+                                    className="edit-button"
+                                    onClick={() => {
+                                        console.log('Edit button clicked');
+                                        setShowEditModal(true);
+                                    }}
+                                >
+                                    ⋮
+                                </button>
+                            )}
                         </div>
                         <p className="description">{community?.description}</p>
                         <p className="creator-info">
@@ -357,13 +355,10 @@ const CommunityDetail = () => {
                 }
 
                 .title-wrapper {
-                    margin-bottom: 1rem;
-                }
-
-                .title-with-menu {
                     display: flex;
-                    align-items: center;
+                    align-items: baseline;
                     gap: 0.25rem;
+                    margin-bottom: 1rem;
                 }
 
                 h1 {
@@ -394,14 +389,13 @@ const CommunityDetail = () => {
                     border: none;
                     color: white;
                     font-size: 2rem;
-                    padding: 0 0.25rem;
+                    padding: 0;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    height: 3rem;
-                    margin-top: 0.5rem;
+                    margin-top: 0;
                 }
 
                 .edit-button:hover {
