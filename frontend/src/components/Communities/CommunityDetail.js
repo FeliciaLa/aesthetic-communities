@@ -120,13 +120,11 @@ const Description = styled.p`
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
-const CreatorInfo = styled.div`
-    font-size: 1rem;
-    opacity: 0.9;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+const CreatorSection = styled.div`
     display: flex;
     align-items: center;
     gap: 1rem;
+    margin-top: 0.5rem;
 `;
 
 const CommunityDetail = () => {
@@ -287,13 +285,13 @@ const CommunityDetail = () => {
                     <HeaderContent>
                         <Title>{community.name}</Title>
                         <Description>{community.description}</Description>
-                        <CreatorInfo>
+                        <CreatorSection>
                             <span>Created by {community.creator_username}</span>
                             <JoinCommunityButton 
                                 communityId={id} 
                                 isLoggedIn={isLoggedIn} 
                             />
-                        </CreatorInfo>
+                        </CreatorSection>
                     </HeaderContent>
                 </CommunityHeaderSection>
             </div>
