@@ -83,7 +83,7 @@ const SignInPrompt = styled.div`
   }
 `;
 
-const CommunityHeaderSection = styled.div`
+const CommunityBanner = styled.div`
     position: relative;
     width: 100%;
     min-height: 300px;
@@ -95,12 +95,20 @@ const CommunityHeaderSection = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    background-color: rgba(0, 0, 0, 0.5);
-    background-blend-mode: overlay;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+    }
 `;
 
-const HeaderContent = styled.div`
-    max-width: 800px;
+const BannerContent = styled.div`
+    position: relative;
     z-index: 2;
 `;
 
@@ -115,16 +123,16 @@ const Title = styled.h1`
 const Description = styled.p`
     font-size: 1.25rem;
     margin: 1rem 0;
-    max-width: 600px;
-    line-height: 1.5;
+    color: white;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
-const CreatorSection = styled.div`
+const CreatorInfo = styled.div`
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-top: 0.5rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
 const CommunityDetail = () => {
@@ -281,19 +289,19 @@ const CommunityDetail = () => {
             </div>
 
             <div className="community-banner">
-                <CommunityHeaderSection bannerImage={community?.banner_image}>
-                    <HeaderContent>
+                <CommunityBanner bannerImage={community?.banner_image}>
+                    <BannerContent>
                         <Title>{community.name}</Title>
                         <Description>{community.description}</Description>
-                        <CreatorSection>
+                        <CreatorInfo>
                             <span>Created by {community.creator_username}</span>
                             <JoinCommunityButton 
                                 communityId={id} 
                                 isLoggedIn={isLoggedIn} 
                             />
-                        </CreatorSection>
-                    </HeaderContent>
-                </CommunityHeaderSection>
+                        </CreatorInfo>
+                    </BannerContent>
+                </CommunityBanner>
             </div>
 
             <div className="community-tabs">
