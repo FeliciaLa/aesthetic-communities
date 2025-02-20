@@ -326,12 +326,19 @@ const CommunityDetail = () => {
                     padding: 0;
                     padding-right: ${isSidebarOpen ? '300px' : '0'};
                     transition: padding-right 0.3s ease;
+                    overflow-x: hidden;
+                    position: relative;
+                    width: 100%;
                 }
 
                 .community-banner {
                     position: relative;
-                    width: 100%;
+                    width: 100vw;
                     min-height: 300px;
+                    left: 50%;
+                    right: 50%;
+                    margin-left: -50vw;
+                    margin-right: -50vw;
                     background-image: url(${community?.banner_image || '/default-banner.jpg'});
                     background-size: cover;
                     background-position: center;
@@ -573,11 +580,14 @@ const CommunityDetail = () => {
                     margin: 0;
                     padding: 0;
                     overflow-x: hidden;
+                    width: 100%;
                 }
 
                 :global(#root) {
                     margin: 0;
                     padding: 0;
+                    overflow-x: hidden;
+                    width: 100%;
                 }
 
                 .modal-overlay {
