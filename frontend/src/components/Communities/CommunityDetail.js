@@ -189,17 +189,6 @@ const CommunityDetail = () => {
                             <p className="creator-info">
                                 Created by <span className="creator-name">{community?.created_by || 'Unknown'}</span>
                             </p>
-                            {isCreator && (
-                                <button 
-                                    className="edit-button"
-                                    onClick={() => {
-                                        console.log('Edit button clicked');
-                                        setShowEditModal(true);
-                                    }}
-                                >
-                                    Edit
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -236,6 +225,14 @@ const CommunityDetail = () => {
                 >
                     Products
                 </button>
+                {isCreator && (
+                    <button 
+                        className={`tab ${activeTab === 'edit' ? 'active' : ''}`}
+                        onClick={() => setShowEditModal(true)}
+                    >
+                        Edit Community
+                    </button>
+                )}
             </div>
 
             <div className="tab-content">
@@ -387,22 +384,6 @@ const CommunityDetail = () => {
                     display: flex;
                     flex-direction: column;
                     gap: 0.5rem;
-                }
-
-                .edit-button {
-                    background: none;
-                    border: 1px solid white;
-                    color: white;
-                    font-size: 0.9rem;
-                    padding: 0.5rem 1rem;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    border-radius: 4px;
-                    width: fit-content;
-                }
-
-                .edit-button:hover {
-                    background: rgba(255, 255, 255, 0.1);
                 }
 
                 .community-tabs {
