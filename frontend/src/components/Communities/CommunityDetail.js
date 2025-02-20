@@ -288,21 +288,19 @@ const CommunityDetail = () => {
                 </div>
             </div>
 
-            <div className="community-banner">
-                <CommunityBanner bannerImage={community?.banner_image}>
-                    <BannerContent>
-                        <Title>{community.name}</Title>
-                        <Description>{community.description}</Description>
-                        <CreatorInfo>
-                            <span>Created by {community.creator_username}</span>
-                            <JoinCommunityButton 
-                                communityId={id} 
-                                isLoggedIn={isLoggedIn} 
-                            />
-                        </CreatorInfo>
-                    </BannerContent>
-                </CommunityBanner>
-            </div>
+            <CommunityBanner bannerImage={community?.banner_image}>
+                <BannerContent>
+                    <Title>{community.name}</Title>
+                    <Description>{community.description}</Description>
+                    <CreatorInfo>
+                        <span>Created by {community.creator_username}</span>
+                        <JoinCommunityButton 
+                            communityId={id} 
+                            isLoggedIn={isLoggedIn} 
+                        />
+                    </CreatorInfo>
+                </BannerContent>
+            </CommunityBanner>
 
             <div className="community-tabs">
                 <button 
@@ -456,10 +454,8 @@ const CommunityDetail = () => {
                     color: white;
                     padding: 3rem 2rem;
                     display: flex;
-                    align-items: flex-end;
-                    justify-content: flex-start;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    background-blend-mode: overlay;
+                    flex-direction: column;
+                    justify-content: flex-end;
                 }
 
                 .community-header {
