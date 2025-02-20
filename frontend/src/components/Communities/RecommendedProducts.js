@@ -97,7 +97,93 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         fetchSavedProducts();
     }, []);
 
-    const ProductCard = styled.div`
+    const ProductCard = ({ product }) => {
+        const [imageUrl, setImageUrl] = useState(null);
+
+        useEffect(() => {
+            const fetchPreview = async () => {
+                try {
+                    // First try client-side extraction
+                    const response = await fetch(product.url);
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    
+                    // Try to find meta og:image first
+                    let img = doc.querySelector('meta[property="og:image"]');
+                    if (img) {
+                        setImageUrl(img.getAttribute('content'));
+                        return;
+                    }
+
+                    // If client-side fails, try server-side proxy
+                    const token = localStorage.getItem('token');
+                    const proxyResponse = await api.get(
+                        `preview/?url=${encodeURIComponent(product.url)}`,
+                        {
+                            headers: { 'Authorization': `Token ${token}` }
+                        }
+                    );
+
+                    if (proxyResponse.data.image_url) {
+                        setImageUrl(proxyResponse.data.image_url);
+                    } else {
+                        setImageUrl(FALLBACK_IMAGE);
+                    }
+
+                } catch (err) {
+                    console.error('Error fetching image:', err);
+                    setImageUrl(FALLBACK_IMAGE);
+                }
+            };
+
+            fetchPreview();
+        }, [product.url]);
+
+        return (
+            <StyledProductCard>
+                <div className="product-image-container">
+                    {imageUrl ? (
+                        <img 
+                            src={imageUrl} 
+                            alt={product.title} 
+                            className="product-image"
+                            onError={(e) => e.target.src = FALLBACK_IMAGE}
+                        />
+                    ) : (
+                        <div className="product-image-placeholder">Loading...</div>
+                    )}
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleSaveProduct(product.id);
+                        }}
+                        className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                        title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
+                    >
+                        {savedProducts.has(product.id) ? '★' : '☆'}
+                    </button>
+                </div>
+                <div className="product-info">
+                    <h3>{product.title}</h3>
+                    <p className="product-category">{product.catalogue_name}</p>
+                    {product.comment && (
+                        <p className="product-description">{product.comment}</p>
+                    )}
+                    <a 
+                        href={product.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="view-product-button"
+                    >
+                        View Product
+                    </a>
+                </div>
+            </StyledProductCard>
+        );
+    };
+
+    const StyledProductCard = styled.div`
         border: 1px solid #ddd;
         border-radius: 8px;
         overflow: hidden;
@@ -122,6 +208,16 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .product-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
         }
 
         .save-button {
@@ -234,44 +330,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     <div className="products-scroll">
                         <ProductsGrid>
                             {products.map(product => (
-                                <ProductCard key={product.id}>
-                                    <div className="product-image-container">
-                                        <img 
-                                            src={product.url} 
-                                            alt={product.title} 
-                                            className="product-image"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = FALLBACK_IMAGE;
-                                            }}
-                                        />
-                                        <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSaveProduct(product.id);
-                                            }}
-                                            className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
-                                            title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
-                                        >
-                                            {savedProducts.has(product.id) ? '★' : '☆'}
-                                        </button>
-                                    </div>
-                                    <div className="product-info">
-                                        <h3>{product.title}</h3>
-                                        <p className="product-category">{product.catalogue_name}</p>
-                                        {product.comment && (
-                                            <p className="product-description">{product.comment}</p>
-                                        )}
-                                        <a 
-                                            href={product.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            className="view-product-button"
-                                        >
-                                            View Product
-                                        </a>
-                                    </div>
-                                </ProductCard>
+                                <ProductCard key={product.id} product={product} />
                             ))}
                         </ProductsGrid>
                     </div>
