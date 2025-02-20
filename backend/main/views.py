@@ -1863,13 +1863,6 @@ def delete_community(request, community_id):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Delete the banner image if it exists
-        if community.banner_image:
-            try:
-                default_storage.delete(community.banner_image.path)
-            except Exception:
-                pass  # If file doesn't exist, continue
-        
         # Delete the community
         community.delete()
         

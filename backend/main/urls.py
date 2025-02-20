@@ -127,7 +127,7 @@ urlpatterns = [
 
     path('auth/activate/<str:registration_id>/', AccountActivationView.as_view(), name='account-activation'),
 
-    path('communities/<int:community_id>/', delete_community, name='delete_community'),
+    path('communities/<int:community_id>/', views.delete_community, name='delete_community'),
 ]
 
 # Add this for debugging
