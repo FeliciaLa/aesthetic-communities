@@ -25,17 +25,19 @@ const SignInPrompt = styled.div`
 
   p {
     color: #666;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     text-align: center;
+    padding: 0 16px;
   }
 
   .auth-buttons {
     display: flex;
     gap: 12px;
     justify-content: center;
+    margin-bottom: 8px;
 
     button {
-      padding: 10px 24px;
+      padding: 12px 28px;
       border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
