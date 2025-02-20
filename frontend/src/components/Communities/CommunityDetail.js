@@ -83,6 +83,13 @@ const SignInPrompt = styled.div`
   }
 `;
 
+const CommunityHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+`;
+
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -238,8 +245,14 @@ const CommunityDetail = () => {
 
             <div className="community-banner">
                 <div className="community-header">
-                    <div className="title-section">
+                    <CommunityHeader>
                         <h1>{community?.name}</h1>
+                        <JoinCommunityButton 
+                            communityId={id} 
+                            isLoggedIn={isLoggedIn} 
+                        />
+                    </CommunityHeader>
+                    <div className="title-section">
                         <p className="description">{community?.description}</p>
                         <div className="creator-section">
                             <p className="creator-info">
