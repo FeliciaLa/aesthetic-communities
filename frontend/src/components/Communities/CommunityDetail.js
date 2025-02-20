@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import Modal from '../Common/Modal';
 import MediaGallery from './MediaGallery';
@@ -28,6 +28,61 @@ const ProductPlaceholder = styled.div`
   border: 2px dashed #ddd;
 `;
 
+const SignInPrompt = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  max-width: 500px;
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+
+    button {
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+
+    .register-btn {
+      background-color: white;
+      color: #007bff;
+      border: 1px solid #007bff;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+`;
+
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -39,6 +94,7 @@ const CommunityDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [images, setImages] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         console.log('Community ID:', id);
@@ -266,7 +322,25 @@ const CommunityDetail = () => {
                     </div>
                 )}
                 
-                {activeTab === 'feed' && <CommunityFeed communityId={id} />}
+                {activeTab === 'feed' && (
+                    <>
+                        {!isLoggedIn && (
+                            <SignInPrompt>
+                                <h2>{community?.name} Feed</h2>
+                                <p>Sign in to participate in this community and join the conversation</p>
+                                <div className="auth-buttons">
+                                    <button className="login-btn" onClick={() => navigate('/login')}>
+                                        Log In
+                                    </button>
+                                    <button className="register-btn" onClick={() => navigate('/register')}>
+                                        Register
+                                    </button>
+                                </div>
+                            </SignInPrompt>
+                        )}
+                        <CommunityFeed communityId={id} />
+                    </>
+                )}
                 
                 {activeTab === 'gallery' && (
                     <GalleryView 
