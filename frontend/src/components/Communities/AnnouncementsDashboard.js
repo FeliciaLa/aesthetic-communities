@@ -107,150 +107,75 @@ const AnnouncementsDashboard = ({ communityId, isLoggedIn }) => {
   };
 
   return (
-    <div className="announcements-dashboard">
-      <div className="announcements-container">
-        <h2>Announcements</h2>
-        
+    <div style={{
+      padding: '1rem',
+      background: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      width: '100%',
+      maxWidth: '100%',
+      marginBottom: '1rem'
+    }}>
+      <h2 style={{ marginTop: 0 }}>Announcements</h2>
+      
+      {isCreator && (
+        <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
+          <textarea
+            value={newAnnouncement}
+            onChange={(e) => setNewAnnouncement(e.target.value)}
+            placeholder="Write a new announcement..."
+            style={{
+              width: '100%',
+              minHeight: '100px',
+              padding: '0.5rem',
+              marginBottom: '0.5rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              resize: 'vertical'
+            }}
+          />
+          <button 
+            type="submit" 
+            style={{
+              backgroundColor: '#ff6b6b',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Post Announcement
+          </button>
+        </form>
+      )}
+
+      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
         {loading ? (
-          <div className="loading">Loading...</div>
+          <p>Loading announcements...</p>
+        ) : error ? (
+          <p style={{ color: '#ff0000', padding: '0.5rem' }}>{error}</p>
+        ) : announcements.length === 0 ? (
+          <p>No announcements yet.</p>
         ) : (
-          <>
-            {isCreator && (
-              <form onSubmit={handleSubmit} className="announcement-form">
-                <textarea
-                  value={newAnnouncement}
-                  onChange={(e) => setNewAnnouncement(e.target.value)}
-                  placeholder="Write a new announcement..."
-                  className="announcement-input"
-                />
-                <button type="submit" className="post-announcement-btn">
-                  Post Announcement
-                </button>
-              </form>
-            )}
-            
-            <div className="announcements-list">
-              {Array.isArray(announcements) && announcements.length > 0 ? (
-                announcements.map((announcement) => (
-                  <div key={announcement.id || Math.random()} className="announcement-card">
-                    <div className="announcement-content">
-                      {announcement.content || 'No content'}
-                    </div>
-                    {announcement.created_at && (
-                      <div className="announcement-date">
-                        {new Date(announcement.created_at).toLocaleDateString()}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-announcements">No announcements yet.</p>
-              )}
+          announcements.map(announcement => (
+            <div 
+              key={announcement.id} 
+              style={{
+                padding: '1rem',
+                borderBottom: '1px solid #eee'
+              }}
+            >
+              <p style={{ margin: '0 0 0.5rem 0', whiteSpace: 'pre-wrap' }}>
+                {announcement.content}
+              </p>
+              <small style={{ color: '#666', fontSize: '0.85rem' }}>
+                Posted by {announcement.created_by?.username} on {new Date(announcement.created_at).toLocaleDateString()}
+              </small>
             </div>
-          </>
+          ))
         )}
       </div>
-
-      <style jsx>{`
-        .announcements-dashboard {
-          padding: 20px;
-        }
-
-        .announcements-container {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          border: 1px solid #eee;
-        }
-
-        h2 {
-          font-size: 1.75rem;
-          color: #2c3e50;
-          margin-bottom: 24px;
-          font-weight: 600;
-        }
-
-        .announcement-form {
-          margin-bottom: 32px;
-        }
-
-        .announcement-input {
-          width: 100%;
-          min-height: 100px;
-          padding: 16px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          margin-bottom: 16px;
-          font-size: 15px;
-          resize: vertical;
-          transition: border-color 0.2s ease;
-        }
-
-        .announcement-input:focus {
-          outline: none;
-          border-color: #fa8072;
-        }
-
-        .post-announcement-btn {
-          background: #fa8072;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 15px;
-          transition: all 0.2s ease;
-        }
-
-        .post-announcement-btn:hover {
-          background: #ff9288;
-          transform: translateY(-1px);
-        }
-
-        .announcements-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .announcement-card {
-          background: #f8f9fa;
-          border-radius: 8px;
-          padding: 20px;
-          border: 1px solid #eee;
-          transition: transform 0.2s ease;
-        }
-
-        .announcement-card:hover {
-          transform: translateY(-2px);
-        }
-
-        .announcement-content {
-          color: #334155;
-          line-height: 1.6;
-          font-size: 15px;
-          margin-bottom: 12px;
-        }
-
-        .announcement-date {
-          color: #94a3b8;
-          font-size: 13px;
-        }
-
-        .no-announcements {
-          color: #94a3b8;
-          text-align: center;
-          padding: 32px;
-          font-size: 15px;
-        }
-
-        .loading {
-          text-align: center;
-          padding: 32px;
-          color: #94a3b8;
-        }
-      `}</style>
     </div>
   );
 };
