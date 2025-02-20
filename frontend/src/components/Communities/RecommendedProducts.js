@@ -112,10 +112,34 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        img {
+        .product-image-container {
+            position: relative;
             width: 100%;
             height: 200px;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+        }
+
+        .save-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 1;
+        }
+
+        .save-button:hover {
+            background: rgba(0, 0, 0, 0.7);
         }
 
         .product-info {
