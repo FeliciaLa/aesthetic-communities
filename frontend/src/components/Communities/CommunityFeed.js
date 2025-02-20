@@ -42,22 +42,22 @@ const SignInPrompt = styled.div`
     }
 
     .login-btn {
-      background-color: #007bff;
+      background-color: #fa8072;
       color: white;
       border: none;
       
       &:hover {
-        background-color: #0056b3;
+        background-color: #ff9288;
       }
     }
 
     .register-btn {
       background-color: white;
-      color: #007bff;
-      border: 1px solid #007bff;
+      color: #fa8072;
+      border: 1px solid #fa8072;
       
       &:hover {
-        background-color: #f8f9fa;
+        background-color: #fff1f0;
       }
     }
   }
