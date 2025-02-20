@@ -355,9 +355,8 @@ const CommunityDetail = () => {
                 }
 
                 .title-wrapper {
-                    display: inline-flex;
+                    display: flex;
                     align-items: center;
-                    gap: 1 rem;
                     margin-bottom: 1rem;
                 }
 
@@ -389,14 +388,12 @@ const CommunityDetail = () => {
                     border: none;
                     color: white;
                     font-size: 2.5rem;
-                    padding: 0;
+                    padding-left: 1rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    display: inline-flex;
+                    display: flex;
                     align-items: center;
                     line-height: 1;
-                    position: relative;
-                    top: -2px;
                 }
 
                 .edit-button:hover {
