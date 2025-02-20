@@ -540,7 +540,7 @@ const CommunityDetail = () => {
                     grid-template-columns: 1fr 1fr;
                     grid-template-areas: "side feed";
                     gap: 2rem;
-                    padding: 0 1rem;
+                    padding: 0;
                     margin: 0 auto;
                     align-items: start;
                 }
