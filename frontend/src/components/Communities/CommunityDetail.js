@@ -385,17 +385,17 @@ const CommunityDetail = () => {
                     background: none;
                     border: none;
                     color: white;
-                    font-size: 1rem;
-                    padding: 0;
-                    margin-top: 0.5rem;
+                    font-size: 0.9rem;
+                    padding: 0.5rem 1rem;
+                    margin-top: 0.75rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    display: flex;
-                    align-items: center;
+                    border: 1px solid white;
+                    border-radius: 4px;
                 }
 
                 .edit-button:hover {
-                    transform: scale(1.1);
+                    background: rgba(255, 255, 255, 0.1);
                 }
 
                 .community-tabs {
