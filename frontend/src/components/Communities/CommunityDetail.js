@@ -552,6 +552,7 @@ const CommunityDetail = () => {
                     flex-direction: column;
                     gap: 22px;
                     width: 100%;
+                    margin-bottom: 2rem;
                 }
 
                 .main-column {
