@@ -173,15 +173,45 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         );
     };
 
+    const ProductsContainer = styled.div`
+        position: relative;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+    `;
+
+    const ProductsScroll = styled.div`
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 10px 0;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #fa8072 #f1f1f1;
+
+        &::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #fa8072;
+            border-radius: 3px;
+        }
+    `;
+
     const StyledProductCard = styled.div`
+        flex: 0 0 220px;
         border: 1px solid #ddd;
         border-radius: 8px;
         overflow: hidden;
         transition: transform 0.3s ease;
         background: white;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+        height: 300px;
 
         &:hover {
             transform: translateY(-4px);
@@ -191,7 +221,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         .product-image-container {
             position: relative;
             width: 100%;
-            height: 200px;
+            height: 150px;
         }
 
         .product-image {
@@ -265,13 +295,6 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         }
     `;
 
-    const ProductsGrid = styled.div`
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-    `;
-
     const handleAllClick = () => {
         setActiveCatalogue('all');
         if (onTabChange) {
@@ -318,11 +341,13 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             ) : (
                 <div className="products-container">
                     <div className="products-scroll">
-                        <ProductsGrid>
-                            {products.map(product => (
-                                <ProductCard key={product.id} product={product} />
-                            ))}
-                        </ProductsGrid>
+                        <ProductsContainer>
+                            <ProductsScroll>
+                                {products.map(product => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </ProductsScroll>
+                        </ProductsContainer>
                     </div>
                 </div>
             )}
