@@ -59,6 +59,7 @@ urlpatterns = [
     path('communities/<int:pk>/', CommunityDetailView.as_view(), name='community-detail'),
     path('communities/<int:community_id>/update_details/', CommunityUpdateView.as_view(), name='community-update'),
     path('communities/<int:community_id>/banner/', update_community_banner, name='update-community-banner'),
+    path('communities/<int:community_id>/delete/', views.delete_community, name='delete-community'),
     
     # Resource endpoints
     path('resources/categories/', ResourceCategoryView.as_view(), name='resource-categories'),
@@ -126,8 +127,6 @@ urlpatterns = [
     path('communities/trending/', TrendingCommunitiesView.as_view(), name='trending-communities'),
 
     path('auth/activate/<str:registration_id>/', AccountActivationView.as_view(), name='account-activation'),
-
-    path('communities/<int:community_id>/', views.delete_community, name='delete_community'),
 ]
 
 # Add this for debugging

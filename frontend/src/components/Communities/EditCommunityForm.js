@@ -50,7 +50,7 @@ const EditCommunityForm = ({ community, onSuccess, onClose }) => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this community? This action cannot be undone.')) {
       try {
-        await api.delete(`/communities/${community.id}/`);
+        await api.delete(`/communities/${community.id}/delete/`);
         onSuccess(); // This will close the modal and refresh the page
         window.location.href = '/communities'; // Redirect to communities page
       } catch (err) {
