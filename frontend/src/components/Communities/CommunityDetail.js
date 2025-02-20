@@ -83,37 +83,50 @@ const SignInPrompt = styled.div`
   }
 `;
 
-const CommunityHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-`;
-
 const CommunityHeaderSection = styled.div`
-    padding: 2rem;
-    color: white;
     position: relative;
-    z-index: 1;
+    width: 100%;
+    min-height: 300px;
+    background-image: url(${props => props.bannerImage || '/default-banner.jpg'});
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-color: rgba(0, 0, 0, 0.5);
+    background-blend-mode: overlay;
 `;
 
 const HeaderContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    max-width: 800px;
+    z-index: 2;
+`;
+
+const Title = styled.h1`
+    margin: 0;
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+`;
+
+const Description = styled.p`
+    font-size: 1.25rem;
+    margin: 1rem 0;
+    max-width: 600px;
+    line-height: 1.5;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
 const CreatorInfo = styled.div`
+    font-size: 1rem;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-`;
-
-const ActionButtons = styled.div`
-    display: flex;
+    align-items: center;
     gap: 1rem;
-    margin-top: 0.5rem;
 `;
 
 const CommunityDetail = () => {
@@ -270,23 +283,19 @@ const CommunityDetail = () => {
             </div>
 
             <div className="community-banner">
-                <div className="community-header">
-                    <CommunityHeaderSection>
-                        <HeaderContent>
-                            <h1>{community.name}</h1>
-                            <p>{community.description}</p>
-                            <CreatorInfo>
-                                <span>Created by {community.creator_username}</span>
-                                <ActionButtons>
-                                    <JoinCommunityButton 
-                                        communityId={id} 
-                                        isLoggedIn={isLoggedIn} 
-                                    />
-                                </ActionButtons>
-                            </CreatorInfo>
-                        </HeaderContent>
-                    </CommunityHeaderSection>
-                </div>
+                <CommunityHeaderSection bannerImage={community?.banner_image}>
+                    <HeaderContent>
+                        <Title>{community.name}</Title>
+                        <Description>{community.description}</Description>
+                        <CreatorInfo>
+                            <span>Created by {community.creator_username}</span>
+                            <JoinCommunityButton 
+                                communityId={id} 
+                                isLoggedIn={isLoggedIn} 
+                            />
+                        </CreatorInfo>
+                    </HeaderContent>
+                </CommunityHeaderSection>
             </div>
 
             <div className="community-tabs">
