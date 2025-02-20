@@ -551,14 +551,14 @@ const CommunityDetail = () => {
                     flex-direction: column;
                     gap: 22px;
                     width: 100%;
-                    padding-left: 1rem;
+                    padding-left: 2rem;
                 }
 
                 .main-column {
                     grid-area: feed;
                     width: 100%;
                     min-width: 0;
-                    padding-right: 1rem;
+                    padding-right: 2rem;
                 }
 
                 @media (max-width: 1024px) {
