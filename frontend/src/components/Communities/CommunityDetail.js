@@ -356,7 +356,7 @@ const CommunityDetail = () => {
 
                 .title-wrapper {
                     display: flex;
-                    align-items: baseline;
+                    align-items: center;
                     gap: 0.25rem;
                     margin-bottom: 1rem;
                 }
@@ -388,14 +388,16 @@ const CommunityDetail = () => {
                     background: none;
                     border: none;
                     color: white;
-                    font-size: 2rem;
+                    font-size: 2.5rem;
                     padding: 0;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    height: 3rem;
                     margin-top: 0;
+                    line-height: 1;
                 }
 
                 .edit-button:hover {
