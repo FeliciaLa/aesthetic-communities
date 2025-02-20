@@ -560,7 +560,8 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
               </ViewOptions>
             </SectionHeader>
             <CommunitiesGrid>
-              {communities
+              {filteredCommunities
+                .slice(0, displayLimit)
                 .map(community => (
                   <StyledLink to={`/communities/${community.id}`} key={community.id}>
                     <CommunityCard community={community} />
