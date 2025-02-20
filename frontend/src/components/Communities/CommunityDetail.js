@@ -147,15 +147,6 @@ const CreatorText = styled.span`
     margin-bottom: 1rem;
 `;
 
-const ActionBar = styled.div`
-    display: flex;
-    justify-content: center;
-    padding: 1rem 2rem;
-    background: white;
-    border-bottom: 1px solid #eaeaea;
-    margin-bottom: -24px;
-`;
-
 const CommunityDetail = () => {
     const { id } = useParams();
     const [community, setCommunity] = useState(null);
@@ -317,52 +308,53 @@ const CommunityDetail = () => {
                 </BannerContent>
             </CommunityBanner>
 
-            <ActionBar>
-                <JoinCommunityButton 
-                    communityId={id} 
-                    isLoggedIn={isLoggedIn} 
-                />
-            </ActionBar>
-
             <div className="community-tabs">
-                <button 
-                    className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('overview')}
-                >
-                    Overview
-                </button>
-                <button 
-                    className={`tab ${activeTab === 'feed' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('feed')}
-                >
-                    Feed
-                </button>
-                <button 
-                    className={`tab ${activeTab === 'gallery' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('gallery')}
-                >
-                    Gallery
-                </button>
-                <button 
-                    className={`tab ${activeTab === 'resources' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('resources')}
-                >
-                    Resources
-                </button>
-                <button 
-                    className={`tab ${activeTab === 'products' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('products')}
-                >
-                    Products
-                </button>
-                {isCreator && (
+                <div className="tabs-left">
                     <button 
-                        className={`tab ${activeTab === 'edit' ? 'active' : ''}`}
-                        onClick={() => setShowEditModal(true)}
+                        className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('overview')}
                     >
-                        Edit Community
+                        Overview
                     </button>
-                )}
+                    <button 
+                        className={`tab ${activeTab === 'feed' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('feed')}
+                    >
+                        Feed
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'gallery' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('gallery')}
+                    >
+                        Gallery
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'resources' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('resources')}
+                    >
+                        Resources
+                    </button>
+                    <button 
+                        className={`tab ${activeTab === 'products' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('products')}
+                    >
+                        Products
+                    </button>
+                    {isCreator && (
+                        <button 
+                            className={`tab ${activeTab === 'edit' ? 'active' : ''}`}
+                            onClick={() => setShowEditModal(true)}
+                        >
+                            Edit Community
+                        </button>
+                    )}
+                </div>
+                <div className="tabs-right">
+                    <JoinCommunityButton 
+                        communityId={id} 
+                        isLoggedIn={isLoggedIn} 
+                    />
+                </div>
             </div>
 
             <div className="tab-content">
@@ -534,11 +526,21 @@ const CommunityDetail = () => {
 
                 .community-tabs {
                     display: flex;
-                    gap: 1rem;
+                    justify-content: space-between;
+                    align-items: center;
                     padding: 1rem;
                     background: white;
                     border-bottom: 1px solid #eaeaea;
                     margin-bottom: 24px;
+                }
+
+                .tabs-left {
+                    display: flex;
+                    gap: 1rem;
+                }
+
+                .tabs-right {
+                    margin-left: auto;
                 }
 
                 .tab {
