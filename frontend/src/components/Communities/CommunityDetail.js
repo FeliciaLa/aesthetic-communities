@@ -603,6 +603,21 @@ const CommunityDetail = () => {
                     max-height: 90vh;
                     overflow-y: auto;
                 }
+
+                .section-container {
+                    background: white;
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    width: 100%;
+                    margin: 0;
+                    margin-bottom: 2rem;
+                    box-sizing: border-box;
+                    border: 1px solid #e0e0e0;
+                    height: 352px;
+                    display: flex;
+                    flex-direction: column;
+                }
             `}</style>
         </div>
     );
