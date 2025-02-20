@@ -110,6 +110,11 @@ const CommunityBanner = styled.div`
 const BannerContent = styled.div`
     position: relative;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
 const Title = styled.h1`
@@ -292,13 +297,11 @@ const CommunityDetail = () => {
                 <BannerContent>
                     <Title>{community.name}</Title>
                     <Description>{community.description}</Description>
-                    <CreatorInfo>
-                        <span>Created by {community.creator_username}</span>
-                        <JoinCommunityButton 
-                            communityId={id} 
-                            isLoggedIn={isLoggedIn} 
-                        />
-                    </CreatorInfo>
+                    <span>Created by {community.creator_username}</span>
+                    <JoinCommunityButton 
+                        communityId={id} 
+                        isLoggedIn={isLoggedIn} 
+                    />
                 </BannerContent>
             </CommunityBanner>
 
