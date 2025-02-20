@@ -402,7 +402,7 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
 
   const fetchCommunities = async () => {
     try {
-      const response = await api.get('/communities/');
+      const response = await api.get(`/communities/?view=${activeView}`);
       
       const transformedCommunities = response.data.map(community => ({
         ...community,

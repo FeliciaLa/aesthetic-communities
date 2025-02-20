@@ -214,6 +214,29 @@ class CommunityListView(APIView):
     def get(self, request):
         try:
             communities = Community.objects.all()
+            
+            # Get sort parameter from query
+            sort_by = request.query_params.get('view', 'alphabetical')
+            
+            if sort_by == 'alphabetical':
+                communities = communities.order_by('name')
+            elif sort_by == 'trending':
+                communities = communities.annotate(
+                    member_count=Count('members')
+                ).order_by('-member_count')
+            elif sort_by == 'newest':
+                communities = communities.order_by('-created_at')
+            elif sort_by == 'oldest':
+                communities = communities.order_by('created_at')
+            elif sort_by == 'biggest':
+                communities = communities.annotate(
+                    member_count=Count('members')
+                ).order_by('-member_count')
+            elif sort_by == 'smallest':
+                communities = communities.annotate(
+                    member_count=Count('members')
+                ).order_by('member_count')
+            
             serializer = CommunitySerializer(
                 communities, 
                 many=True,
