@@ -210,7 +210,7 @@ const CommunityDetail = () => {
                         </div>
                         <p className="description">{community?.description}</p>
                         <p className="creator-info">
-                            Created by {community?.creator_name}
+                            Created by <span className="creator-name">{community?.creator_name || 'Unknown'}</span>
                         </p>
                     </div>
                 </div>
