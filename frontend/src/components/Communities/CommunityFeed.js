@@ -434,10 +434,12 @@ const CommunityFeed = ({ communityId }) => {
                         className="avatar"
                       />
                       <div className="answer-meta">
-                        <span className="username">{answer.created_by.username}</span>
-                        <span className="timestamp">
-                          {new Date(answer.created_at).toLocaleDateString()}
-                        </span>
+                        <div className="answer-info">
+                          <span className="username">{answer.created_by.username}</span>
+                          <span className="timestamp">
+                            {new Date(answer.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
                         <div className="answer-content">
                           {answer.content}
                         </div>
