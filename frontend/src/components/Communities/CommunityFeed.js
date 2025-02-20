@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api';
+import styled from 'styled-components';
 
 export const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
@@ -13,6 +14,60 @@ const REACTIONS = [
   { type: 'sad', emoji: '😢' },
   { type: 'angry', emoji: '😠' }
 ];
+
+const SignInPrompt = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+
+    button {
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+
+    .register-btn {
+      background-color: white;
+      color: #007bff;
+      border: 1px solid #007bff;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+`;
 
 const CommunityFeed = ({ communityId }) => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -29,6 +84,7 @@ const CommunityFeed = ({ communityId }) => {
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [replies, setReplies] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchContributions();
@@ -705,10 +761,18 @@ const CommunityFeed = ({ communityId }) => {
           </form>
         </>
       ) : (
-        <div className="auth-prompt">
-          <p>Sign in to participate in this community</p>
-          <Link to="/login" className="login-button">Sign In</Link>
-        </div>
+        <SignInPrompt>
+          <h2>Community Feed</h2>
+          <p>Sign in to participate in this community and join the conversation</p>
+          <div className="auth-buttons">
+            <button className="login-btn" onClick={() => navigate('/login')}>
+              Log In
+            </button>
+            <button className="register-btn" onClick={() => navigate('/register')}>
+              Register
+            </button>
+          </div>
+        </SignInPrompt>
       )}
 
       <style jsx>{`
