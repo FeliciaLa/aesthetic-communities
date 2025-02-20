@@ -98,54 +98,45 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
     }, []);
 
     const ProductCard = ({ product }) => {
-        const [imageUrl, setImageUrl] = useState(null);
+        const [previewUrl, setPreviewUrl] = useState(null);
 
         useEffect(() => {
-            const fetchPreview = async () => {
-                try {
-                    // First try client-side extraction
-                    const response = await fetch(product.url);
-                    const text = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-                    
-                    // Try to find meta og:image first
-                    let img = doc.querySelector('meta[property="og:image"]');
-                    if (img) {
-                        setImageUrl(img.getAttribute('content'));
-                        return;
-                    }
+            const fetchImagePreview = async () => {
+                if (!product.url) {
+                    setPreviewUrl(null);
+                    return;
+                }
 
-                    // If client-side fails, try server-side proxy
+                try {
                     const token = localStorage.getItem('token');
-                    const proxyResponse = await api.get(
-                        `preview/?url=${encodeURIComponent(product.url)}`,
+                    const response = await api.get(
+                        `/preview/?url=${encodeURIComponent(product.url)}`,
                         {
-                            headers: { 'Authorization': `Token ${token}` }
+                            headers: { 
+                                'Authorization': `Token ${token}`
+                            },
+                            timeout: 5000
                         }
                     );
-
-                    if (proxyResponse.data.image_url) {
-                        setImageUrl(proxyResponse.data.image_url);
-                    } else {
-                        setImageUrl(FALLBACK_IMAGE);
+                    
+                    if (response.data.image) {
+                        setPreviewUrl(response.data.image);
                     }
-
                 } catch (err) {
-                    console.error('Error fetching image:', err);
-                    setImageUrl(FALLBACK_IMAGE);
+                    console.error('Failed to fetch image preview:', err);
+                    setPreviewUrl(FALLBACK_IMAGE);
                 }
             };
 
-            fetchPreview();
+            fetchImagePreview();
         }, [product.url]);
 
         return (
-            <StyledProductCard>
+            <div className="product-card">
                 <div className="product-image-container">
-                    {imageUrl ? (
+                    {previewUrl ? (
                         <img 
-                            src={imageUrl} 
+                            src={previewUrl} 
                             alt={product.title} 
                             className="product-image"
                             onError={(e) => e.target.src = FALLBACK_IMAGE}
@@ -159,7 +150,6 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                             handleSaveProduct(product.id);
                         }}
                         className={`save-button ${savedProducts.has(product.id) ? 'saved' : ''}`}
-                        title={savedProducts.has(product.id) ? 'Unsave Product' : 'Save Product'}
                     >
                         {savedProducts.has(product.id) ? '★' : '☆'}
                     </button>
@@ -173,13 +163,13 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                     <a 
                         href={product.url} 
                         target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="view-product-button"
+                        rel="noopener noreferrer"
+                        className="view-product"
                     >
                         View Product
                     </a>
                 </div>
-            </StyledProductCard>
+            </div>
         );
     };
 
