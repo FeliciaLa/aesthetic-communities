@@ -540,7 +540,7 @@ const CommunityDetail = () => {
                     grid-template-columns: 1fr 1fr;
                     grid-template-areas: "side feed";
                     gap: 2rem;
-                    padding: 0 1rem 0 0;
+                    padding: 0 1rem;
                     margin: 0 auto;
                     align-items: start;
                 }
@@ -551,12 +551,14 @@ const CommunityDetail = () => {
                     flex-direction: column;
                     gap: 22px;
                     width: 100%;
+                    padding-left: 1rem;
                 }
 
                 .main-column {
                     grid-area: feed;
                     width: 100%;
                     min-width: 0;
+                    padding-right: 1rem;
                 }
 
                 @media (max-width: 1024px) {
