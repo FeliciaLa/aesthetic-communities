@@ -135,7 +135,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         }, [product.url]);
 
         return (
-            <div className="product-card">
+            <StyledProductCard>
                 <div className="product-image-container">
                     {previewUrl ? (
                         <img 
@@ -160,9 +160,6 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                 <div className="product-info">
                     <h3>{product.title}</h3>
                     <p className="product-category">{product.catalogue_name}</p>
-                    {product.comment && (
-                        <p className="product-description">{product.comment}</p>
-                    )}
                     <a 
                         href={product.url} 
                         target="_blank" 
@@ -172,7 +169,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
                         View Product
                     </a>
                 </div>
-            </div>
+            </StyledProductCard>
         );
     };
 
@@ -217,11 +214,6 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         height: 240px;
         display: flex;
         flex-direction: column;
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
 
         .product-image-container {
             position: relative;
@@ -269,6 +261,8 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             flex: 1;
             display: flex;
             flex-direction: column;
+            gap: 4px;
+            max-height: 120px;
         }
 
         h3 {
@@ -276,7 +270,7 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
             font-size: 0.9rem;
             font-weight: 500;
             line-height: 1.2;
-            height: 2.4em;
+            max-height: 2.4em;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -287,33 +281,15 @@ const RecommendedProducts = ({ communityId, isCreator, onTabChange }) => {
         .product-category {
             font-size: 0.8rem;
             color: #666;
-            margin: 4px 0;
-        }
-
-        .product-description {
-            font-size: 0.85rem;
-            color: #666;
-            margin: 4px 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            margin: 0;
         }
 
         .view-product {
             margin-top: auto;
-            padding: 6px 12px;
+            padding: 6px 0;
             font-size: 0.8rem;
-            text-align: center;
-            background: #fa8072;
-            color: white;
+            color: #fa8072;
             text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.2s;
-
-            &:hover {
-                background: #ff9288;
-            }
         }
     `;
 
