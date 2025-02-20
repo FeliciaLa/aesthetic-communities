@@ -343,6 +343,7 @@ const CommunityDetail = () => {
                     padding: 2rem;
                     display: flex;
                     align-items: flex-end;
+                    justify-content: flex-start;
                     background-color: rgba(0, 0, 0, 0.5);
                     background-blend-mode: overlay;
                 }
@@ -354,11 +355,15 @@ const CommunityDetail = () => {
                     max-width: 1200px;
                     margin: 0 auto;
                     padding: 0 2rem;
+                    text-align: left;
+                    align-self: flex-start;
                 }
 
                 .title-section {
                     max-width: 800px;
                     text-align: left;
+                    margin-left: 0;
+                    padding-left: 0;
                 }
 
                 .title-wrapper {
