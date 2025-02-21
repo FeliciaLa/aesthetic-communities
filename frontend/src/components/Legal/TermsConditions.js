@@ -85,6 +85,10 @@ const TermsConditions = () => {
                         <li>We may update these Terms from time to time. Users will be notified of significant changes.</li>
                     </ul>
                 </section>
+
+                <p className="contact">
+                    For any privacy-related concerns, contact us at <a href="mailto:almasplatforms@gmail.com">almasplatforms@gmail.com</a>
+                </p>
             </div>
 
             <style jsx>{`

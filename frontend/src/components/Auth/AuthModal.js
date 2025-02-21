@@ -73,6 +73,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isOver16, setIsOver16] = useState(false);
   const [error, setError] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,6 +88,11 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             }
             if (!isOver16) {
                 setError('You must be over 16 to register');
+                return;
+            }
+            
+            if (!agreedToTerms || !agreedToPrivacy) {
+                setError("Please agree to both the Terms & Conditions and Privacy Policy");
                 return;
             }
             
@@ -186,6 +193,27 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
               </Checkbox>
             </>
           )}
+          <div className="agreements">
+            <label className="agreement-label">
+                <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    required
+                />
+                I agree to the <Link to="/terms" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link>
+            </label>
+            
+            <label className="agreement-label">
+                <input
+                    type="checkbox"
+                    checked={agreedToPrivacy}
+                    onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                    required
+                />
+                I agree to the <Link to="/privacy-policy" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link>
+            </label>
+          </div>
           <button type="submit">
             {mode === 'login' ? 'Log In' : 'Sign Up'}
           </button>
@@ -203,6 +231,37 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
           {mode === 'login' ? 'Need an account? Sign up' : 'Already have an account? Log in'}
         </button>
       </ModalContent>
+      <style jsx>{`
+        .agreements {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .agreement-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .agreement-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .agreement-label a {
+            color: #fa8072;
+            text-decoration: none;
+        }
+
+        .agreement-label a:hover {
+            text-decoration: underline;
+        }
+      `}</style>
     </ModalOverlay>
   );
 };
