@@ -204,26 +204,26 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 />
                 <label>I confirm that I am 16 years or older</label>
               </Checkbox>
+              <Checkbox>
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={e => setAgreedToTerms(e.target.checked)}
+                  required
+                />
+                <label>I agree to the <Link to="/terms" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link></label>
+              </Checkbox>
+              <Checkbox>
+                <input
+                  type="checkbox"
+                  checked={agreedToPrivacy}
+                  onChange={e => setAgreedToPrivacy(e.target.checked)}
+                  required
+                />
+                <label>I agree to the <Link to="/privacy-policy" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link></label>
+              </Checkbox>
             </>
           )}
-          <Checkbox>
-            <input
-              type="checkbox"
-              checked={agreedToTerms}
-              onChange={e => setAgreedToTerms(e.target.checked)}
-              required
-            />
-            <label>I agree to the <Link to="/terms" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link></label>
-          </Checkbox>
-          <Checkbox>
-            <input
-              type="checkbox"
-              checked={agreedToPrivacy}
-              onChange={e => setAgreedToPrivacy(e.target.checked)}
-              required
-            />
-            <label>I agree to the <Link to="/privacy-policy" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link></label>
-          </Checkbox>
           <button type="submit">
             {mode === 'login' ? 'Log In' : 'Sign Up'}
           </button>
