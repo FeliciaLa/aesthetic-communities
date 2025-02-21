@@ -18,6 +18,9 @@ import { createContext, useContext } from 'react';
 import api from './api';
 import AccountActivation from './components/Auth/AccountActivation';
 import AccountDeleted from './components/Auth/AccountDeleted';
+import Footer from './components/Layout/Footer';
+import PrivacyPolicy from './components/Legal/PrivacyPolicy';
+import TermsConditions from './components/Legal/TermsConditions';
 
 const DebugRoute = () => {
   const location = useLocation();
@@ -129,107 +132,118 @@ const App = () => {
   return (
     <ErrorBoundary>
       <MusicProvider>
-        <>
-          {isLoggedIn ? (
-            <NavbarLoggedIn handleLogout={handleLogout} />
-          ) : (
-            <NavbarLoggedOut 
-              setShowAuthModal={setShowAuthModal} 
-              setInitialAuthMode={setInitialAuthMode}
-            />
-          )}
+        <div className="app-container">
+          <NavbarLoggedIn handleLogout={handleLogout} />
+          <main className="main-content">
+            <Routes>
+              {console.log('🎯 ROUTES RENDERING', window.location.pathname)}
+              {!isLoading && <Route path="*" element={<DebugRoute />} />}
+              {isLoading ? (
+                <Route path="*" element={<div>Loading...</div>} />
+              ) : (
+                <>
+                  {/* Test route */}
+                  <Route path="/test" element={
+                    <div style={{ 
+                      padding: '20px',
+                      textAlign: 'center',
+                      marginTop: '50px',
+                      backgroundColor: '#f0f0f0',
+                      minHeight: '200px',
+                      border: '2px solid #ccc'
+                    }}>
+                      <h1 style={{ color: '#fa8072' }}>Test Route</h1>
+                      <p>If you can see this, routing is working correctly!</p>
+                      <p>Current path: {window.location.pathname}</p>
+                    </div>
+                  } />
 
-          <Routes>
-            {console.log('🎯 ROUTES RENDERING', window.location.pathname)}
-            {!isLoading && <Route path="*" element={<DebugRoute />} />}
-            {isLoading ? (
-              <Route path="*" element={<div>Loading...</div>} />
-            ) : (
-              <>
-                {/* Test route */}
-                <Route path="/test" element={
-                  <div style={{ 
-                    padding: '20px',
-                    textAlign: 'center',
-                    marginTop: '50px',
-                    backgroundColor: '#f0f0f0',
-                    minHeight: '200px',
-                    border: '2px solid #ccc'
-                  }}>
-                    <h1 style={{ color: '#fa8072' }}>Test Route</h1>
-                    <p>If you can see this, routing is working correctly!</p>
-                    <p>Current path: {window.location.pathname}</p>
-                  </div>
-                } />
+                  {/* Auth routes */}
+                  <Route path="/password-reset" element={<PasswordReset />} />
+                  <Route 
+                    path="/reset-password/:userId/:token" 
+                    element={
+                      <>
+                        {console.log('⚡ PASSWORD RESET ROUTE MATCHED')}
+                        <PasswordResetConfirm />
+                      </>
+                    } 
+                  />
 
-                {/* Auth routes */}
-                <Route path="/password-reset" element={<PasswordReset />} />
-                <Route 
-                  path="/reset-password/:userId/:token" 
-                  element={
-                    <>
-                      {console.log('⚡ PASSWORD RESET ROUTE MATCHED')}
-                      <PasswordResetConfirm />
-                    </>
-                  } 
-                />
+                  {/* Activation routes */}
+                  <Route 
+                    path="/auth/activate/:registration_id" 
+                    element={
+                      <>
+                        {console.log('🔑 ACTIVATION ROUTE MATCHED')}
+                        <AccountActivation />
+                      </>
+                    } 
+                  />
+                  
+                  {/* Protected routes */}
+                  <Route path="/profile" element={
+                    <PrivateRoute isLoggedIn={isLoggedIn}>
+                      <Profile />
+                    </PrivateRoute>
+                  } />
+                  
+                  {/* Community routes */}
+                  <Route path="/create-community" element={<CreateCommunity />} />
+                  <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
+                  <Route path="/communities/:id" element={<CommunityDetail />} />
+                  <Route 
+                    path="/communities" 
+                    element={
+                      <ExploreCommunities 
+                        isLoggedIn={isLoggedIn}
+                        onAuthClick={() => {
+                          setInitialAuthMode('register');
+                          setShowAuthModal(true);
+                        }}
+                      />
+                    } 
+                  />
+                  
+                  {/* Home route */}
+                  <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
+                    setInitialAuthMode('register');
+                    setShowAuthModal(true);
+                  }}/>} />
 
-                {/* Activation routes */}
-                <Route 
-                  path="/auth/activate/:registration_id" 
-                  element={
-                    <>
-                      {console.log('🔑 ACTIVATION ROUTE MATCHED')}
-                      <AccountActivation />
-                    </>
-                  } 
-                />
-                
-                {/* Protected routes */}
-                <Route path="/profile" element={
-                  <PrivateRoute isLoggedIn={isLoggedIn}>
-                    <Profile />
-                  </PrivateRoute>
-                } />
-                
-                {/* Community routes */}
-                <Route path="/create-community" element={<CreateCommunity />} />
-                <Route path="/communities/:communityId/resources/:collectionId" element={<CollectionDetailPage />} />
-                <Route path="/communities/:id" element={<CommunityDetail />} />
-                <Route 
-                  path="/communities" 
-                  element={
-                    <ExploreCommunities 
-                      isLoggedIn={isLoggedIn}
-                      onAuthClick={() => {
-                        setInitialAuthMode('register');
-                        setShowAuthModal(true);
-                      }}
-                    />
-                  } 
-                />
-                
-                {/* Home route */}
-                <Route path="/" element={<ExploreCommunities isLoggedIn={isLoggedIn} onAuthClick={() => {
-                  setInitialAuthMode('register');
-                  setShowAuthModal(true);
-                }}/>} />
+                  {/* Account deleted route */}
+                  <Route path="/account-deleted" element={<AccountDeleted />} />
+                  
+                  {/* Legal routes */}
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsConditions />} />
+                  
+                </>
+              )}
+            </Routes>
 
-                {/* Account deleted route */}
-                <Route path="/account-deleted" element={<AccountDeleted />} />
-                
-              </>
+            {showAuthModal && (
+              <AuthModal
+                initialMode={initialAuthMode}
+                onClose={() => setShowAuthModal(false)}
+                onLoginSuccess={handleLoginSuccess}
+              />
             )}
-          </Routes>
+          </main>
+          <Footer />
 
-          {showAuthModal && (
-            <AuthModal
-              initialMode={initialAuthMode}
-              onClose={() => setShowAuthModal(false)}
-              onLoginSuccess={handleLoginSuccess}
-            />
-          )}
-        </>
+          <style jsx>{`
+            .app-container {
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+
+            .main-content {
+              flex: 1 0 auto;
+            }
+          `}</style>
+        </div>
       </MusicProvider>
     </ErrorBoundary>
   );
