@@ -3,6 +3,7 @@
     "find-up": "^7.0.0",
     "p-limit": "^6.2.0",
     "p-locate": "^6.0.0",
+    "react-dev-utils": "^12.0.1",
     "react-error-boundary": "^5.0.0"
   }
 }
