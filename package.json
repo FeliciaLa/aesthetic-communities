@@ -5,5 +5,9 @@
     "p-locate": "^6.0.0",
     "react-dev-utils": "^12.0.1",
     "react-error-boundary": "^5.0.0"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
   }
 }
