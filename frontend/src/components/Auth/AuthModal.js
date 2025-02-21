@@ -86,9 +86,9 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isOver16, setIsOver16] = useState(false);
-  const [error, setError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,6 +145,13 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         <h2>{mode === 'login' ? 'Log In' : 'Sign Up'}</h2>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
           {mode === 'register' && (
             <input
               type="email"
@@ -155,37 +162,12 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             />
           )}
           <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-          />
-          <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
-          {mode === 'login' && (
-            <Link 
-              to="/password-reset"
-              onClick={() => {
-                onClose();  // Close the modal when clicking the link
-              }}
-              style={{
-                display: 'block',
-                textAlign: 'center',
-                marginTop: '0.5rem',
-                color: '#fa8072',
-                textDecoration: 'none',
-                fontSize: '0.9rem'
-              }}
-            >
-              Forgot Password?
-            </Link>
-          )}
           {mode === 'register' && (
             <>
               <input
@@ -223,6 +205,24 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 <label>I agree to the <Link to="/privacy-policy" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link></label>
               </Checkbox>
             </>
+          )}
+          {mode === 'login' && (
+            <Link 
+              to="/password-reset"
+              onClick={() => {
+                onClose();
+              }}
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                marginTop: '0.5rem',
+                color: '#fa8072',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}
+            >
+              Forgot Password?
+            </Link>
           )}
           <button type="submit">
             {mode === 'login' ? 'Log In' : 'Sign Up'}
