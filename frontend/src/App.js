@@ -85,32 +85,36 @@ const App = () => {
   }, [location]);
 
   const validateAuth = async () => {
+    console.log('Validating auth...'); // Debug log
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setIsLoggedIn(false);
-        setIsLoading(false);
-        return;
-      }
-      
-      const response = await api.get('/auth/profile/', {
-        headers: {
-          'Authorization': `Token ${token}`
+        const token = localStorage.getItem('token');
+        console.log('Token found:', !!token); // Debug log
+        if (!token) {
+            setIsLoggedIn(false);
+            setIsLoading(false);
+            return;
         }
-      });
-      
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-      } else {
-        throw new Error('Invalid token');
-      }
+        
+        const response = await api.get('/auth/profile/', {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        
+        console.log('Auth response:', response.status); // Debug log
+        
+        if (response.status === 200) {
+            setIsLoggedIn(true);
+        } else {
+            throw new Error('Invalid token');
+        }
     } catch (error) {
-      console.error('Auth validation failed:', error);
-      setIsLoggedIn(false);
-      authService.logout();
+        console.error('Auth validation failed:', error);
+        setIsLoggedIn(false);
+        authService.logout();
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 
@@ -133,7 +137,14 @@ const App = () => {
     <ErrorBoundary>
       <MusicProvider>
         <div className="app-container">
-          <NavbarLoggedIn handleLogout={handleLogout} />
+          {isLoggedIn ? (
+            <NavbarLoggedIn handleLogout={handleLogout} />
+          ) : (
+            <NavbarLoggedOut 
+              setShowAuthModal={setShowAuthModal}
+              setInitialAuthMode={setInitialAuthMode}
+            />
+          )}
           <main className="main-content">
             <Routes>
               {console.log('🎯 ROUTES RENDERING', window.location.pathname)}
