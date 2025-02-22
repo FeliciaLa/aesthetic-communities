@@ -561,22 +561,19 @@ class ResourceView(APIView):
 
     def get(self, request):
         try:
-            category_id = request.query_params.get('category')
-            community_id = request.query_params.get('community')
+            category_id = request.query_params.get('category_id')
+            community_id = request.query_params.get('community_id')
             
             # Start with all resources
             resources = Resource.objects.all()
             
-            # Filter by community_id if provided
-            if community_id:
-                # Get all categories in this community
-                community_categories = ResourceCategory.objects.filter(community_id=community_id)
-                # Filter resources by these categories
-                resources = resources.filter(category__in=community_categories)
-            
-            # Additional category filter if provided
+            # Filter by category_id if provided
             if category_id:
                 resources = resources.filter(category_id=category_id)
+            
+            # Filter by community_id if provided
+            if community_id:
+                resources = resources.filter(category__community_id=community_id)
                 
             serializer = ResourceSerializer(resources, many=True)
             return Response(serializer.data)

@@ -97,14 +97,18 @@ const CollectionDetailPage = () => {
     const fetchResources = async () => {
         try {
             const response = await api.get('/resources/', {
-                params: { category_id: collectionId }
+                params: { 
+                    category_id: collectionId
+                }
             });
             
-            console.log('Resource data:', response.data);
-            const sortedResources = response.data.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            console.log('Resource data for collection:', collectionId, response.data);
+            const sortedResources = response.data
+                .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            
             setResources(sortedResources);
             
-            const previewPromises = response.data.map(async (resource) => {
+            const previewPromises = sortedResources.map(async (resource) => {
                 const previewUrl = await getPreviewImage(resource.url);
                 return [resource.id, previewUrl];
             });
