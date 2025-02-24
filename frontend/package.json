@@ -16,14 +16,18 @@
     "styled-components": "^5.3.10",
     "web-vitals": "^2.1.4",
     "react-error-boundary": "^4.0.12",
-    "yocto-queue": "^0.1.0"
+    "p-limit": "3.1.0",
+    "p-locate": "5.0.0",
+    "locate-path": "6.0.0",
+    "find-up": "5.0.0",
+    "yocto-queue": "0.1.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false GENERATE_SOURCEMAP=false NODE_OPTIONS=--max_old_space_size=4096 react-scripts build",
+    "build": "CI=false NODE_ENV=production react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -44,11 +48,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "resolutions": {
-    "p-limit": "3.1.0",
-    "p-locate": "5.0.0",
-    "locate-path": "6.0.0",
-    "find-up": "5.0.0"
   }
 }

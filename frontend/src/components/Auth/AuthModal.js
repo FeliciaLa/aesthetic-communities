@@ -17,6 +17,7 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
+  position: relative;
   background: white;
   padding: 2rem;
   border-radius: 12px;
@@ -112,13 +113,15 @@ const ModalContent = styled.div`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 1.5rem;
+  right: 1.5rem;
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
   color: #666;
+  padding: 0;
+  line-height: 1;
   
   &:hover {
     color: #333;
