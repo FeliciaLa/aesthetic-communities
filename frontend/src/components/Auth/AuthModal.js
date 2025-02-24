@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { authService } from '../../services/authService';
+import authService from '../../services/authService';
 import { Link } from 'react-router-dom';
 
 const ModalOverlay = styled.div`
@@ -94,53 +94,52 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     setError('');
 
     try {
-        if (mode === 'register') {
-            if (password !== confirmPassword) {
-                setError('Passwords do not match');
-                return;
-            }
-            if (!isOver16) {
-                setError('You must be over 16 to register');
-                return;
-            }
-            if (!agreedToTerms || !agreedToPrivacy) {
-                setError('Please agree to both the Terms & Conditions and Privacy Policy');
-                return;
-            }
-            
-            const response = await authService.register({
-                email,
-                password,
-                password_confirm: confirmPassword
-            });
-            
-            onClose();
-            alert('Please check your email to activate your account');
-        } else {
-            const response = await authService.login({
-                email,
-                password
-            });
-
-            if (response && response.token) {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('userId', response.user.id.toString());
-                localStorage.setItem('email', response.user.email);
-                setTimeout(async () => {
-                    await onLoginSuccess();
-                }, 100);
-            }
+      if (mode === 'register') {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          return;
         }
+        if (!isOver16) {
+          setError('You must be over 16 to register');
+          return;
+        }
+        if (!agreedToTerms || !agreedToPrivacy) {
+          setError('Please agree to both the Terms & Conditions and Privacy Policy');
+          return;
+        }
+        
+        const response = await authService.register({
+          email,
+          password,
+          password_confirm: confirmPassword
+        });
+        
+        onClose();
+        alert('Please check your email to activate your account');
+      } else {
+        const response = await authService.login({
+          email,
+          password
+        });
+
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('userId', response.user.id.toString());
+          localStorage.setItem('email', response.user.email);
+          setTimeout(async () => {
+            await onLoginSuccess();
+          }, 100);
+        }
+      }
     } catch (err) {
-        console.error('Auth error:', err);
-        setError(err.response?.data?.detail || err.response?.data?.error || 'An error occurred');
+      setError(err.response?.data?.detail || 'An error occurred');
     }
   };
 
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
-        <h2>{mode === 'login' ? 'Log In' : 'Sign Up'}</h2>
+        <h2>{mode === 'register' ? 'Create Account' : 'Log In'}</h2>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
           <input
@@ -150,15 +149,6 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             onChange={e => setEmail(e.target.value)}
             required
           />
-          {mode === 'register' && (
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-          )}
           <input
             type="password"
             placeholder="Password"
@@ -182,7 +172,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                   onChange={e => setIsOver16(e.target.checked)}
                   required
                 />
-                <label>I confirm that I am 16 years or older</label>
+                <label>I am over 16 years old</label>
               </Checkbox>
               <Checkbox>
                 <input
@@ -204,39 +194,25 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
               </Checkbox>
             </>
           )}
-          {mode === 'login' && (
-            <Link 
-              to="/password-reset"
-              onClick={() => {
-                onClose();
-              }}
-              style={{
-                display: 'block',
-                textAlign: 'center',
-                marginTop: '0.5rem',
-                color: '#fa8072',
-                textDecoration: 'none',
-                fontSize: '0.9rem'
-              }}
-            >
-              Forgot Password?
-            </Link>
-          )}
           <button type="submit">
-            {mode === 'login' ? 'Log In' : 'Sign Up'}
+            {mode === 'register' ? 'Create Account' : 'Log In'}
           </button>
         </Form>
-        <button 
-          onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-          style={{ 
-            marginTop: '1rem',
-            background: 'transparent',
-            border: 'none',
-            color: 'black',
-            cursor: 'pointer'
-          }}
-        >
-          {mode === 'login' ? 'Need an account? Sign up' : 'Already have an account? Log in'}
+        <div className="modal-footer">
+          {mode === 'register' ? (
+            <p>
+              Already have an account?{' '}
+              <button onClick={() => setMode('login')}>Log In</button>
+            </p>
+          ) : (
+            <p>
+              Don't have an account?{' '}
+              <button onClick={() => setMode('register')}>Create Account</button>
+            </p>
+          )}
+        </div>
+        <button className="close-button" onClick={onClose}>
+          ×
         </button>
       </ModalContent>
     </ModalOverlay>
