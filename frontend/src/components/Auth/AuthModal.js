@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { authService } from '../../services/authService';
-import { Link } from 'react-router-dom';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -9,7 +8,7 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,63 +18,109 @@ const ModalOverlay = styled.div`
 const ModalContent = styled.div`
   background: white;
   padding: 2rem;
-  border-radius: 8px;
-  width: 90%;
+  border-radius: 12px;
+  width: 100%;
   max-width: 400px;
-`;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  input {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
   }
 
-  button {
-    padding: 0.5rem;
-    background: #fa8072;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 
-    &:hover {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      
+      &:focus {
+        outline: none;
+        border-color: #fa8072;
+        box-shadow: 0 0 0 2px rgba(250, 128, 114, 0.2);
+      }
+    }
+
+    button {
       background: #fa8072;
+      color: white;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #ff6b5b;
+      }
     }
   }
-`;
 
-const ErrorMessage = styled.div`
-  color: red;
-  margin-bottom: 1rem;
-`;
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
 
-const Checkbox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  
-  input[type="checkbox"] {
-    width: auto;
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
   }
 
-  label {
+  .error-message {
+    color: #ff4444;
+    text-align: center;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  p {
+    text-align: center;
+    margin-top: 1rem;
     color: #666;
-  }
 
-  a {
-    color: #fa8072;
-    text-decoration: none;
-    
-    &:hover {
+    button.switch-mode {
+      background: none;
+      border: none;
+      color: #fa8072;
+      cursor: pointer;
+      padding: 0;
+      font-size: inherit;
       text-decoration: underline;
+
+      &:hover {
+        color: #ff6b5b;
+      }
     }
+  }
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  
+  &:hover {
+    color: #333;
   }
 `;
 
@@ -122,7 +167,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         const response = await authService.login({
           username: email,
           email: email,
-          password: password
+          password
         });
 
         if (response && response.token) {
@@ -140,8 +185,9 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   };
 
   return (
-    <ModalOverlay onClick={onClose}>
-      <ModalContent onClick={e => e.stopPropagation()}>
+    <ModalOverlay>
+      <ModalContent>
+        <CloseButton onClick={onClose}>&times;</CloseButton>
         <h2>{mode === 'register' ? 'Create Account' : 'Log In'}</h2>
         <form onSubmit={handleSubmit}>
           {mode === 'register' ? (
@@ -235,9 +281,6 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             {mode === 'register' ? 'Log In' : 'Register'}
           </button>
         </p>
-        <button className="close-button" onClick={onClose}>
-          ×
-        </button>
       </ModalContent>
     </ModalOverlay>
   );
