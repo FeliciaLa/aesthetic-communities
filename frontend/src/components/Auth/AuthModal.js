@@ -120,8 +120,9 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         alert('Please check your email to activate your account');
       } else {
         const response = await authService.login({
-          email,
-          password
+          username: email,
+          email: email,
+          password: password
         });
 
         if (response && response.token) {

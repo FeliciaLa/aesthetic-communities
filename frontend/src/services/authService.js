@@ -10,6 +10,7 @@ export const authService = {
             });
 
             const response = await api.post('/auth/login/', {
+                username: credentials.email,
                 email: credentials.email,
                 password: credentials.password
             });
