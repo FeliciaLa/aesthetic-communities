@@ -142,9 +142,8 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={e => e.stopPropagation()}>
         <h2>{mode === 'register' ? 'Create Account' : 'Log In'}</h2>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Form onSubmit={handleSubmit}>
-          {mode === 'register' && (
+        <form onSubmit={handleSubmit}>
+          {mode === 'register' ? (
             <>
               <input
                 type="text"
@@ -164,62 +163,77 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <input
                 type="password"
                 placeholder="Confirm Password"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
-              <Checkbox>
-                <input
-                  type="checkbox"
-                  checked={isOver16}
-                  onChange={e => setIsOver16(e.target.checked)}
-                  required
-                />
-                <label>I am over 16 years old</label>
-              </Checkbox>
-              <Checkbox>
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={e => setAgreedToTerms(e.target.checked)}
-                  required
-                />
-                <label>I agree to the <Link to="/terms" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link></label>
-              </Checkbox>
-              <Checkbox>
-                <input
-                  type="checkbox"
-                  checked={agreedToPrivacy}
-                  onChange={e => setAgreedToPrivacy(e.target.checked)}
-                  required
-                />
-                <label>I agree to the <Link to="/privacy-policy" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link></label>
-              </Checkbox>
+              <div className="checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={isOver16}
+                    onChange={(e) => setIsOver16(e.target.checked)}
+                  />
+                  I am over 16 years old
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  />
+                  I agree to the Terms & Conditions
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={agreedToPrivacy}
+                    onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                  />
+                  I agree to the Privacy Policy
+                </label>
+              </div>
+            </>
+          ) : (
+            <>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </>
           )}
+          {error && <div className="error-message">{error}</div>}
           <button type="submit">
             {mode === 'register' ? 'Create Account' : 'Log In'}
           </button>
-        </Form>
-        <div className="modal-footer">
-          {mode === 'register' ? (
-            <p>
-              Already have an account?{' '}
-              <button onClick={() => setMode('login')}>Log In</button>
-            </p>
-          ) : (
-            <p>
-              Don't have an account?{' '}
-              <button onClick={() => setMode('register')}>Create Account</button>
-            </p>
-          )}
-        </div>
+        </form>
+        <p>
+          {mode === 'register' 
+            ? 'Already have an account? ' 
+            : "Don't have an account? "}
+          <button 
+            className="switch-mode" 
+            onClick={() => setMode(mode === 'register' ? 'login' : 'register')}
+          >
+            {mode === 'register' ? 'Log In' : 'Register'}
+          </button>
+        </p>
         <button className="close-button" onClick={onClose}>
           ×
         </button>
