@@ -15,18 +15,14 @@
     "react-scripts": "5.0.1",
     "styled-components": "^5.3.10",
     "web-vitals": "^2.1.4",
-    "react-error-boundary": "^4.0.12",
-    "find-up": "^4.1.0",
-    "p-limit": "^3.1.0",
-    "p-locate": "^4.1.0",
-    "locate-path": "^5.0.0"
+    "react-error-boundary": "^4.0.12"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false GENERATE_SOURCEMAP=false react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -47,9 +43,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "engines": {
-    "node": "18.x",
-    "npm": "9.x"
   }
 }
