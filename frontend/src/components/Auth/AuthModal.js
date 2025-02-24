@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { authService } from '../../services/authService';
 
@@ -124,6 +125,24 @@ const CloseButton = styled.button`
   }
 `;
 
+const ForgotPasswordLink = styled.button`
+  background: none;
+  border: none;
+  color: #fa8072;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin: 10px 0;
+  font-size: 0.9em;
+  display: block;
+  width: 100%;
+  text-align: center;
+
+  &:hover {
+    color: #ff6b5b;
+  }
+`;
+
 const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
@@ -134,6 +153,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -182,6 +202,11 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
     } catch (err) {
       setError(err.response?.data?.detail || 'An error occurred');
     }
+  };
+
+  const handleForgotPassword = () => {
+    onClose();
+    navigate('/password-reset');
   };
 
   return (
@@ -266,6 +291,11 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             </>
           )}
           {error && <div className="error-message">{error}</div>}
+          {mode === 'login' && (
+            <ForgotPasswordLink type="button" onClick={handleForgotPassword}>
+              Forgot Password?
+            </ForgotPasswordLink>
+          )}
           <button type="submit">
             {mode === 'register' ? 'Create Account' : 'Log In'}
           </button>
