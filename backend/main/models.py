@@ -59,8 +59,8 @@ class ResourceCategory(models.Model):
         return self.name
 
 class Resource(models.Model):
+    url = models.URLField(max_length=2000)
     title = models.CharField(max_length=200)
-    url = models.URLField()
     remark = models.TextField(null=True, blank=True)
     category = models.ForeignKey('ResourceCategory', on_delete=models.CASCADE)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

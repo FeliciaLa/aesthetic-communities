@@ -501,8 +501,8 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
     <ErrorBoundary>
       <Container isLoggedIn={isLoggedIn}>
         <ExploreHeader>
-          <h1>Explore Aesthetic Hubs</h1>
-          <p>Get inspired, find your community, and craft your unique aesthetic</p>
+          <h1>Explore Hubs</h1>
+          <p>Get inspired, find your community, and craft your unique world</p>
           <SearchContainer>
             <Search />
             <input
