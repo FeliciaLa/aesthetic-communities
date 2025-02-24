@@ -364,6 +364,22 @@ const SectionHeader = styled.div`
   }
 `;
 
+const TestingBanner = styled.div`
+  background: linear-gradient(90deg, #FF7F6F, #ff9288);
+  color: white;
+  text-align: center;
+  padding: 12px 20px;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  font-size: 0.95rem;
+  z-index: 20;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+`;
+
 const getImageUrl = (image) => {
   return image.startsWith('http') 
     ? image 
@@ -499,6 +515,9 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
 
   return (
     <ErrorBoundary>
+      <TestingBanner>
+        🚀 Almas Platforms is in testing mode! We're continuously improving things, so some features may change. Log in to get full access and create your own hubs.
+      </TestingBanner>
       <Container isLoggedIn={isLoggedIn}>
         <ExploreHeader>
           <h1>Explore Hubs</h1>
