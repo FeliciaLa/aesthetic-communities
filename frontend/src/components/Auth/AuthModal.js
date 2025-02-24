@@ -147,7 +147,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         <Form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Email address"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
