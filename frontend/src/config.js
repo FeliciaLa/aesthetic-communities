@@ -1,3 +1,18 @@
+// Move all imports to the top
+import axios from 'axios';
+// Add any other imports here
+
+const config = {
+  // Your configuration settings
+};
+
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 // Base API URL for production
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 console.log('Environment Variables:', {
@@ -28,7 +43,6 @@ export const getBaseUrl = () => {
 export { API_BASE_URL };
 
 // Axios default config
-import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const axiosConfig = {
@@ -37,4 +51,6 @@ export const axiosConfig = {
     headers: {
         'Content-Type': 'application/json'
     }
-}; 
+};
+
+export default api; 
