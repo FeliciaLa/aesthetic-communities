@@ -5,32 +5,32 @@ export const authService = {
     login: async (credentials) => {
         try {
             console.log('Login attempt:', {
-                username: credentials.username,
+                email: credentials.email,
                 timestamp: new Date().toISOString()
             });
 
             const response = await api.post('/auth/login/', {
-                username: credentials.username,
+                email: credentials.email,
                 password: credentials.password
             });
 
             console.log('Login response:', {
                 hasToken: !!response.data?.token,
                 hasUser: !!response.data?.user,
-                username: response.data?.user?.username,
+                email: response.data?.user?.email,
                 timestamp: new Date().toISOString()
             });
 
             if (response.data?.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userId', response.data.user.id.toString());
-                localStorage.setItem('username', response.data.user.username);
+                localStorage.setItem('email', response.data.user.email);
 
                 // Verify storage
                 console.log('LocalStorage after login:', {
                     storedToken: !!localStorage.getItem('token'),
                     storedUserId: localStorage.getItem('userId'),
-                    storedUsername: localStorage.getItem('username'),
+                    storedEmail: localStorage.getItem('email'),
                     allKeys: Object.keys(localStorage)
                 });
 
@@ -45,7 +45,7 @@ export const authService = {
             });
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('username');
+            localStorage.removeItem('email');
             throw error;
         }
     },
@@ -87,7 +87,7 @@ export const authService = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
-        localStorage.removeItem('username');
+        localStorage.removeItem('email');
     },
 
     getCurrentUser: () => {
@@ -108,7 +108,7 @@ export const authService = {
             // Clear invalid tokens
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('username');
+            localStorage.removeItem('email');
             return false;
         }
     },

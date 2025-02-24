@@ -82,6 +82,7 @@ const Checkbox = styled.div`
 const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isOver16, setIsOver16] = useState(false);
@@ -109,6 +110,7 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         }
         
         const response = await authService.register({
+          username,
           email,
           password,
           password_confirm: confirmPassword
@@ -142,22 +144,29 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         <h2>{mode === 'register' ? 'Create Account' : 'Log In'}</h2>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
           {mode === 'register' && (
             <>
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
               <input
                 type="password"
                 placeholder="Confirm Password"
