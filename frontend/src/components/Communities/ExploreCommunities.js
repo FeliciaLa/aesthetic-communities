@@ -515,9 +515,9 @@ const ExploreCommunities = ({ onAuthClick, isLoggedIn }) => {
 
   return (
     <ErrorBoundary>
-      <TestingBanner>
+      <div className="testing-banner">
         🚀 Almas Platforms is in testing mode! We're continuously improving things, so some features may change. Log in to get full access and create your own hubs.
-      </TestingBanner>
+      </div>
       <Container isLoggedIn={isLoggedIn}>
         <ExploreHeader>
           <h1>Explore Hubs</h1>

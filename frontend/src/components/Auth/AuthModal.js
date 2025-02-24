@@ -81,7 +81,6 @@ const Checkbox = styled.div`
 
 const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
   const [mode, setMode] = useState(initialMode);
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -110,7 +109,6 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             }
             
             const response = await authService.register({
-                username,
                 email,
                 password,
                 password_confirm: confirmPassword
@@ -120,14 +118,14 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
             alert('Please check your email to activate your account');
         } else {
             const response = await authService.login({
-                username,
+                email,
                 password
             });
 
             if (response && response.token) {
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('userId', response.user.id.toString());
-                localStorage.setItem('username', response.user.username);
+                localStorage.setItem('email', response.user.email);
                 setTimeout(async () => {
                     await onLoginSuccess();
                 }, 100);
@@ -146,10 +144,10 @@ const AuthModal = ({ onClose, initialMode, onLoginSuccess }) => {
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Form onSubmit={handleSubmit}>
           <input
-            type="text"
+            type="email"
             placeholder="Email address"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             required
           />
           {mode === 'register' && (

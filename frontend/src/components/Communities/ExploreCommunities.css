@@ -91,4 +91,20 @@
     color: white;
     font-size: 2rem;
     font-weight: bold;
+}
+
+.testing-banner {
+  background: linear-gradient(90deg, #FF7F6F, #ff9288);
+  color: white;
+  text-align: center;
+  padding: 12px 20px;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  font-size: 0.95rem;
+  z-index: 20;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } 
